@@ -1,0 +1,36 @@
+<?php
+
+namespace SameOldNick\BackupManager\Models\Factories;
+
+use SameOldNick\BackupManager\Models\FilesystemConfigurationFTP;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<FilesystemConfigurationFTP>
+ */
+class FilesystemConfigurationFTPFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<Model>
+     */
+    protected $model = FilesystemConfigurationFTP::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition()
+    {
+        return [
+            'host' => $this->faker->boolean ? $this->faker->unique()->ipv4 : $this->faker->unique()->domainName,
+            'port' => $this->faker->boolean(90) ? 21 : $this->faker->numberBetween(1000, 9999),
+            'username' => $this->faker->unique()->userName,
+            'password' => $this->faker->unique()->password,
+            'root' => $this->faker->boolean ? implode('/', $this->faker->words($this->faker->numberBetween(1, 4))) : null,
+            'extra' => $this->faker->boolean ? [] : null,
+        ];
+    }
+}
