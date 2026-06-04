@@ -22,7 +22,6 @@ use SameOldNick\BackupManager\Models\Factories\BackupFileFactory;
  * @property string $name
  * @property string $path
  * @property string $disk
- * @property bool $is_public
  * @property ?int $user_id
  * @property ?string $fileable_type
  * @property ?string $fileable_id
