@@ -57,6 +57,10 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function boot()
     {
+        if (config('backup-manager.routes.enabled', true)) {
+            $this->registerRoutes();
+        }
+
         $this->publishesMigrations([
             __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'backup-manager-migrations');
@@ -71,6 +75,10 @@ class ServiceProvider extends BaseServiceProvider
         $this->subscribeToEvents();
     }
 
+    protected function registerRoutes()
+    {
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+    }
 
     protected function subscribeToEvents()
     {
