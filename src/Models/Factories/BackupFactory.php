@@ -4,6 +4,8 @@ namespace SameOldNick\BackupManager\Models\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\File;
+use Illuminate\Http\UploadedFile;
 use SameOldNick\BackupManager\Models\Backup;
 
 /**
@@ -30,6 +32,12 @@ class BackupFactory extends Factory
         ];
     }
 
+    /**
+     * Indicate that the backup was successful.
+     *
+     * @param  UploadedFile|File|string|null  $file
+     * @return BackupFactory
+     */
     public function successful($file = null): static
     {
         return $this->state(fn () => [
@@ -40,6 +48,12 @@ class BackupFactory extends Factory
         });
     }
 
+    /**
+     * Indicate that the backup failed with an error message.
+     *
+     * @param  string|null  $errorMessage
+     * @return BackupFactory
+     */
     public function failed($errorMessage = null): static
     {
         return $this->state(fn () => [
@@ -47,6 +61,12 @@ class BackupFactory extends Factory
         ]);
     }
 
+    /**
+     * Indicate that the backup file is missing to simulate a file not found scenario.
+     *
+     * @param  string|null  $path
+     * @return BackupFactory
+     */
     public function fileNotFound($path = null): static
     {
         return $this->afterCreating(function (Backup $backup) use ($path) {
@@ -55,6 +75,11 @@ class BackupFactory extends Factory
         });
     }
 
+    /**
+     * Indicate that the backup was deleted.
+     *
+     * @return BackupFactory
+     */
     public function deleted(): static
     {
         return $this->afterCreating(function (Backup $backup) {

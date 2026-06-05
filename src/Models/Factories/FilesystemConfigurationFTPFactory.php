@@ -2,8 +2,9 @@
 
 namespace SameOldNick\BackupManager\Models\Factories;
 
-use SameOldNick\BackupManager\Models\FilesystemConfigurationFTP;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
+use SameOldNick\BackupManager\Models\FilesystemConfigurationFTP;
 
 /**
  * @extends Factory<FilesystemConfigurationFTP>

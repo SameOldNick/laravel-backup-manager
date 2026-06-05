@@ -2,8 +2,9 @@
 
 namespace SameOldNick\BackupManager\Models\Factories;
 
-use SameOldNick\BackupManager\Models\FilesystemConfigurationSFTP;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
+use SameOldNick\BackupManager\Models\FilesystemConfigurationSFTP;
 
 /**
  * @extends Factory<FilesystemConfigurationSFTP>
@@ -32,6 +33,11 @@ class FilesystemConfigurationSFTPFactory extends Factory
         ];
     }
 
+    /**
+     * Configure SFTP authentication with password credentials.
+     *
+     * @return FilesystemConfigurationSFTPFactory
+     */
     public function authPassword()
     {
         return $this->state(fn () => [
@@ -39,6 +45,11 @@ class FilesystemConfigurationSFTPFactory extends Factory
         ]);
     }
 
+    /**
+     * Configure SFTP authentication with key credentials.
+     *
+     * @return FilesystemConfigurationSFTPFactory
+     */
     public function authKey()
     {
         return $this->state(fn () => [

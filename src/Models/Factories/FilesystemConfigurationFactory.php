@@ -2,11 +2,12 @@
 
 namespace SameOldNick\BackupManager\Models\Factories;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Models\FilesystemConfigurationFTP;
 use SameOldNick\BackupManager\Models\FilesystemConfigurationLocal;
 use SameOldNick\BackupManager\Models\FilesystemConfigurationSFTP;
-use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<FilesystemConfiguration>
@@ -33,6 +34,11 @@ class FilesystemConfigurationFactory extends Factory
         ];
     }
 
+    /**
+     * Configure the filesystem as local.
+     *
+     * @return FilesystemConfigurationFactory
+     */
     public function local(): static
     {
         return $this->state([
@@ -40,6 +46,11 @@ class FilesystemConfigurationFactory extends Factory
         ])->configurable(FilesystemConfigurationLocal::factory());
     }
 
+    /**
+     * Configure the filesystem as FTP.
+     *
+     * @return FilesystemConfigurationFactory
+     */
     public function ftp(): static
     {
         return $this->state([
@@ -47,6 +58,12 @@ class FilesystemConfigurationFactory extends Factory
         ])->configurable(FilesystemConfigurationFTP::factory());
     }
 
+    /**
+     * Configure the filesystem as SFTP.
+     *
+     * @param  'password'|'key'|null  $authType
+     * @return FilesystemConfigurationFactory
+     */
     public function sftp(?string $authType = null): static
     {
         $factory = match ($authType) {
@@ -60,6 +77,12 @@ class FilesystemConfigurationFactory extends Factory
         ])->configurable($factory);
     }
 
+    /**
+     * Attach a polymorphic configuration model.
+     *
+     * @param  Factory<Model>  $factory
+     * @return FilesystemConfigurationFactory
+     */
     public function configurable($factory): static
     {
         return $this->afterMaking(function (FilesystemConfiguration $fsConfiguration) use ($factory) {

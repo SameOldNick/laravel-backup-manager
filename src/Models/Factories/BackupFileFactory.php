@@ -4,6 +4,7 @@ namespace SameOldNick\BackupManager\Models\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -33,6 +34,12 @@ class BackupFileFactory extends Factory
         ];
     }
 
+    /**
+     * Associate the backup file with a fileable model.
+     *
+     * @param  Factory|Model  $factory
+     * @return BackupFileFactory
+     */
     public function fileable($factory)
     {
         return $this->for(
@@ -40,6 +47,14 @@ class BackupFileFactory extends Factory
         );
     }
 
+    /**
+     * Create a fake file and associate it with the backup file.
+     *
+     * @param  string|null  $name
+     * @param  string  $disk
+     * @param  int  $sizeInKilobytes
+     * @return BackupFileFactory
+     */
     public function fakeFile($name = null, $disk = 'local', $sizeInKilobytes = 100)
     {
         $uploadedFile = UploadedFile::fake()->create($name ?? $this->faker->word().'.txt', $sizeInKilobytes);
@@ -47,6 +62,12 @@ class BackupFileFactory extends Factory
         return $this->uploadedFile($uploadedFile, '', $disk);
     }
 
+    /**
+     * Indicate that the backup file is missing by setting a path that doesn't exist on the disk.
+     *
+     * @param  string|null  $path
+     * @return BackupFileFactory
+     */
     public function missingFile($path = null)
     {
         return $this->state(fn () => [
@@ -54,6 +75,13 @@ class BackupFileFactory extends Factory
         ]);
     }
 
+    /**
+     * Store the given uploaded file and associate it with the backup file.
+     *
+     * @param  UploadedFile|File|string|null  $uploadedFile
+     * @param  string|null  $disk
+     * @return BackupFileFactory
+     */
     public function uploadedFile($uploadedFile, string $path = '', $disk = 'local')
     {
         return $this->state(fn () => [
@@ -61,6 +89,12 @@ class BackupFileFactory extends Factory
         ]);
     }
 
+    /**
+     * Create a file with the given contents and associate it with the backup file.
+     *
+     * @param  string|null  $disk
+     * @return BackupFileFactory
+     */
     public function fromContents(string $fileName, string $contents, $disk = 'local')
     {
         return $this->state(function (array $attributes) use ($fileName, $contents, $disk) {
