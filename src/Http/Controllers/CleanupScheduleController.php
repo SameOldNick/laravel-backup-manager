@@ -20,7 +20,7 @@ class CleanupScheduleController
      */
     public function create()
     {
-        return $this->ui->renderCreateCleanupSchedule(request());
+        return $this->ui->renderCreateCleanupSchedule();
     }
 
     /**

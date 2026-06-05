@@ -101,7 +101,7 @@ class BackupController
     /**
      * Shows the perform backup page.
      */
-    public function showPerform(Request $request, string $type, string $uuid)
+    public function showPerform(string $type, string $uuid)
     {
         return $this->ui->renderPerformBackup($type, $uuid);
     }

@@ -77,9 +77,9 @@ class BackupDestinationsController
      *
      * @return mixed
      */
-    public function create(Request $request)
+    public function create()
     {
-        return $this->ui->renderCreateBackupDestination($request);
+        return $this->ui->renderCreateBackupDestination();
     }
 
     /**
