@@ -1,10 +1,11 @@
 <?php
 
-namespace SameOldNick\BackupManager\Http\Responders\Tests;
+namespace SameOldNick\BackupManager\Testing\Responders;
 
 use Illuminate\Database\Eloquent\Collection;
 use SameOldNick\BackupManager\Contracts\Responders\BackupSchedulesUiResponder as BackupSchedulesUiResponderContract;
 use SameOldNick\BackupManager\Models\BackupSchedule;
+use SameOldNick\BackupManager\Testing\Concerns;
 
 class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
 {

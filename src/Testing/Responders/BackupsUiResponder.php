@@ -1,9 +1,10 @@
 <?php
 
-namespace SameOldNick\BackupManager\Http\Responders\Tests;
+namespace SameOldNick\BackupManager\Testing\Responders;
 
 use Illuminate\Pagination\AbstractPaginator;
 use SameOldNick\BackupManager\Contracts\Responders\BackupsUiResponder as BackupsUiResponderContract;
+use SameOldNick\BackupManager\Testing\Concerns;
 
 class BackupsUiResponder implements BackupsUiResponderContract
 {

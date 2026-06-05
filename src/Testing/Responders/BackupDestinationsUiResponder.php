@@ -1,6 +1,6 @@
 <?php
 
-namespace SameOldNick\BackupManager\Http\Responders\Tests;
+namespace SameOldNick\BackupManager\Testing\Responders;
 
 use Illuminate\Pagination\AbstractPaginator;
 use SameOldNick\BackupManager\Contracts\FilesystemConfiguration;

@@ -1,9 +1,10 @@
 <?php
 
-namespace SameOldNick\BackupManager\Http\Responders\Tests;
+namespace SameOldNick\BackupManager\Testing\Responders;
 
 use SameOldNick\BackupManager\Contracts\Responders\CleanupSchedulesUiResponder as CleanupSchedulesUiResponderContract;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
+use SameOldNick\BackupManager\Testing\Concerns;
 
 class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
 {

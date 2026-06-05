@@ -1,6 +1,6 @@
 <?php
 
-namespace SameOldNick\BackupManager\Http\Responders\Tests\Concerns;
+namespace SameOldNick\BackupManager\Testing\Concerns;
 
 trait CreatesTestResponses
 {
