@@ -19,6 +19,6 @@ class ScheduleController
      */
     public function index()
     {
-        return $this->ui->renderScheduleList(BackupSchedule::all(), CleanupSchedule::all());
+        return $this->ui->renderSchedulesList(BackupSchedule::all(), CleanupSchedule::all());
     }
 }

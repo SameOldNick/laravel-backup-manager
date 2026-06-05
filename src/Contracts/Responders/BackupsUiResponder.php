@@ -2,16 +2,16 @@
 
 namespace SameOldNick\BackupManager\Contracts\Responders;
 
-use SameOldNick\BackupManager\Models\Collections\BackupCollection;
+use Illuminate\Pagination\AbstractPaginator;
 
-interface BackupUiResponder
+interface BackupsUiResponder
 {
     /**
      * Renders the backups list screen.
      *
      * @return mixed
      */
-    public function renderBackupsList(BackupCollection $backups);
+    public function renderBackupsList(AbstractPaginator $backups);
 
     /**
      * Renders the perform backup screen.
