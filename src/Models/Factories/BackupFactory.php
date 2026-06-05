@@ -2,9 +2,9 @@
 
 namespace SameOldNick\BackupManager\Models\Factories;
 
-use SameOldNick\BackupManager\Models\Backup;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
+use SameOldNick\BackupManager\Models\Backup;
 
 /**
  * @extends Factory<Backup>
@@ -36,7 +36,7 @@ class BackupFactory extends Factory
             'error_message' => null,
         ])->afterCreating(function (Backup $backup) use ($file) {
             // Ensure the backup file exists for successful backups
-            $backup->file()->save($file ?? FileFactory::new()->fakeFile()->create());
+            $backup->file()->save($file ?? BackupFileFactory::new()->fakeFile()->create());
         });
     }
 
@@ -51,7 +51,7 @@ class BackupFactory extends Factory
     {
         return $this->afterCreating(function (Backup $backup) use ($path) {
             // Create a backup with a file that doesn't exist to simulate file not found
-            $backup->file()->save(FileFactory::new()->missingFile($path)->create());
+            $backup->file()->save(BackupFileFactory::new()->missingFile($path)->create());
         });
     }
 
