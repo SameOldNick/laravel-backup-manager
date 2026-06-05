@@ -9,7 +9,7 @@ use Illuminate\Testing\Fluent\AssertableJson;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 use SameOldNick\BackupManager\Models\Backup;
 use SameOldNick\BackupManager\Models\Factories\BackupFileFactory;
-use SameOldNick\BackupManager\Tests\Concerns;
+use SameOldNick\BackupManager\Testing\Concerns;
 use SameOldNick\BackupManager\Tests\TestCase;
 
 class BackupControllerTest extends TestCase
