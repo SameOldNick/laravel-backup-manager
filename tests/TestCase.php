@@ -33,6 +33,8 @@ class TestCase extends Orchestra
         tap($app['config'], function (Repository $config) {
             $config->set('database.default', 'testing');
 
+            $config->set('backup', require __DIR__.'/../config/backup.php');
+            $config->set('backup-manager', require __DIR__.'/../config/backup-manager.php');
         });
     }
 
