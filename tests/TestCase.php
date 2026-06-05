@@ -1,6 +1,6 @@
 <?php
 
-namespace SameOldNick\OAuth\Tests;
+namespace SameOldNick\BackupManager\Tests;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -8,6 +8,7 @@ use Illuminate\Routing\Router;
 use Orchestra\Testbench\Concerns\WithLaravelMigrations;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Workbench\App\Models\User;
 
 class TestCase extends Orchestra
 {
@@ -38,5 +39,13 @@ class TestCase extends Orchestra
      */
     protected function defineRoutes($router)
     {
+    /**
+     * Helper method to create an admin user for testing.
+     */
+    protected function createAdmin(): User
+    {
+        $admin = User::factory()->create();
+
+        return $admin;
     }
 }
