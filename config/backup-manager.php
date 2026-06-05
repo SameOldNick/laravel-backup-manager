@@ -12,6 +12,12 @@ return [
             'as' => 'backup.',
         ],
 
+        'management' => [
+            'middleware' => [
+                'auth',
+            ],
+        ],
+
         'download' => [
             'middleware' => [
                 'signed',

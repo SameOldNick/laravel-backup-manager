@@ -39,6 +39,10 @@ class TestCase extends Orchestra
      */
     protected function defineRoutes($router)
     {
+        require __DIR__.'/../routes/web.php';
+        require __DIR__.'/../routes/channels.php';
+    }
+
     /**
      * Helper method to create an admin user for testing.
      */
