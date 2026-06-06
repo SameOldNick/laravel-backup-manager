@@ -68,6 +68,10 @@ class ServiceProvider extends BaseServiceProvider
             $this->registerRoutes();
         }
 
+        $this->publishes([
+            __DIR__.'/../config/backup-manager.php' => $this->app->configPath('backup-manager.php'),
+        ], 'backup-manager-config');
+
         $this->publishesMigrations([
             __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'backup-manager-migrations');
