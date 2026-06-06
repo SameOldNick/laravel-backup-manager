@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
 use SameOldNick\BackupManager\Broadcasting\Access\Stores\CacheStore;
+use SameOldNick\BackupManager\Commands\InstallBackupManager;
 use SameOldNick\BackupManager\Contracts\BackupConfigurationProvider;
 use SameOldNick\BackupManager\Contracts\ChannelAccessStore;
 use SameOldNick\BackupManager\Contracts\ConfigProvider;
@@ -57,6 +58,12 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function boot()
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                InstallBackupManager::class,
+            ]);
+        }
+
         if (config('backup-manager.routes.enabled', true)) {
             $this->registerRoutes();
         }
