@@ -1,6 +1,16 @@
 <?php
 
 return [
+    /*
+    |--------------------------------------------------------------------------
+    | Backup Manager Routes
+    |--------------------------------------------------------------------------
+    |
+    | Here you can specify the settings for the routes used by the backup manager.
+    | You can disable the routes by setting 'enabled' to false. You can also specify
+    | the middleware, prefix and name for the routes. The 'all' key is used for all routes,
+    | while the 'management' and 'download' keys are used for the management and download routes respectively.
+     */
     'routes' => [
         'enabled' => true,
 
