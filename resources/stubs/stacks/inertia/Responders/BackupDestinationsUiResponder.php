@@ -3,6 +3,7 @@
 namespace VendorName\BackupManager\Responders;
 
 use Illuminate\Pagination\AbstractPaginator;
+use Inertia\Inertia;
 use SameOldNick\BackupManager\Contracts\FilesystemConfiguration;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder as BackupDestinationsUiResponderContract;
 use Spatie\Backup\Config\Config;
@@ -14,7 +15,7 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
      */
     public function renderBackupDestinationsList(AbstractPaginator $backupDestinations)
     {
-        return inertia('dashboard/settings/backups/page', [
+        return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'destinations',
             'action' => 'list',
             'destinations' => $backupDestinations,
