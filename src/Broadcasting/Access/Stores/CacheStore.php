@@ -75,7 +75,7 @@ class CacheStore implements ChannelAccessStore
             return null;
         }
 
-        return $data;
+        return [...$data, 'expires_at' => $expiresAt];
     }
 
     /**
