@@ -2,21 +2,21 @@
 
 namespace VendorName\BackupManager\Responders;
 
-use Illuminate\Pagination\AbstractPaginator;
 use Inertia\Inertia;
 use SameOldNick\BackupManager\Contracts\Responders\BackupsUiResponder as BackupsUiResponderContract;
+use SameOldNick\BackupManager\Models\Collections\BackupCollection;
 
 class BackupsUiResponder implements BackupsUiResponderContract
 {
     /**
      * {@inheritDoc}
      */
-    public function renderBackupsList(AbstractPaginator $backups)
+    public function renderBackupsList(BackupCollection $backups)
     {
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'backups',
             'action' => 'list',
-            'backups' => $backups,
+            'backups' => $backups->paginate(request()->query('per_page', 15))->withQueryString(),
         ]);
     }
 

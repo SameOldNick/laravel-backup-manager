@@ -2,7 +2,7 @@
 
 namespace SameOldNick\BackupManager\Contracts\Responders;
 
-use Illuminate\Pagination\AbstractPaginator;
+use SameOldNick\BackupManager\Models\Collections\BackupCollection;
 
 interface BackupsUiResponder
 {
@@ -11,7 +11,7 @@ interface BackupsUiResponder
      *
      * @return mixed
      */
-    public function renderBackupsList(AbstractPaginator $backups);
+    public function renderBackupsList(BackupCollection $backups);
 
     /**
      * Renders the perform backup screen.

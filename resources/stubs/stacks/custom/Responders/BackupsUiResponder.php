@@ -2,15 +2,15 @@
 
 namespace VendorName\BackupManager\Responders;
 
-use Illuminate\Pagination\AbstractPaginator;
 use SameOldNick\BackupManager\Contracts\Responders\BackupsUiResponder as BackupsUiResponderContract;
+use SameOldNick\BackupManager\Models\Collections\BackupCollection;
 
 class BackupsUiResponder implements BackupsUiResponderContract
 {
     /**
      * {@inheritDoc}
      */
-    public function renderBackupsList(AbstractPaginator $backups)
+    public function renderBackupsList(BackupCollection $backups)
     {
         //
     }

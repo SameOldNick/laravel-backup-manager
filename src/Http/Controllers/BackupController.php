@@ -11,13 +11,14 @@ use SameOldNick\BackupManager\Contracts\Responders\BackupsUiResponder;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 use SameOldNick\BackupManager\Models\Backup;
 use SameOldNick\BackupManager\Models\Collections\BackupCollection;
-use SameOldNick\BackupManager\Models\File;
+use SameOldNick\BackupManager\Services\BackupsService;
 
 class BackupController
 {
     use DispatchesJobs;
 
     public function __construct(
+        protected readonly BackupsService $service,
         protected readonly BackupsUiResponder $ui
     ) {
         //
@@ -40,10 +41,12 @@ class BackupController
             ])],
         ]);
 
-        return $this->ui->renderBackupsList($this->filterBackups(
+        $backups = $this->service->getBackups(
             status: $request->filled('status') ? $request->str('status')->toString() : null,
             query: $request->filled('query') ? $request->str('query')->toString() : null,
-        )->paginate($request->query('per_page', 15))->withQueryString());
+        );
+
+        return $this->ui->renderBackupsList($backups);
     }
 
     /**
@@ -106,36 +109,5 @@ class BackupController
         return $this->ui->renderPerformBackup($type, $uuid);
     }
 
-    /**
-     * Filters the backups based on the given status and query.
-     *
-     * @param  string|null  $status  The status to filter by (successful, failed, deleted)
-     * @param  string|null  $query  The search query to filter by (matches uuid, status, or file path)
-     * @return BackupCollection
-     */
-    protected function filterBackups(?string $status = null, ?string $query = null)
-    {
-        /**
-         * Since the where() method creates WHERE clauses for actual columns, we can't use it for appended attributes.
-         * Instead, we can use afterQuery() to filter the models after their pulled.
-         */
-        return Backup::query()->withTrashed()->afterQuery(function (BackupCollection $found) use ($status, $query) {
-            $collection = ! is_null($status) && $status !== 'all' ? $found->status($status) : $found;
-
-            if (! is_null($query)) {
-                $collection = $collection->filter(function (Backup $backup) use ($query) {
-                    return str_contains($backup->uuid, $query)
-                        || str_contains($backup->status, $query)
-                        || str_contains($backup->file?->path ?? '', $query);
-                });
-            }
-
-            /**
-             * The keys need to be reset so they are in sequence (0,1,2...)
-             * Passing the keys without being in sequence causes issues with pagination.
-             * It also causes JS to treat the data as an object, not an array.
-             */
-            return $collection->values();
-        })->latest();
     }
 }
