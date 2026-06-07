@@ -2,6 +2,7 @@
 
 namespace VendorName\BackupManager\Responders;
 
+use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Contracts\Responders\BackupsUiResponder as BackupsUiResponderContract;
 use SameOldNick\BackupManager\Models\Collections\BackupCollection;
 
@@ -18,7 +19,7 @@ class BackupsUiResponder implements BackupsUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderPerformBackup(string $type, string $uuid)
+    public function renderPerformBackup(string $type, string $uuid, ?ChannelLease $lease)
     {
         //
     }

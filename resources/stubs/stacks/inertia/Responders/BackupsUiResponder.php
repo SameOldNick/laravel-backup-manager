@@ -3,6 +3,7 @@
 namespace VendorName\BackupManager\Responders;
 
 use Inertia\Inertia;
+use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Contracts\Responders\BackupsUiResponder as BackupsUiResponderContract;
 use SameOldNick\BackupManager\Models\Collections\BackupCollection;
 
@@ -23,8 +24,12 @@ class BackupsUiResponder implements BackupsUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderPerformBackup(string $type, string $uuid)
+    public function renderPerformBackup(string $type, string $uuid, ?ChannelLease $lease)
     {
+        if (! $lease) {
+            abort(404, __('backup::messages.backup_job_not_found'));
+        }
+
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'backups',
             'action' => 'list',

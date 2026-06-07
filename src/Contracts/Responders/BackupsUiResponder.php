@@ -2,6 +2,7 @@
 
 namespace SameOldNick\BackupManager\Contracts\Responders;
 
+use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Models\Collections\BackupCollection;
 
 interface BackupsUiResponder
@@ -18,5 +19,5 @@ interface BackupsUiResponder
      *
      * @return mixed
      */
-    public function renderPerformBackup(string $type, string $uuid);
+    public function renderPerformBackup(string $type, string $uuid, ?ChannelLease $lease);
 }
