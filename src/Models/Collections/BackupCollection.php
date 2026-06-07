@@ -2,14 +2,17 @@
 
 namespace SameOldNick\BackupManager\Models\Collections;
 
-use SameOldNick\BackupManager\Models\Backup;
 use Illuminate\Database\Eloquent\Collection;
+use SameOldNick\BackupManager\Concerns\PaginatesCollection;
+use SameOldNick\BackupManager\Models\Backup;
 
 /**
  * @extends Collection<int, Backup>
  */
 class BackupCollection extends Collection
 {
+    use PaginatesCollection;
+
     /**
      * Gets backups with status
      *
