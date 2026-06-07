@@ -4,6 +4,7 @@ namespace SameOldNick\BackupManager\Broadcasting\Access\Stores;
 
 use DateTimeInterface;
 use Illuminate\Cache\Repository;
+use Illuminate\Support\Carbon;
 use Ramsey\Uuid\Uuid;
 use SameOldNick\BackupManager\Contracts\ChannelAccessStore;
 
@@ -30,12 +31,13 @@ class CacheStore implements ChannelAccessStore
      */
     public function open(string $channelId, object $notifiable, ?DateTimeInterface $expiresAt = null): array
     {
+        $expiresAt = Carbon::instance($expiresAt ?? now()->addHours(3));
 
         $data = [
             'channel' => $channelId,
             'notifiable_class' => get_class($notifiable),
             'notifiable_key' => $this->getNotifiableKey($notifiable),
-            'expires_at' => $expiresAt ?? now()->addHours(3),
+            'expires_at' => $expiresAt->toIso8601String(),
         ];
 
         if (! $this->cache->put($this->cacheKey($channelId), $data, $data['expires_at'])) {
@@ -65,7 +67,9 @@ class CacheStore implements ChannelAccessStore
     {
         $data = $this->cache->get($this->cacheKey($channelId));
 
-        if (is_null($data) || now()->isAfter($data['expires_at'])) {
+        $expiresAt = isset($data['expires_at']) ? Carbon::parse($data['expires_at']) : null;
+
+        if (is_null($data) || ($expiresAt && Carbon::now()->isAfter($expiresAt))) {
             $this->close($channelId);
 
             return null;
