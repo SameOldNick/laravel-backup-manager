@@ -7,6 +7,7 @@ use SameOldNick\BackupManager\DataTransferObjects\CreateBackupScheduleData;
 use SameOldNick\BackupManager\DataTransferObjects\UpdateBackupScheduleData;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\Collections\BackupScheduleCollection;
+use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 
 class BackupSchedulesService
 {
@@ -21,6 +22,11 @@ class BackupSchedulesService
     public function getBackupSchedules(): BackupScheduleCollection
     {
         return BackupSchedule::all();
+    }
+
+    public function getAvailableDestinations(): FilesystemConfigurationCollection
+    {
+        return BackupSchedule::availableDestinations();
     }
 
     public function createBackupSchedule(CreateBackupScheduleData $data): BackupSchedule

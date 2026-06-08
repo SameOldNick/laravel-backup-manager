@@ -8,7 +8,6 @@ use SameOldNick\BackupManager\DataTransferObjects\UpdateBackupScheduleData;
 use SameOldNick\BackupManager\Http\Requests\StoreBackupScheduleRequest;
 use SameOldNick\BackupManager\Http\Requests\UpdateBackupScheduleRequest;
 use SameOldNick\BackupManager\Models\BackupSchedule;
-use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Services\BackupSchedulesService;
 
 class BackupScheduleController
@@ -25,12 +24,7 @@ class BackupScheduleController
      */
     public function create()
     {
-        return $this->ui->renderCreateBackupSchedule(
-            FilesystemConfiguration::query()
-                ->active()
-                ->orderBy('name')
-                ->get()
-        );
+        return $this->ui->renderCreateBackupSchedule($this->service->getAvailableDestinations());
     }
 
     /**
@@ -55,16 +49,9 @@ class BackupScheduleController
             ->pluck('filesystem_configurations.id')
             ->all();
 
-        $destinations = FilesystemConfiguration::query()
-            ->where(function ($query) use ($selectedDestinationIds) {
-                $query->active();
-
-                if (count($selectedDestinationIds) > 0) {
-                    $query->orWhereIn('id', $selectedDestinationIds);
-                }
-            })
-            ->orderBy('name')
-            ->get();
+        $destinations = $this->service->getAvailableDestinations()->filter(function ($destination) use ($selectedDestinationIds) {
+            return $destination->is_active || in_array($destination->id, $selectedDestinationIds);
+        });
 
         return $this->ui->renderEditBackupSchedule($schedule, $destinations);
     }

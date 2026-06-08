@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Models;
 
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Models\Collections\BackupScheduleCollection;
@@ -49,5 +50,18 @@ class BackupSchedule extends AbstractSchedule
     public function filesystemConfigurations(): BelongsToMany
     {
         return $this->belongsToMany(FilesystemConfiguration::class);
+    }
+
+    /**
+     * Get the available backup destinations for scheduling.
+     *
+     * @return Collection<int, FilesystemConfiguration>
+     */
+    public static function availableDestinations()
+    {
+        return FilesystemConfiguration::query()
+            ->active()
+            ->orderBy('name')
+            ->get();
     }
 }
