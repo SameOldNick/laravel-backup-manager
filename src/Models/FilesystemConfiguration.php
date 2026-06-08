@@ -2,6 +2,7 @@
 
 namespace SameOldNick\BackupManager\Models;
 
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use SameOldNick\BackupManager\Contracts\FilesystemConfiguration as FilesystemConfigurationContract;
+use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 use SameOldNick\BackupManager\Models\Factories\FilesystemConfigurationFactory;
 use Spatie\Backup\Config\Config;
 
@@ -31,6 +33,7 @@ use Spatie\Backup\Config\Config;
  * @method static Builder active(bool $isActive = true)
  */
 #[UseFactory(FilesystemConfigurationFactory::class)]
+#[CollectedBy(FilesystemConfigurationCollection::class)]
 class FilesystemConfiguration extends Model implements FilesystemConfigurationContract
 {
     /** @use HasFactory<FilesystemConfigurationFactory> */
