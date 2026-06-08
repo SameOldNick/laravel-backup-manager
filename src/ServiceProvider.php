@@ -6,7 +6,6 @@ use Exception;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Filesystem\Factory as FactoryContract;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -100,12 +99,12 @@ class ServiceProvider extends BaseServiceProvider
     /**
      * Checks if database has been setup by checking if the specified tables exist.
      */
-    protected function isDatabaseSetup($tables): bool
+    protected function isDatabaseSetup(array $tables): bool
     {
         try {
             // If the database is not setup, this will throw an exception, which we catch and return false.
             // We don't need to check if the connection is available because if it's not, the exception will be thrown when we try to check for the tables.
-            foreach (Arr::wrap($tables) as $table) {
+            foreach ($tables as $table) {
                 if (! Schema::hasTable($table)) {
                     return false;
                 }
@@ -133,7 +132,7 @@ class ServiceProvider extends BaseServiceProvider
          * the instance and re-save it when the database becomes available.
          */
         $this->app->beforeResolving(Config::class, function ($abstract, $params, $app) use (&$hasReset) {
-            if ($this->isDatabaseSetup('filesystem_configurations') && ! $hasReset) {
+            if ($this->isDatabaseSetup(['filesystem_configurations']) && ! $hasReset) {
                 $app->forgetInstance(Config::class);
 
                 $hasReset = true;
@@ -141,7 +140,7 @@ class ServiceProvider extends BaseServiceProvider
         });
 
         $this->app->extend(Config::class, function (Config $config, Container $app) {
-            return $this->isDatabaseSetup('filesystem_configurations') ? $app->make(DatabaseConfigProvider::class, ['original' => $config]) : $config;
+            return $this->isDatabaseSetup(['filesystem_configurations']) ? $app->make(DatabaseConfigProvider::class, ['original' => $config]) : $config;
         });
     }
 
