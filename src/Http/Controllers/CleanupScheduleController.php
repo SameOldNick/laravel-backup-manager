@@ -2,14 +2,18 @@
 
 namespace SameOldNick\BackupManager\Http\Controllers;
 
-use Illuminate\Http\Request;
 use SameOldNick\BackupManager\Contracts\Responders\CleanupSchedulesUiResponder;
+use SameOldNick\BackupManager\DataTransferObjects\CreateCleanupScheduleData;
+use SameOldNick\BackupManager\DataTransferObjects\UpdateCleanupScheduleData;
+use SameOldNick\BackupManager\Http\Requests\StoreCleanupScheduleRequest;
+use SameOldNick\BackupManager\Http\Requests\UpdateCleanupScheduleRequest;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
-use SameOldNick\BackupManager\Rules\CronExpression as CronExpressionRule;
+use SameOldNick\BackupManager\Services\CleanupSchedulesService;
 
 class CleanupScheduleController
 {
     public function __construct(
+        protected readonly CleanupSchedulesService $service,
         protected readonly CleanupSchedulesUiResponder $ui
     ) {
         //
@@ -26,15 +30,11 @@ class CleanupScheduleController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCleanupScheduleRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'cron_expression' => ['required', 'string', new CronExpressionRule],
-            'is_active' => 'sometimes|boolean',
-        ]);
+        $data = CreateCleanupScheduleData::fromArray($request->validated());
 
-        $schedule = CleanupSchedule::create($validated);
+        $schedule = $this->service->createCleanupSchedule($data);
 
         return $this->ui->renderStoreCleanupSchedule($schedule);
     }
@@ -50,15 +50,11 @@ class CleanupScheduleController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, CleanupSchedule $schedule)
+    public function update(UpdateCleanupScheduleRequest $request, CleanupSchedule $schedule)
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'cron_expression' => ['sometimes', 'string', new CronExpressionRule],
-            'is_active' => 'sometimes|boolean',
-        ]);
+        $data = UpdateCleanupScheduleData::fromArray($request->validated());
 
-        $schedule->update($validated);
+        $this->service->updateCleanupSchedule($schedule, $data);
 
         return $this->ui->renderUpdateCleanupSchedule($schedule);
     }
@@ -68,7 +64,7 @@ class CleanupScheduleController
      */
     public function destroy(CleanupSchedule $schedule)
     {
-        $schedule->delete();
+        $this->service->removeCleanupSchedule($schedule);
 
         return $this->ui->renderDestroyCleanupSchedule($schedule);
     }
