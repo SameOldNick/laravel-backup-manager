@@ -2,9 +2,9 @@
 
 namespace SameOldNick\BackupManager\Testing\Responders;
 
-use Illuminate\Pagination\AbstractPaginator;
 use SameOldNick\BackupManager\Contracts\FilesystemConfiguration;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder as BackupDestinationsUiResponderContract;
+use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 use SameOldNick\BackupManager\Testing\Concerns;
 use Spatie\Backup\Config\Config;
 
@@ -15,10 +15,10 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     /**
      * {@inheritDoc}
      */
-    public function renderBackupDestinationsList(AbstractPaginator $backupDestinations)
+    public function renderBackupDestinationsList(FilesystemConfigurationCollection $backupDestinations)
     {
         return $this->createTestResponse('list', [
-            'backupDestinations' => $backupDestinations->toArray(),
+            'backupDestinations' => $backupDestinations->paginate()->toArray(),
         ]);
     }
 

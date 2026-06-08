@@ -2,8 +2,8 @@
 
 namespace SameOldNick\BackupManager\Contracts\Responders;
 
-use Illuminate\Pagination\AbstractPaginator;
 use SameOldNick\BackupManager\Contracts\FilesystemConfiguration;
+use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 use Spatie\Backup\Config\Config;
 
 interface BackupDestinationsUiResponder
@@ -13,7 +13,7 @@ interface BackupDestinationsUiResponder
      *
      * @return mixed
      */
-    public function renderBackupDestinationsList(AbstractPaginator $backupDestinations);
+    public function renderBackupDestinationsList(FilesystemConfigurationCollection $backupDestinations);
 
     /**
      * Renders the create backup destination screen.

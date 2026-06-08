@@ -17,6 +17,7 @@ use SameOldNick\BackupManager\Models\FilesystemConfigurationLocal;
 use SameOldNick\BackupManager\Models\FilesystemConfigurationSFTP;
 use SameOldNick\BackupManager\Rules\RelativePath;
 use SameOldNick\BackupManager\Rules\Slugified;
+use SameOldNick\BackupManager\Services\BackupDestinationsService;
 use Spatie\Backup\Config\Config;
 
 class BackupDestinationsController
@@ -24,6 +25,7 @@ class BackupDestinationsController
     use DispatchesJobs;
 
     public function __construct(
+        protected readonly BackupDestinationsService $service,
         protected readonly BackupDestinationsUiResponder $ui
     ) {
         //
@@ -42,34 +44,12 @@ class BackupDestinationsController
             'status' => ['sometimes', Rule::in(['enabled', 'disabled'])],
         ]);
 
-        $query = FilesystemConfiguration::query()->afterQuery(function (Collection $found) use ($request) {
-            $isActive = $request->filled('status') ? ($request->str('status') === 'enabled') : null;
-            $query = $request->str('query');
+        $isActive = $request->filled('status') ? ($request->str('status') === 'enabled') : null;
+        $query = $request->filled('query') ? $request->str('query') : null;
 
-            $collection = $found->filter(function (FilesystemConfiguration $config) use ($isActive, $query) {
-                if ($isActive !== null && $config->is_active !== $isActive) {
-                    return false;
-                }
+        $destinations = $this->service->getBackupDestinations($isActive, $query);
 
-                if ($query &&
-                    ! str_contains($config->name, $query) &&
-                    ! str_contains($config->type, $query) &&
-                    ! str_contains($config->host, $query)) {
-                    return false;
-                }
-
-                return true;
-            });
-
-            /**
-             * The keys need to be reset so they are in sequence (0,1,2...)
-             * Passing the keys without being in sequence causes issues with pagination.
-             * It also causes JS to treat the data as an object, not an array.
-             */
-            return ! is_null($collection) ? $collection->values() : null;
-        })->latest();
-
-        return $this->ui->renderBackupDestinationsList($query->paginate($request->integer('per_page', 15))->withQueryString());
+        return $this->ui->renderBackupDestinationsList($destinations);
     }
 
     /**
