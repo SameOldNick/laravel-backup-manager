@@ -2,8 +2,6 @@
 
 namespace SameOldNick\BackupManager\Models;
 
-use SameOldNick\BackupManager\Contracts\FilesystemConfiguration as FilesystemConfigurationContract;
-use SameOldNick\BackupManager\Models\Factories\FilesystemConfigurationFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,7 +9,11 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use SameOldNick\BackupManager\Contracts\FilesystemConfiguration as FilesystemConfigurationContract;
+use SameOldNick\BackupManager\Models\Factories\FilesystemConfigurationFactory;
+use Spatie\Backup\Config\Config;
 
 /**
  * @property int $id
@@ -88,6 +90,17 @@ class FilesystemConfiguration extends Model implements FilesystemConfigurationCo
     public function backupSchedules(): BelongsToMany
     {
         return $this->belongsToMany(BackupSchedule::class);
+    }
+
+    /**
+     * Determine if the destination is enabled based on the Spatie Backup config.
+     */
+    public function isEnabled(Config $backupConfig): bool
+    {
+        // Pull disks indirectly through Spatie Backup config
+        $enabled = $backupConfig->backup->destination->disks;
+
+        return in_array($this->driver_name, $enabled, true);
     }
 
     /**

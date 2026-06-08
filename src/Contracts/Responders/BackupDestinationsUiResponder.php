@@ -34,7 +34,14 @@ interface BackupDestinationsUiResponder
      *
      * @return mixed
      */
-    public function renderEditBackupDestination(Config $backupConfig, FilesystemConfiguration $configuration, bool $enabled);
+    public function renderEditBackupDestination(Config $backupConfig, FilesystemConfiguration $configuration);
+
+    /**
+     * Renders the response after testing a backup destination.
+     *
+     * @return mixed
+     */
+    public function renderBackupDestinationTestResult(Config $backupConfig, FilesystemConfiguration $configuration, string $uuid);
 
     /**
      * Renders the response after updating a backup destination.

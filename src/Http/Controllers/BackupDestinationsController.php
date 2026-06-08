@@ -84,7 +84,10 @@ class BackupDestinationsController
             return response()->json(['message' => __('backup::messages.destination_unconfigured')], 404);
         }
 
-        return $this->createEditResponse($backupConfig, $destination);
+        return $this->ui->renderEditBackupDestination(
+            $backupConfig,
+            $destination
+        );
     }
 
     /**
@@ -111,9 +114,7 @@ class BackupDestinationsController
      */
     public function showTestResult(Config $backupConfig, FilesystemConfiguration $destination, string $uuid)
     {
-        return
-            $this->createEditResponse($backupConfig, $destination)
-                ->with('testUuid', $uuid);
+        return $this->ui->renderBackupDestinationTestResult($backupConfig, $destination, $uuid);
     }
 
     /**
@@ -147,22 +148,5 @@ class BackupDestinationsController
         $this->service->removeBackupDestination($destination);
 
         return $this->ui->renderDestroyBackupDestination($destination);
-    }
-
-    /**
-     * Show the edit page for a specific configuration
-     *
-     * @return mixed
-     */
-    protected function createEditResponse(Config $backupConfig, FilesystemConfiguration $destination)
-    {
-        // Pull disks indirectly through Spatie Backup config
-        $enabled = $backupConfig->backup->destination->disks;
-
-        return $this->ui->renderEditBackupDestination(
-            $backupConfig,
-            $destination,
-            in_array($destination->driver_name, $enabled, true)
-        );
     }
 }

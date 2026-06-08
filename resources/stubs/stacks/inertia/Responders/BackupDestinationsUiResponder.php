@@ -2,10 +2,10 @@
 
 namespace VendorName\BackupManager\Responders;
 
-use Illuminate\Pagination\AbstractPaginator;
 use Inertia\Inertia;
 use SameOldNick\BackupManager\Contracts\FilesystemConfiguration;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder as BackupDestinationsUiResponderContract;
+use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 use Spatie\Backup\Config\Config;
 
 class BackupDestinationsUiResponder implements BackupDestinationsUiResponderContract
@@ -13,7 +13,7 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     /**
      * {@inheritDoc}
      */
-    public function renderBackupDestinationsList(AbstractPaginator $backupDestinations)
+    public function renderBackupDestinationsList(FilesystemConfigurationCollection $backupDestinations)
     {
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'destinations',
@@ -44,13 +44,27 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     /**
      * {@inheritDoc}
      */
-    public function renderEditBackupDestination(Config $backupConfig, FilesystemConfiguration $configuration, bool $enabled)
+    public function renderEditBackupDestination(Config $backupConfig, FilesystemConfiguration $configuration)
     {
         return inertia('dashboard/settings/backups/page', [
             'tab' => 'destinations',
             'action' => 'edit',
             'destination' => $configuration,
-            'enabled' => $enabled,
+            'enabled' => $configuration->isEnabled($backupConfig),
+        ]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function renderBackupDestinationTestResult(Config $backupConfig, FilesystemConfiguration $configuration, string $uuid)
+    {
+        return inertia('dashboard/settings/backups/page', [
+            'tab' => 'destinations',
+            'action' => 'edit',
+            'destination' => $configuration,
+            'enabled' => $configuration->isEnabled($backupConfig),
+            'testUuid' => $uuid,
         ]);
     }
 
