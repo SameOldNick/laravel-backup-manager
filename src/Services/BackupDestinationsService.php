@@ -44,11 +44,11 @@ class BackupDestinationsService
     {
         return DB::transaction(function () use ($data) {
             $config = match ($data->type) {
-                'local' => FilesystemConfigurationLocal::create([
+                CreateBackupDestinationData::TYPE_LOCAL => FilesystemConfigurationLocal::create([
                     'root' => $data->root,
                     'extra' => $data->extra,
                 ]),
-                'ftp' => FilesystemConfigurationFTP::create([
+                CreateBackupDestinationData::TYPE_FTP => FilesystemConfigurationFTP::create([
                     'host' => $data->host,
                     'port' => $data->port,
                     'username' => $data->username,
@@ -56,7 +56,7 @@ class BackupDestinationsService
                     'root' => $data->root,
                     'extra' => $data->extra,
                 ]),
-                'sftp' => FilesystemConfigurationSFTP::create([
+                CreateBackupDestinationData::TYPE_SFTP => FilesystemConfigurationSFTP::create([
                     'host' => $data->host,
                     'port' => $data->port,
                     'username' => $data->username,
