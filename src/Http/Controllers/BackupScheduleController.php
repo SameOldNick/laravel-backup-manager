@@ -2,13 +2,11 @@
 
 namespace SameOldNick\BackupManager\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Contracts\Responders\BackupSchedulesUiResponder;
-use SameOldNick\BackupManager\Enums\BackupTypes;
+use SameOldNick\BackupManager\Http\Requests\StoreBackupScheduleRequest;
+use SameOldNick\BackupManager\Http\Requests\UpdateBackupScheduleRequest;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
-use SameOldNick\BackupManager\Rules\CronExpression as CronExpressionRule;
 
 class BackupScheduleController
 {
@@ -34,28 +32,9 @@ class BackupScheduleController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreBackupScheduleRequest $request)
     {
-        $rules = [
-            'name' => 'required|string|max:255',
-            'type' => [
-                'required',
-                'string',
-                Rule::enum(BackupTypes::class),
-            ],
-            'cron_expression' => ['required', 'string', new CronExpressionRule],
-            'is_active' => 'sometimes|boolean',
-            'destination_ids' => 'sometimes|array|min:1',
-            'destination_ids.*' => [
-                'integer',
-                Rule::exists(FilesystemConfiguration::class, 'id')->where(
-                    'is_active',
-                    true,
-                ),
-            ],
-        ];
-
-        $validated = $request->validate($rules);
+        $validated = $request->validated();
 
         $schedule = BackupSchedule::create(collect($validated)->except('destination_ids')->all());
 
@@ -93,28 +72,9 @@ class BackupScheduleController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BackupSchedule $schedule)
+    public function update(UpdateBackupScheduleRequest $request, BackupSchedule $schedule)
     {
-        $rules = [
-            'name' => 'sometimes|string|max:255',
-            'type' => [
-                'sometimes',
-                'string',
-                Rule::enum(BackupTypes::class),
-            ],
-            'cron_expression' => ['sometimes', 'string', new CronExpressionRule],
-            'is_active' => 'sometimes|boolean',
-            'destination_ids' => 'sometimes|array|min:1',
-            'destination_ids.*' => [
-                'integer',
-                Rule::exists(FilesystemConfiguration::class, 'id')->where(
-                    'is_active',
-                    true,
-                ),
-            ],
-        ];
-
-        $validated = $request->validate($rules);
+        $validated = $request->validated();
 
         $schedule->update(collect($validated)->except('destination_ids')->all());
 
