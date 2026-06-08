@@ -144,6 +144,12 @@ class BackupDestinationsService
         });
     }
 
+    public function removeBackupDestination(FilesystemConfiguration $destination): void
+    {
+        $destination->configurable->delete();
+        $destination->delete();
+    }
+
     public function startBackupDestinationTest(FilesystemConfiguration $destination, ?string $uuid = null): ChannelLease
     {
         $channel = $this->createChannelId($uuid ?? Str::uuid());

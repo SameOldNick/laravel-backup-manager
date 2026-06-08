@@ -144,7 +144,7 @@ class BackupDestinationsController
      */
     public function destroy(FilesystemConfiguration $destination)
     {
-        $this->performDestroy($destination);
+        $this->service->removeBackupDestination($destination);
 
         return $this->ui->renderDestroyBackupDestination($destination);
     }
@@ -164,16 +164,5 @@ class BackupDestinationsController
             $destination,
             in_array($destination->driver_name, $enabled, true)
         );
-    }
-
-    /**
-     * Removes a configuration
-     *
-     * @return void
-     */
-    protected function performDestroy(FilesystemConfiguration $destination)
-    {
-        $destination->configurable->delete();
-        $destination->delete();
     }
 }
