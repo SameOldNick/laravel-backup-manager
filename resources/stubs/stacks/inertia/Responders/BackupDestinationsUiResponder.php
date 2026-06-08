@@ -3,22 +3,25 @@
 namespace VendorName\BackupManager\Responders;
 
 use Inertia\Inertia;
-use SameOldNick\BackupManager\Contracts\FilesystemConfiguration;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder as BackupDestinationsUiResponderContract;
-use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
-use Spatie\Backup\Config\Config;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationsListViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationTestResultViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\DestroyBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\EditBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\StoreBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\UpdateBackupDestinationViewData;
 
 class BackupDestinationsUiResponder implements BackupDestinationsUiResponderContract
 {
     /**
      * {@inheritDoc}
      */
-    public function renderBackupDestinationsList(FilesystemConfigurationCollection $backupDestinations)
+    public function renderBackupDestinationsList(BackupDestinationsListViewData $data)
     {
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'destinations',
             'action' => 'list',
-            'destinations' => $backupDestinations,
+            'destinations' => $data->backupDestinations,
         ]);
     }
 
@@ -36,42 +39,42 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     /**
      * {@inheritDoc}
      */
-    public function renderStoreBackupDestination(FilesystemConfiguration $configuration)
+    public function renderStoreBackupDestination(StoreBackupDestinationViewData $data)
     {
-        return redirect()->route('backup.destinations.show', ['destination' => $configuration]);
+        return redirect()->route('backup.destinations.show', ['destination' => $data->configuration]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function renderEditBackupDestination(Config $backupConfig, FilesystemConfiguration $configuration)
+    public function renderEditBackupDestination(EditBackupDestinationViewData $data)
     {
         return inertia('dashboard/settings/backups/page', [
             'tab' => 'destinations',
             'action' => 'edit',
-            'destination' => $configuration,
-            'enabled' => $configuration->isEnabled($backupConfig),
+            'destination' => $data->configuration,
+            'enabled' => $data->configuration->isEnabled($data->backupConfig),
         ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function renderBackupDestinationTestResult(Config $backupConfig, FilesystemConfiguration $configuration, string $uuid)
+    public function renderBackupDestinationTestResult(BackupDestinationTestResultViewData $data)
     {
         return inertia('dashboard/settings/backups/page', [
             'tab' => 'destinations',
             'action' => 'edit',
-            'destination' => $configuration,
-            'enabled' => $configuration->isEnabled($backupConfig),
-            'testUuid' => $uuid,
+            'destination' => $data->configuration,
+            'enabled' => $data->configuration->isEnabled($data->backupConfig),
+            'testUuid' => $data->uuid,
         ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function renderUpdateBackupDestination(FilesystemConfiguration $destination)
+    public function renderUpdateBackupDestination(UpdateBackupDestinationViewData $data)
     {
         return back();
     }
@@ -79,7 +82,7 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     /**
      * {@inheritDoc}
      */
-    public function renderDestroyBackupDestination(FilesystemConfiguration $destination)
+    public function renderDestroyBackupDestination(DestroyBackupDestinationViewData $data)
     {
         return back();
     }

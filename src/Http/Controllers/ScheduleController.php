@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Http\Controllers;
 
 use SameOldNick\BackupManager\Contracts\Responders\SchedulesUiResponder;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\SchedulesListViewData;
 use SameOldNick\BackupManager\Services\BackupSchedulesService;
 use SameOldNick\BackupManager\Services\CleanupSchedulesService;
 
@@ -21,9 +22,9 @@ class ScheduleController
      */
     public function index()
     {
-        return $this->ui->renderSchedulesList(
-            $this->backupScheduleService->getBackupSchedules(),
-            $this->cleanupScheduleService->getCleanupSchedules()
-        );
+        return $this->ui->renderSchedulesList(new SchedulesListViewData(
+            backupSchedules: $this->backupScheduleService->getBackupSchedules(),
+            cleanupSchedules: $this->cleanupScheduleService->getCleanupSchedules(),
+        ));
     }
 }

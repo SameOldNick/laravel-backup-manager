@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Contracts\Responders\BackupsUiResponder;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Backups\BackupsListViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Backups\PerformBackupViewData;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 use SameOldNick\BackupManager\Models\Backup;
 use SameOldNick\BackupManager\Services\BackupsService;
@@ -44,7 +46,9 @@ class BackupController
             query: $request->filled('query') ? $request->str('query')->toString() : null,
         );
 
-        return $this->ui->renderBackupsList($backups);
+        return $this->ui->renderBackupsList(new BackupsListViewData(
+            backups: $backups,
+        ));
     }
 
     /**
@@ -104,6 +108,10 @@ class BackupController
     {
         $lease = $this->service->getBackupChannelLease($this->service->createChannelId($uuid));
 
-        return $this->ui->renderPerformBackup($type, $uuid, $lease);
+        return $this->ui->renderPerformBackup(new PerformBackupViewData(
+            type: $type,
+            uuid: $uuid,
+            lease: $lease,
+        ));
     }
 }

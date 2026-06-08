@@ -2,8 +2,7 @@
 
 namespace SameOldNick\BackupManager\Contracts\Responders;
 
-use Illuminate\Database\Eloquent\Collection;
-use SameOldNick\BackupManager\Models\Collections\BackupScheduleCollection;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\SchedulesListViewData;
 
 interface SchedulesUiResponder
 {
@@ -12,5 +11,5 @@ interface SchedulesUiResponder
      *
      * @return mixed
      */
-    public function renderSchedulesList(BackupScheduleCollection $backupSchedules, Collection $cleanupSchedules);
+    public function renderSchedulesList(SchedulesListViewData $data);
 }

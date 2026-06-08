@@ -7,8 +7,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationsListViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationTestResultViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Services\CreateBackupDestinationData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\DestroyBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\EditBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\StoreBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateBackupDestinationData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\UpdateBackupDestinationViewData;
 use SameOldNick\BackupManager\Http\Requests\StoreBackupDestinationRequest;
 use SameOldNick\BackupManager\Http\Requests\UpdateBackupDestinationRequest;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
@@ -44,7 +50,9 @@ class BackupDestinationsController
 
         $destinations = $this->service->getBackupDestinations($isActive, $query);
 
-        return $this->ui->renderBackupDestinationsList($destinations);
+        return $this->ui->renderBackupDestinationsList(new BackupDestinationsListViewData(
+            backupDestinations: $destinations,
+        ));
     }
 
     /**
@@ -68,7 +76,9 @@ class BackupDestinationsController
             CreateBackupDestinationData::fromArray($request->validated())
         );
 
-        return $this->ui->renderStoreBackupDestination($destination);
+        return $this->ui->renderStoreBackupDestination(new StoreBackupDestinationViewData(
+            configuration: $destination,
+        ));
     }
 
     /**
@@ -84,10 +94,10 @@ class BackupDestinationsController
             return response()->json(['message' => __('backup::messages.destination_unconfigured')], 404);
         }
 
-        return $this->ui->renderEditBackupDestination(
-            $backupConfig,
-            $destination
-        );
+        return $this->ui->renderEditBackupDestination(new EditBackupDestinationViewData(
+            backupConfig: $backupConfig,
+            configuration: $destination,
+        ));
     }
 
     /**
@@ -114,7 +124,11 @@ class BackupDestinationsController
      */
     public function showTestResult(Config $backupConfig, FilesystemConfiguration $destination, string $uuid)
     {
-        return $this->ui->renderBackupDestinationTestResult($backupConfig, $destination, $uuid);
+        return $this->ui->renderBackupDestinationTestResult(new BackupDestinationTestResultViewData(
+            backupConfig: $backupConfig,
+            configuration: $destination,
+            uuid: $uuid,
+        ));
     }
 
     /**
@@ -135,7 +149,9 @@ class BackupDestinationsController
             UpdateBackupDestinationData::fromArray($request->validated())
         );
 
-        return $this->ui->renderUpdateBackupDestination($destination);
+        return $this->ui->renderUpdateBackupDestination(new UpdateBackupDestinationViewData(
+            destination: $destination,
+        ));
     }
 
     /**
@@ -147,6 +163,8 @@ class BackupDestinationsController
     {
         $this->service->removeBackupDestination($destination);
 
-        return $this->ui->renderDestroyBackupDestination($destination);
+        return $this->ui->renderDestroyBackupDestination(new DestroyBackupDestinationViewData(
+            destination: $destination,
+        ));
     }
 }

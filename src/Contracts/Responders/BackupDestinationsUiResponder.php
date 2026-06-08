@@ -2,9 +2,12 @@
 
 namespace SameOldNick\BackupManager\Contracts\Responders;
 
-use SameOldNick\BackupManager\Contracts\FilesystemConfiguration;
-use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
-use Spatie\Backup\Config\Config;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationsListViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationTestResultViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\DestroyBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\EditBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\StoreBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\UpdateBackupDestinationViewData;
 
 interface BackupDestinationsUiResponder
 {
@@ -13,7 +16,7 @@ interface BackupDestinationsUiResponder
      *
      * @return mixed
      */
-    public function renderBackupDestinationsList(FilesystemConfigurationCollection $backupDestinations);
+    public function renderBackupDestinationsList(BackupDestinationsListViewData $data);
 
     /**
      * Renders the create backup destination screen.
@@ -27,33 +30,33 @@ interface BackupDestinationsUiResponder
      *
      * @return mixed
      */
-    public function renderStoreBackupDestination(FilesystemConfiguration $configuration);
+    public function renderStoreBackupDestination(StoreBackupDestinationViewData $data);
 
     /**
      * Renders the edit backup destination screen.
      *
      * @return mixed
      */
-    public function renderEditBackupDestination(Config $backupConfig, FilesystemConfiguration $configuration);
+    public function renderEditBackupDestination(EditBackupDestinationViewData $data);
 
     /**
      * Renders the response after testing a backup destination.
      *
      * @return mixed
      */
-    public function renderBackupDestinationTestResult(Config $backupConfig, FilesystemConfiguration $configuration, string $uuid);
+    public function renderBackupDestinationTestResult(BackupDestinationTestResultViewData $data);
 
     /**
      * Renders the response after updating a backup destination.
      *
      * @return mixed
      */
-    public function renderUpdateBackupDestination(FilesystemConfiguration $destination);
+    public function renderUpdateBackupDestination(UpdateBackupDestinationViewData $data);
 
     /**
      * Renders the response after deleting a backup destination.
      *
      * @return mixed
      */
-    public function renderDestroyBackupDestination(FilesystemConfiguration $destination);
+    public function renderDestroyBackupDestination(DestroyBackupDestinationViewData $data);
 }

@@ -2,17 +2,20 @@
 
 namespace VendorName\BackupManager\Responders;
 
-use SameOldNick\BackupManager\Contracts\FilesystemConfiguration;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder as BackupDestinationsUiResponderContract;
-use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
-use Spatie\Backup\Config\Config;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationsListViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationTestResultViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\DestroyBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\EditBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\StoreBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\UpdateBackupDestinationViewData;
 
 class BackupDestinationsUiResponder implements BackupDestinationsUiResponderContract
 {
     /**
      * {@inheritDoc}
      */
-    public function renderBackupDestinationsList(FilesystemConfigurationCollection $backupDestinations)
+    public function renderBackupDestinationsList(BackupDestinationsListViewData $data)
     {
         //
     }
@@ -28,7 +31,7 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     /**
      * {@inheritDoc}
      */
-    public function renderStoreBackupDestination(FilesystemConfiguration $configuration)
+    public function renderStoreBackupDestination(StoreBackupDestinationViewData $data)
     {
         //
     }
@@ -36,7 +39,7 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     /**
      * {@inheritDoc}
      */
-    public function renderEditBackupDestination(Config $backupConfig, FilesystemConfiguration $configuration)
+    public function renderEditBackupDestination(EditBackupDestinationViewData $data)
     {
         //
     }
@@ -44,7 +47,7 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     /**
      * {@inheritDoc}
      */
-    public function renderBackupDestinationTestResult(Config $backupConfig, FilesystemConfiguration $configuration, string $uuid)
+    public function renderBackupDestinationTestResult(BackupDestinationTestResultViewData $data)
     {
         //
     }
@@ -52,7 +55,7 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     /**
      * {@inheritDoc}
      */
-    public function renderUpdateBackupDestination(FilesystemConfiguration $destination)
+    public function renderUpdateBackupDestination(UpdateBackupDestinationViewData $data)
     {
         //
     }
@@ -60,7 +63,7 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     /**
      * {@inheritDoc}
      */
-    public function renderDestroyBackupDestination(FilesystemConfiguration $destination)
+    public function renderDestroyBackupDestination(DestroyBackupDestinationViewData $data)
     {
         //
     }

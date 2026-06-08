@@ -3,6 +3,10 @@
 namespace SameOldNick\BackupManager\Http\Controllers;
 
 use SameOldNick\BackupManager\Contracts\Responders\CleanupSchedulesUiResponder;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\DestroyCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\EditCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\StoreCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\UpdateCleanupScheduleViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Services\CreateCleanupScheduleData;
 use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateCleanupScheduleData;
 use SameOldNick\BackupManager\Http\Requests\StoreCleanupScheduleRequest;
@@ -36,7 +40,9 @@ class CleanupScheduleController
 
         $schedule = $this->service->createCleanupSchedule($data);
 
-        return $this->ui->renderStoreCleanupSchedule($schedule);
+        return $this->ui->renderStoreCleanupSchedule(new StoreCleanupScheduleViewData(
+            schedule: $schedule,
+        ));
     }
 
     /**
@@ -44,7 +50,9 @@ class CleanupScheduleController
      */
     public function edit(CleanupSchedule $schedule)
     {
-        return $this->ui->renderEditCleanupSchedule($schedule);
+        return $this->ui->renderEditCleanupSchedule(new EditCleanupScheduleViewData(
+            schedule: $schedule,
+        ));
     }
 
     /**
@@ -56,7 +64,9 @@ class CleanupScheduleController
 
         $this->service->updateCleanupSchedule($schedule, $data);
 
-        return $this->ui->renderUpdateCleanupSchedule($schedule);
+        return $this->ui->renderUpdateCleanupSchedule(new UpdateCleanupScheduleViewData(
+            schedule: $schedule,
+        ));
     }
 
     /**
@@ -66,6 +76,8 @@ class CleanupScheduleController
     {
         $this->service->removeCleanupSchedule($schedule);
 
-        return $this->ui->renderDestroyCleanupSchedule($schedule);
+        return $this->ui->renderDestroyCleanupSchedule(new DestroyCleanupScheduleViewData(
+            schedule: $schedule,
+        ));
     }
 }

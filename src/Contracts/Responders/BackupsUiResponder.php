@@ -2,8 +2,8 @@
 
 namespace SameOldNick\BackupManager\Contracts\Responders;
 
-use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
-use SameOldNick\BackupManager\Models\Collections\BackupCollection;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Backups\BackupsListViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Backups\PerformBackupViewData;
 
 interface BackupsUiResponder
 {
@@ -12,12 +12,12 @@ interface BackupsUiResponder
      *
      * @return mixed
      */
-    public function renderBackupsList(BackupCollection $backups);
+    public function renderBackupsList(BackupsListViewData $data);
 
     /**
      * Renders the perform backup screen.
      *
      * @return mixed
      */
-    public function renderPerformBackup(string $type, string $uuid, ?ChannelLease $lease);
+    public function renderPerformBackup(PerformBackupViewData $data);
 }

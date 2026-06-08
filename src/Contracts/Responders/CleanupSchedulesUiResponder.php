@@ -2,7 +2,10 @@
 
 namespace SameOldNick\BackupManager\Contracts\Responders;
 
-use SameOldNick\BackupManager\Models\CleanupSchedule;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\DestroyCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\EditCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\StoreCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\UpdateCleanupScheduleViewData;
 
 interface CleanupSchedulesUiResponder
 {
@@ -18,26 +21,26 @@ interface CleanupSchedulesUiResponder
      *
      * @return mixed
      */
-    public function renderStoreCleanupSchedule(CleanupSchedule $schedule);
+    public function renderStoreCleanupSchedule(StoreCleanupScheduleViewData $data);
 
     /**
      * Renders the edit cleanup schedule screen.
      *
      * @return mixed
      */
-    public function renderEditCleanupSchedule(CleanupSchedule $schedule);
+    public function renderEditCleanupSchedule(EditCleanupScheduleViewData $data);
 
     /**
      * Renders the response after updating a cleanup schedule.
      *
      * @return mixed
      */
-    public function renderUpdateCleanupSchedule(CleanupSchedule $schedule);
+    public function renderUpdateCleanupSchedule(UpdateCleanupScheduleViewData $data);
 
     /**
      * Renders the response after deleting a cleanup schedule.
      *
      * @return mixed
      */
-    public function renderDestroyCleanupSchedule(CleanupSchedule $schedule);
+    public function renderDestroyCleanupSchedule(DestroyCleanupScheduleViewData $data);
 }

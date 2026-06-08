@@ -4,7 +4,10 @@ namespace VendorName\BackupManager\Responders;
 
 use Inertia\Inertia;
 use SameOldNick\BackupManager\Contracts\Responders\CleanupSchedulesUiResponder as CleanupSchedulesUiResponderContract;
-use SameOldNick\BackupManager\Models\CleanupSchedule;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\DestroyCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\EditCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\StoreCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\UpdateCleanupScheduleViewData;
 
 class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
 {
@@ -22,7 +25,7 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderStoreCleanupSchedule(CleanupSchedule $schedule)
+    public function renderStoreCleanupSchedule(StoreCleanupScheduleViewData $data)
     {
         return redirect()->route('backup-manager.schedules.index');
     }
@@ -30,19 +33,19 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderEditCleanupSchedule(CleanupSchedule $schedule)
+    public function renderEditCleanupSchedule(EditCleanupScheduleViewData $data)
     {
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'schedule',
             'action' => 'edit:cleanup',
-            'schedule' => $schedule,
+            'schedule' => $data->schedule,
         ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function renderUpdateCleanupSchedule(CleanupSchedule $schedule)
+    public function renderUpdateCleanupSchedule(UpdateCleanupScheduleViewData $data)
     {
         return redirect()->route('backup-manager.schedules.index');
     }
@@ -50,7 +53,7 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderDestroyCleanupSchedule(CleanupSchedule $schedule)
+    public function renderDestroyCleanupSchedule(DestroyCleanupScheduleViewData $data)
     {
         return redirect()->route('backup-manager.schedules.index');
     }

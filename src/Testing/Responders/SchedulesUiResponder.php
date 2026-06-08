@@ -2,8 +2,8 @@
 
 namespace SameOldNick\BackupManager\Testing\Responders;
 
-use Illuminate\Database\Eloquent\Collection;
 use SameOldNick\BackupManager\Contracts\Responders\SchedulesUiResponder as SchedulesUiResponderContract;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\SchedulesListViewData;
 use SameOldNick\BackupManager\Testing\Concerns;
 
 class SchedulesUiResponder implements SchedulesUiResponderContract
@@ -13,11 +13,11 @@ class SchedulesUiResponder implements SchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderSchedulesList(Collection $backupSchedules, Collection $cleanupSchedules)
+    public function renderSchedulesList(SchedulesListViewData $data)
     {
         return $this->createTestResponse('list', [
-            'backupSchedules' => $backupSchedules,
-            'cleanupSchedules' => $cleanupSchedules,
+            'backupSchedules' => $data->backupSchedules,
+            'cleanupSchedules' => $data->cleanupSchedules,
         ]);
     }
 

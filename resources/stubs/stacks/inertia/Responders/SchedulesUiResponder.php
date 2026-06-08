@@ -2,22 +2,22 @@
 
 namespace VendorName\BackupManager\Responders;
 
-use Illuminate\Database\Eloquent\Collection;
 use Inertia\Inertia;
 use SameOldNick\BackupManager\Contracts\Responders\SchedulesUiResponder as SchedulesUiResponderContract;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\SchedulesListViewData;
 
 class SchedulesUiResponder implements SchedulesUiResponderContract
 {
     /**
      * {@inheritDoc}
      */
-    public function renderSchedulesList(Collection $backupSchedules, Collection $cleanupSchedules)
+    public function renderSchedulesList(SchedulesListViewData $data)
     {
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'schedule',
             'action' => 'list',
-            'backupSchedules' => $backupSchedules,
-            'cleanupSchedules' => $cleanupSchedules,
+            'backupSchedules' => $data->backupSchedules,
+            'cleanupSchedules' => $data->cleanupSchedules,
         ]);
     }
 }

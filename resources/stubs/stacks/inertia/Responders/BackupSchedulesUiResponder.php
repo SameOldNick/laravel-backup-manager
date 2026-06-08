@@ -2,29 +2,32 @@
 
 namespace VendorName\BackupManager\Responders;
 
-use Illuminate\Database\Eloquent\Collection;
 use Inertia\Inertia;
 use SameOldNick\BackupManager\Contracts\Responders\BackupSchedulesUiResponder as BackupSchedulesUiResponderContract;
-use SameOldNick\BackupManager\Models\BackupSchedule;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\CreateBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\DestroyBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\EditBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\StoreBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\UpdateBackupScheduleViewData;
 
 class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
 {
     /**
      * {@inheritDoc}
      */
-    public function renderCreateBackupSchedule(Collection $configurations)
+    public function renderCreateBackupSchedule(CreateBackupScheduleViewData $data)
     {
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'schedule',
             'action' => 'create:backup',
-            'destinations' => $configurations,
+            'destinations' => $data->configurations,
         ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function renderStoreBackupSchedule(BackupSchedule $schedule)
+    public function renderStoreBackupSchedule(StoreBackupScheduleViewData $data)
     {
         return redirect()->route('backup-manager.schedules.index');
     }
@@ -32,9 +35,9 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderEditBackupSchedule(BackupSchedule $schedule, Collection $destinations)
+    public function renderEditBackupSchedule(EditBackupScheduleViewData $data)
     {
-        $selectedDestinationIds = $schedule
+        $selectedDestinationIds = $data->schedule
             ->filesystemConfigurations()
             ->pluck('filesystem_configurations.id')
             ->all();
@@ -43,17 +46,17 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
             'tab' => 'schedule',
             'action' => 'edit:backup',
             'schedule' => [
-                ...$schedule->toArray(),
+                ...$data->schedule->toArray(),
                 'destination_ids' => $selectedDestinationIds,
             ],
-            'destinations' => $destinations,
+            'destinations' => $data->configurations,
         ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function renderUpdateBackupSchedule(BackupSchedule $schedule)
+    public function renderUpdateBackupSchedule(UpdateBackupScheduleViewData $data)
     {
         return redirect()->route('backup-manager.schedules.index');
     }
@@ -61,7 +64,7 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderDestroyBackupSchedule(BackupSchedule $schedule)
+    public function renderDestroyBackupSchedule(DestroyBackupScheduleViewData $data)
     {
         return redirect()->route('backup-manager.schedules.index');
     }

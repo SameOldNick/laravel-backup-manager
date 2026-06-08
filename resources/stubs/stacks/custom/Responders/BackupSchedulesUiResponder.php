@@ -2,16 +2,19 @@
 
 namespace VendorName\BackupManager\Responders;
 
-use Illuminate\Database\Eloquent\Collection;
 use SameOldNick\BackupManager\Contracts\Responders\BackupSchedulesUiResponder as BackupSchedulesUiResponderContract;
-use SameOldNick\BackupManager\Models\BackupSchedule;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\CreateBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\DestroyBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\EditBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\StoreBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\UpdateBackupScheduleViewData;
 
 class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
 {
     /**
      * {@inheritDoc}
      */
-    public function renderCreateBackupSchedule(Collection $configurations)
+    public function renderCreateBackupSchedule(CreateBackupScheduleViewData $data)
     {
         //
     }
@@ -19,7 +22,7 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderStoreBackupSchedule(BackupSchedule $schedule)
+    public function renderStoreBackupSchedule(StoreBackupScheduleViewData $data)
     {
         //
     }
@@ -27,7 +30,7 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderEditBackupSchedule(BackupSchedule $schedule, Collection $destinations)
+    public function renderEditBackupSchedule(EditBackupScheduleViewData $data)
     {
         //
     }
@@ -35,7 +38,7 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderUpdateBackupSchedule(BackupSchedule $schedule)
+    public function renderUpdateBackupSchedule(UpdateBackupScheduleViewData $data)
     {
         //
     }
@@ -43,7 +46,7 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderDestroyBackupSchedule(BackupSchedule $schedule)
+    public function renderDestroyBackupSchedule(DestroyBackupScheduleViewData $data)
     {
         //
     }

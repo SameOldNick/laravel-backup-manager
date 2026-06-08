@@ -3,6 +3,11 @@
 namespace SameOldNick\BackupManager\Http\Controllers;
 
 use SameOldNick\BackupManager\Contracts\Responders\BackupSchedulesUiResponder;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\CreateBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\DestroyBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\EditBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\StoreBackupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\BackupSchedules\UpdateBackupScheduleViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Services\CreateBackupScheduleData;
 use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateBackupScheduleData;
 use SameOldNick\BackupManager\Http\Requests\StoreBackupScheduleRequest;
@@ -24,7 +29,9 @@ class BackupScheduleController
      */
     public function create()
     {
-        return $this->ui->renderCreateBackupSchedule($this->service->getAvailableDestinations());
+        return $this->ui->renderCreateBackupSchedule(new CreateBackupScheduleViewData(
+            configurations: $this->service->getAvailableDestinations(),
+        ));
     }
 
     /**
@@ -36,7 +43,9 @@ class BackupScheduleController
 
         $schedule = $this->service->createBackupSchedule($data);
 
-        return $this->ui->renderStoreBackupSchedule($schedule);
+        return $this->ui->renderStoreBackupSchedule(new StoreBackupScheduleViewData(
+            schedule: $schedule,
+        ));
     }
 
     /**
@@ -53,7 +62,10 @@ class BackupScheduleController
             return $destination->is_active || in_array($destination->id, $selectedDestinationIds);
         });
 
-        return $this->ui->renderEditBackupSchedule($schedule, $destinations);
+        return $this->ui->renderEditBackupSchedule(new EditBackupScheduleViewData(
+            schedule: $schedule,
+            configurations: $destinations,
+        ));
     }
 
     /**
@@ -65,7 +77,9 @@ class BackupScheduleController
 
         $schedule = $this->service->updateBackupSchedule($schedule, $data);
 
-        return $this->ui->renderUpdateBackupSchedule($schedule);
+        return $this->ui->renderUpdateBackupSchedule(new UpdateBackupScheduleViewData(
+            schedule: $schedule,
+        ));
     }
 
     /**
@@ -75,6 +89,8 @@ class BackupScheduleController
     {
         $this->service->removeBackupSchedule($schedule);
 
-        return $this->ui->renderDestroyBackupSchedule($schedule);
+        return $this->ui->renderDestroyBackupSchedule(new DestroyBackupScheduleViewData(
+            schedule: $schedule,
+        ));
     }
 }

@@ -3,7 +3,10 @@
 namespace SameOldNick\BackupManager\Testing\Responders;
 
 use SameOldNick\BackupManager\Contracts\Responders\CleanupSchedulesUiResponder as CleanupSchedulesUiResponderContract;
-use SameOldNick\BackupManager\Models\CleanupSchedule;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\DestroyCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\EditCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\StoreCleanupScheduleViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\UpdateCleanupScheduleViewData;
 use SameOldNick\BackupManager\Testing\Concerns;
 
 class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
@@ -21,40 +24,40 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderStoreCleanupSchedule(CleanupSchedule $schedule)
+    public function renderStoreCleanupSchedule(StoreCleanupScheduleViewData $data)
     {
         return $this->createTestResponse('store', [
-            'schedule' => $schedule,
+            'schedule' => $data->schedule,
         ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function renderEditCleanupSchedule(CleanupSchedule $schedule)
+    public function renderEditCleanupSchedule(EditCleanupScheduleViewData $data)
     {
         return $this->createTestResponse('edit', [
-            'schedule' => $schedule,
+            'schedule' => $data->schedule,
         ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function renderUpdateCleanupSchedule(CleanupSchedule $schedule)
+    public function renderUpdateCleanupSchedule(UpdateCleanupScheduleViewData $data)
     {
         return $this->createTestResponse('update', [
-            'schedule' => $schedule,
+            'schedule' => $data->schedule,
         ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function renderDestroyCleanupSchedule(CleanupSchedule $schedule)
+    public function renderDestroyCleanupSchedule(DestroyCleanupScheduleViewData $data)
     {
         return $this->createTestResponse('destroy', [
-            'schedule' => $schedule,
+            'schedule' => $data->schedule,
         ]);
     }
 
