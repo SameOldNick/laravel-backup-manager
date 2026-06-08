@@ -7,11 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder;
 use SameOldNick\BackupManager\DataTransferObjects\CreateBackupDestinationData;
 use SameOldNick\BackupManager\Http\Requests\StoreBackupDestinationRequest;
-use SameOldNick\BackupManager\Jobs\Notifiable\FilesystemConfigurationTestJob;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Rules\RelativePath;
 use SameOldNick\BackupManager\Rules\Slugified;
@@ -95,18 +93,11 @@ class BackupDestinationsController
      *
      * @return mixed
      */
-    public function test(ChannelAccessManager $channelAccessManager, Request $request, FilesystemConfiguration $destination)
+    public function test(FilesystemConfiguration $destination)
     {
         $uuid = Str::uuid();
-        $channel = $channelAccessManager->createChannelId('test-destination', $uuid);
 
-        $lease = $channelAccessManager->open(
-            channelId: $channel,
-            notifiable: $request->user(),
-            expiresAt: now()->addHours(3),
-        );
-
-        $this->dispatch(new FilesystemConfigurationTestJob($channel, $request->user(), $destination->driver_name));
+        $lease = $this->service->startBackupDestinationTest($destination, $uuid);
 
         return redirect()->temporarySignedRoute('backup.destinations.test.result', $lease->expiresAt, [
             'destination' => $destination->id,
