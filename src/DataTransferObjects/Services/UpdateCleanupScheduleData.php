@@ -1,17 +1,13 @@
 <?php
 
-namespace SameOldNick\BackupManager\DataTransferObjects;
+namespace SameOldNick\BackupManager\DataTransferObjects\Services;
 
-use SameOldNick\BackupManager\Enums\BackupTypes;
-
-class UpdateBackupScheduleData
+class UpdateCleanupScheduleData
 {
     public function __construct(
         public readonly ?string $name,
-        public readonly ?BackupTypes $type,
         public readonly ?string $cronExpression,
         public readonly ?bool $isActive,
-        public readonly ?array $destinationIds
     ) {
         //
     }
@@ -20,10 +16,8 @@ class UpdateBackupScheduleData
     {
         return new self(
             name: $data['name'] ?? null,
-            type: $data['type'] ? BackupTypes::tryFrom($data['type']) : null,
             cronExpression: $data['cron_expression'] ?? null,
             isActive: $data['is_active'] ?? null,
-            destinationIds: $data['destination_ids'] ?? null,
         );
     }
 }

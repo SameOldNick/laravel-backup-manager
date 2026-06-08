@@ -1,6 +1,6 @@
 <?php
 
-namespace SameOldNick\BackupManager\DataTransferObjects;
+namespace SameOldNick\BackupManager\DataTransferObjects\Services;
 
 class CreateCleanupScheduleData
 {

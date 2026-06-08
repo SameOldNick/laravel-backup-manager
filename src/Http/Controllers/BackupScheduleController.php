@@ -3,8 +3,8 @@
 namespace SameOldNick\BackupManager\Http\Controllers;
 
 use SameOldNick\BackupManager\Contracts\Responders\BackupSchedulesUiResponder;
-use SameOldNick\BackupManager\DataTransferObjects\CreateBackupScheduleData;
-use SameOldNick\BackupManager\DataTransferObjects\UpdateBackupScheduleData;
+use SameOldNick\BackupManager\DataTransferObjects\Services\CreateBackupScheduleData;
+use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateBackupScheduleData;
 use SameOldNick\BackupManager\Http\Requests\StoreBackupScheduleRequest;
 use SameOldNick\BackupManager\Http\Requests\UpdateBackupScheduleRequest;
 use SameOldNick\BackupManager\Models\BackupSchedule;

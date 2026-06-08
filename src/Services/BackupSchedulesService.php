@@ -3,8 +3,8 @@
 namespace SameOldNick\BackupManager\Services;
 
 use Illuminate\Support\Facades\DB;
-use SameOldNick\BackupManager\DataTransferObjects\CreateBackupScheduleData;
-use SameOldNick\BackupManager\DataTransferObjects\UpdateBackupScheduleData;
+use SameOldNick\BackupManager\DataTransferObjects\Services\CreateBackupScheduleData;
+use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateBackupScheduleData;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\Collections\BackupScheduleCollection;
 use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;

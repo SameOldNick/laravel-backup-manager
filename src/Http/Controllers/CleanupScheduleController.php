@@ -3,8 +3,8 @@
 namespace SameOldNick\BackupManager\Http\Controllers;
 
 use SameOldNick\BackupManager\Contracts\Responders\CleanupSchedulesUiResponder;
-use SameOldNick\BackupManager\DataTransferObjects\CreateCleanupScheduleData;
-use SameOldNick\BackupManager\DataTransferObjects\UpdateCleanupScheduleData;
+use SameOldNick\BackupManager\DataTransferObjects\Services\CreateCleanupScheduleData;
+use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateCleanupScheduleData;
 use SameOldNick\BackupManager\Http\Requests\StoreCleanupScheduleRequest;
 use SameOldNick\BackupManager\Http\Requests\UpdateCleanupScheduleRequest;
 use SameOldNick\BackupManager\Models\CleanupSchedule;

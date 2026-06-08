@@ -2,8 +2,8 @@
 
 namespace SameOldNick\BackupManager\Services;
 
-use SameOldNick\BackupManager\DataTransferObjects\CreateCleanupScheduleData;
-use SameOldNick\BackupManager\DataTransferObjects\UpdateCleanupScheduleData;
+use SameOldNick\BackupManager\DataTransferObjects\Services\CreateCleanupScheduleData;
+use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateCleanupScheduleData;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
 use SameOldNick\BackupManager\Models\Collections\CleanupScheduleCollection;
 
