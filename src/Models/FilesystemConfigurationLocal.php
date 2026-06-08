@@ -2,11 +2,12 @@
 
 namespace SameOldNick\BackupManager\Models;
 
-use SameOldNick\BackupManager\Contracts\FilesystemConfiguration as FilesystemConfigurationContract;
-use SameOldNick\BackupManager\Models\Factories\FilesystemConfigurationLocalFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use SameOldNick\BackupManager\Contracts\FilesystemConfiguration as FilesystemConfigurationContract;
+use SameOldNick\BackupManager\Models\Factories\FilesystemConfigurationLocalFactory;
+use Spatie\Backup\Config\Config;
 
 /**
  * @property int $id
@@ -80,6 +81,14 @@ class FilesystemConfigurationLocal extends Model implements FilesystemConfigurat
             'root' => storage_path($this->root),
             ...$extra,
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isEnabled(Config $backupConfig): bool
+    {
+        return $this->filesystemConfiguration->isEnabled($backupConfig);
     }
 
     /**

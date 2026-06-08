@@ -2,11 +2,12 @@
 
 namespace SameOldNick\BackupManager\Models;
 
-use SameOldNick\BackupManager\Contracts\FilesystemConfiguration as FilesystemConfigurationContract;
-use SameOldNick\BackupManager\Models\Factories\FilesystemConfigurationFTPFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use SameOldNick\BackupManager\Contracts\FilesystemConfiguration as FilesystemConfigurationContract;
+use SameOldNick\BackupManager\Models\Factories\FilesystemConfigurationFTPFactory;
+use Spatie\Backup\Config\Config;
 
 /**
  * @property int $id
@@ -94,6 +95,14 @@ class FilesystemConfigurationFTP extends Model implements FilesystemConfiguratio
             'root' => $this->root,
             ...$extra,
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isEnabled(Config $backupConfig): bool
+    {
+        return $this->filesystemConfiguration->isEnabled($backupConfig);
     }
 
     /**
