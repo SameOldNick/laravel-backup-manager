@@ -4,15 +4,14 @@ namespace SameOldNick\BackupManager\Http\Controllers;
 
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder;
 use SameOldNick\BackupManager\DataTransferObjects\CreateBackupDestinationData;
+use SameOldNick\BackupManager\DataTransferObjects\UpdateBackupDestinationData;
 use SameOldNick\BackupManager\Http\Requests\StoreBackupDestinationRequest;
+use SameOldNick\BackupManager\Http\Requests\UpdateBackupDestinationRequest;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
-use SameOldNick\BackupManager\Rules\RelativePath;
-use SameOldNick\BackupManager\Rules\Slugified;
 use SameOldNick\BackupManager\Services\BackupDestinationsService;
 use Spatie\Backup\Config\Config;
 
@@ -122,66 +121,18 @@ class BackupDestinationsController
      *
      * @return mixed
      */
-    public function update(Request $request, FilesystemConfiguration $destination)
+    public function update(UpdateBackupDestinationRequest $request, FilesystemConfiguration $destination)
     {
-        $validated = $request->validate([
-            'enabled' => ['sometimes', 'boolean'],
-            'name' => [
-                'sometimes',
-                'string',
-                'max:255',
-                Rule::unique(FilesystemConfiguration::class)->ignore($destination),
-            ],
-            'slug' => [
-                'sometimes',
-                'nullable',
-                'string',
-                'max:255',
-                Rule::unique(FilesystemConfiguration::class)->ignore($destination),
-                new Slugified,
-            ],
-            'host' => ['sometimes', 'string', 'max:255'],
-            'port' => ['sometimes', 'integer', 'min:1', 'max:65535'],
-            'username' => ['sometimes', 'string', 'max:255'],
-            'auth_type' => ['sometimes', 'nullable', 'string', 'in:password,key'],
-            'password' => [
-                'sometimes',
-                'string',
-                'max:255',
-                'required_with:confirm_password',
-            ],
-            'confirm_password' => [
-                'sometimes',
-                'string',
-                'required_with:password',
-                'same:password',
-            ],
-            'private_key' => ['sometimes', 'string'],
-            'passphrase' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'root' => [
-                'sometimes',
-                'string',
-                'max:255',
-                ...($destination->disk_type === 'local' ? [new RelativePath] : []),
-            ],
-            'extra' => ['sometimes', 'nullable', 'array'],
-        ]);
-
         $config = $destination->configurable;
 
         if (! $config) {
-            return response()->json(['message' => __('backup::messages.destination_not_found')], 404);
+            abort(404, __('backup::messages.destination_not_found'));
         }
 
-        $input = Arr::except($validated, ['enabled']);
-
-        // Only include enabled if it exists
-        if (Arr::has($validated, 'enabled')) {
-            // Convert it to a boolean
-            $input['enabled'] = (bool) Arr::get($validated, 'enabled');
-        }
-
-        $this->performUpdate($destination, $input);
+        $destination = $this->service->updateBackupDestination(
+            $destination,
+            UpdateBackupDestinationData::fromArray($request->validated())
+        );
 
         return $this->ui->renderUpdateBackupDestination($destination);
     }
@@ -196,76 +147,6 @@ class BackupDestinationsController
         $this->performDestroy($destination);
 
         return $this->ui->renderDestroyBackupDestination($destination);
-    }
-
-    /**
-     * Updates a configuration
-     *
-     * @return FilesystemConfiguration
-     */
-    protected function performUpdate(FilesystemConfiguration $destination, array $input)
-    {
-        $data = Arr::only($input, [
-            'enabled',
-            'host',
-            'port',
-            'username',
-            'passphrase',
-            'extra',
-        ]);
-
-        if (Arr::has($input, 'enabled')) {
-            $destination->is_active = (bool) Arr::get($input, 'enabled');
-        }
-
-        if (Arr::has($input, 'name')) {
-            $destination->name = Arr::get($input, 'name');
-        }
-
-        if (Arr::has($input, 'slug')) {
-            $destination->slug = Arr::get($input, 'slug');
-        }
-
-        if ($destination->isDirty()) {
-            $destination->save();
-        }
-
-        $diskType = $destination->disk_type;
-        $authType = Arr::get($input, 'auth_type');
-
-        if ($diskType === 'local' && Arr::has($input, 'root')) {
-            validator(
-                ['root' => Arr::get($input, 'root')],
-                ['root' => ['nullable', 'string', 'max:255', new RelativePath]],
-            )->validate();
-        }
-
-        if (
-            Arr::has($input, 'password') && (
-                $authType &&
-                ($diskType === 'ftp' || ($diskType === 'sftp' && $authType === 'password'))
-            )
-        ) {
-            $data['private_key'] = null;
-            $data['passphrase'] = null;
-            $data['password'] = Arr::get($input, 'password');
-        } elseif (
-            Arr::has($input, 'private_key') && (
-                $authType && $diskType === 'sftp' && $authType === 'key'
-            )
-        ) {
-            $data['password'] = null;
-            $data['private_key'] = Arr::get($input, 'private_key');
-            $data['passphrase'] = Arr::get($input, 'passphrase');
-        }
-
-        if (in_array($diskType, ['local', 'ftp'], true) && Arr::has($input, 'root')) {
-            $data['root'] = Arr::get($input, 'root');
-        }
-
-        $destination->configurable->update($data);
-
-        return $destination;
     }
 
     /**
