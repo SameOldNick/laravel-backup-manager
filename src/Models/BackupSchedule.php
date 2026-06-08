@@ -2,9 +2,12 @@
 
 namespace SameOldNick\BackupManager\Models;
 
-use SameOldNick\BackupManager\Enums\BackupTypes;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use SameOldNick\BackupManager\Enums\BackupTypes;
+use SameOldNick\BackupManager\Models\Collections\BackupScheduleCollection;
 
+#[CollectedBy(BackupScheduleCollection::class)]
 class BackupSchedule extends AbstractSchedule
 {
     /**

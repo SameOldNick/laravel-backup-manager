@@ -2,8 +2,11 @@
 
 namespace SameOldNick\BackupManager\Models;
 
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Model;
+use SameOldNick\BackupManager\Models\Collections\CleanupScheduleCollection;
 
+#[CollectedBy(CleanupScheduleCollection::class)]
 class CleanupSchedule extends AbstractSchedule
 {
     /**
