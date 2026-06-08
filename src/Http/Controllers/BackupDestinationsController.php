@@ -2,7 +2,6 @@
 
 namespace SameOldNick\BackupManager\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -10,11 +9,10 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder;
+use SameOldNick\BackupManager\DataTransferObjects\CreateBackupDestinationData;
+use SameOldNick\BackupManager\Http\Requests\StoreBackupDestinationRequest;
 use SameOldNick\BackupManager\Jobs\Notifiable\FilesystemConfigurationTestJob;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
-use SameOldNick\BackupManager\Models\FilesystemConfigurationFTP;
-use SameOldNick\BackupManager\Models\FilesystemConfigurationLocal;
-use SameOldNick\BackupManager\Models\FilesystemConfigurationSFTP;
 use SameOldNick\BackupManager\Rules\RelativePath;
 use SameOldNick\BackupManager\Rules\Slugified;
 use SameOldNick\BackupManager\Services\BackupDestinationsService;
@@ -67,98 +65,13 @@ class BackupDestinationsController
      *
      * @return mixed
      */
-    public function store(Request $request)
+    public function store(StoreBackupDestinationRequest $request)
     {
-        $request->validate([
-            'enabled' => 'required|boolean',
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique(FilesystemConfiguration::class),
-            ],
-            'slug' => [
-                'nullable',
-                'string',
-                'max:255',
-                Rule::unique(FilesystemConfiguration::class),
-                new Slugified,
-            ],
-            'type' => 'required|in:local,ftp,sftp',
-            'host' => 'nullable|required_if:type,ftp,sftp|string|max:255',
-            'port' => 'nullable|required_if:type,ftp,sftp|integer|min:1|max:65535',
-            'auth_type' => 'nullable|required_if:type,sftp|string|in:password,key',
-            'username' => [
-                'nullable',
-                Rule::requiredIf(fn () => $request->type === 'ftp' || $request->type === 'sftp'),
-                'string',
-                'max:255',
-            ],
-            'password' => [
-                'nullable',
-                Rule::requiredIf(fn () => $request->type === 'ftp' || ($request->type === 'sftp' && $request->auth_type === 'password')),
-                'string',
-                'max:255',
-            ],
-            'root' => [
-                'nullable',
-                Rule::requiredIf(fn () => $request->type === 'local'),
-                'string',
-                'max:255',
-                ...($request->type === 'local' ? [new RelativePath] : []),
-            ],
-            'private_key' => [
-                'nullable',
-                Rule::requiredIf(fn () => $request->type === 'sftp' && $request->auth_type === 'key'),
-                'string',
-            ],
-            'passphrase' => 'nullable|string|max:255',
-            'extra' => 'nullable|array',
-        ]);
+        $destination = $this->service->createBackupDestination(
+            CreateBackupDestinationData::fromArray($request->validated())
+        );
 
-        $config = match ($request->type) {
-            'local' => FilesystemConfigurationLocal::create($request->only([
-                'root',
-                'extra',
-            ])),
-            'ftp' => FilesystemConfigurationFTP::create($request->only([
-                'host',
-                'port',
-                'username',
-                'password',
-                'root',
-                'extra',
-            ])),
-            'sftp' => FilesystemConfigurationSFTP::create($request->only([
-                'host',
-                'port',
-                'username',
-                'password',
-                'private_key',
-                'passphrase',
-                'root',
-                'extra',
-            ])),
-            default => null
-        };
-
-        // The validator shouldn't allow this, but just in case.
-        if (! $config) {
-            return response()->json(['message' => 'Type is invalid.'], 500);
-        }
-
-        $fsConfig = new FilesystemConfiguration([
-            'name' => $request->name,
-            'slug' => $request->filled('slug') ? $request->slug : Str::slug($request->name),
-            'disk_type' => $request->type,
-            'is_active' => $request->boolean('enabled'),
-        ]);
-
-        $fsConfig->configurable()->associate($config);
-
-        $fsConfig->save();
-
-        return $this->ui->renderStoreBackupDestination($fsConfig);
+        return $this->ui->renderStoreBackupDestination($destination);
     }
 
     /**

@@ -3,8 +3,13 @@
 namespace SameOldNick\BackupManager\Services;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use SameOldNick\BackupManager\DataTransferObjects\CreateBackupDestinationData;
 use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
+use SameOldNick\BackupManager\Models\FilesystemConfigurationFTP;
+use SameOldNick\BackupManager\Models\FilesystemConfigurationLocal;
+use SameOldNick\BackupManager\Models\FilesystemConfigurationSFTP;
 
 class BackupDestinationsService
 {
@@ -35,4 +40,45 @@ class BackupDestinationsService
         return new FilesystemConfigurationCollection($fsConfigQuery->latest()->get());
     }
 
+    public function createBackupDestination(CreateBackupDestinationData $data): FilesystemConfiguration
+    {
+        return DB::transaction(function () use ($data) {
+            $config = match ($data->type) {
+                'local' => FilesystemConfigurationLocal::create([
+                    'root' => $data->root,
+                    'extra' => $data->extra,
+                ]),
+                'ftp' => FilesystemConfigurationFTP::create([
+                    'host' => $data->host,
+                    'port' => $data->port,
+                    'username' => $data->username,
+                    'password' => $data->password,
+                    'root' => $data->root,
+                    'extra' => $data->extra,
+                ]),
+                'sftp' => FilesystemConfigurationSFTP::create([
+                    'host' => $data->host,
+                    'port' => $data->port,
+                    'username' => $data->username,
+                    'password' => $data->password,
+                    'private_key' => $data->privateKey,
+                    'passphrase' => $data->passphrase,
+                    'root' => $data->root,
+                    'extra' => $data->extra,
+                ]),
+            };
+
+            $fsConfig = new FilesystemConfiguration([
+                'name' => $data->name,
+                'slug' => $data->slug ?? Str::slug($data->name),
+                'disk_type' => $data->type,
+                'is_active' => $data->enabled,
+            ]);
+
+            $fsConfig->configurable()->associate($config);
+            $fsConfig->save();
+
+            return $fsConfig;
+        });
+    }
 }
