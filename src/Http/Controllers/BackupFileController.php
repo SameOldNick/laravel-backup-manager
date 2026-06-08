@@ -4,25 +4,32 @@ namespace SameOldNick\BackupManager\Http\Controllers;
 
 use Illuminate\Support\Facades\Log;
 use SameOldNick\BackupManager\Models\BackupFile;
+use SameOldNick\BackupManager\Services\BackupDownloadService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BackupFileController
 {
     private const STREAM_CHUNK_SIZE = 1024 * 1024;
 
+    public function __construct(
+        protected readonly BackupDownloadService $service,
+    ) {
+        //
+    }
+
     /**
      * Responds with file contents
      */
     public function retrieve(BackupFile $file): StreamedResponse
     {
-        $stream = $file->getStorageDisk()->readStream($file->path);
-
-        if (! is_resource($stream)) {
-            Log::warning('Backup file stream could not be opened.', [
+        try {
+            $stream = $this->service->openDownloadStream($file);
+        } catch (\RuntimeException $e) {
+            Log::error('Error opening backup file stream.', [
                 'file_id' => $file->id,
                 'disk' => $file->disk,
                 'path' => $file->path,
-                'stream_type' => gettype($stream),
+                'error_message' => $e->getMessage(),
             ]);
 
             abort(404, __('backup::messages.file_not_found'));
