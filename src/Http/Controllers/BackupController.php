@@ -2,7 +2,6 @@
 
 namespace SameOldNick\BackupManager\Http\Controllers;
 
-use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -15,8 +14,6 @@ use SameOldNick\BackupManager\Services\BackupsService;
 
 class BackupController
 {
-    use DispatchesJobs;
-
     public function __construct(
         protected readonly BackupsService $service,
         protected readonly BackupsUiResponder $ui

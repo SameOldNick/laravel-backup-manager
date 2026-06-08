@@ -2,19 +2,18 @@
 
 namespace SameOldNick\BackupManager\Http\Controllers;
 
-use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationsListViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationTestResultViewData;
-use SameOldNick\BackupManager\DataTransferObjects\Services\CreateBackupDestinationData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\DestroyBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\EditBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\StoreBackupDestinationViewData;
-use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateBackupDestinationData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\UpdateBackupDestinationViewData;
+use SameOldNick\BackupManager\DataTransferObjects\Services\CreateBackupDestinationData;
+use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateBackupDestinationData;
 use SameOldNick\BackupManager\Http\Requests\StoreBackupDestinationRequest;
 use SameOldNick\BackupManager\Http\Requests\UpdateBackupDestinationRequest;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
@@ -23,8 +22,6 @@ use Spatie\Backup\Config\Config;
 
 class BackupDestinationsController
 {
-    use DispatchesJobs;
-
     public function __construct(
         protected readonly BackupDestinationsService $service,
         protected readonly BackupDestinationsUiResponder $ui
