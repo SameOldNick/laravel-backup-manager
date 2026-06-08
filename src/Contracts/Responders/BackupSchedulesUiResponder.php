@@ -2,8 +2,8 @@
 
 namespace SameOldNick\BackupManager\Contracts\Responders;
 
-use Illuminate\Database\Eloquent\Collection;
 use SameOldNick\BackupManager\Models\BackupSchedule;
+use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 
 interface BackupSchedulesUiResponder
 {
@@ -12,7 +12,7 @@ interface BackupSchedulesUiResponder
      *
      * @return mixed
      */
-    public function renderCreateBackupSchedule(Collection $configurations);
+    public function renderCreateBackupSchedule(FilesystemConfigurationCollection $configurations);
 
     /**
      * Renders the response after storing a backup schedule.
@@ -26,7 +26,7 @@ interface BackupSchedulesUiResponder
      *
      * @return mixed
      */
-    public function renderEditBackupSchedule(BackupSchedule $schedule, Collection $destinations);
+    public function renderEditBackupSchedule(BackupSchedule $schedule, FilesystemConfigurationCollection $configurations);
 
     /**
      * Renders the response after updating a backup schedule.
