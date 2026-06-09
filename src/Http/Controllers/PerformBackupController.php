@@ -4,10 +4,11 @@ namespace SameOldNick\BackupManager\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Contracts\Responders\PerformBackupUiResponder;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\PerformBackup\PerformBackupViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\PerformBackup\StartBackupViewData;
-use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
+use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Services\PerformBackupService;
 
 class PerformBackupController
@@ -25,7 +26,10 @@ class PerformBackupController
     public function start(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:full,database,files',
+            'type' => [
+                'required',
+                Rule::in(BackupTypes::acceptedValues()),
+            ],
         ]);
 
         /**
@@ -33,16 +37,11 @@ class PerformBackupController
          * This allows it to run asynchronously (so websocket can handle it).
          */
         $uuid = Str::uuid();
-        $type = $request->str('type')->toString();
 
-        $backupType = match ($type) {
-            'database' => BackupJob::BACKUP_ONLY_DATABASES,
-            'files' => BackupJob::BACKUP_ONLY_FILES,
-            default => BackupJob::BACKUP_FULL,
-        };
+        $type = BackupTypes::fromValue((string) $request->str('type'));
 
         $lease = $this->service->startBackup(
-            type: $backupType,
+            type: $type,
             user: $request->user(),
             uuid: $uuid,
         );

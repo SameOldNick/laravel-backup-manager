@@ -5,6 +5,7 @@ namespace SameOldNick\BackupManager\Services;
 use Illuminate\Support\Str;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
+use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 
 class PerformBackupService
@@ -20,19 +21,15 @@ class PerformBackupService
     /**
      * Starts a backup process by dispatching a BackupJob and creating a channel lease for real-time updates.
      *
-     * @param  string  $type  The type of backup to perform (e.g. "full", "database", "files")
+     * @param  BackupTypes  $type  The type of backup to perform (e.g. "full", "database", "files")
      * @param  object  $user  The user initiating the backup (used for channel lease)
      * @param  string|null  $uuid  Optional UUID for the backup process (if not provided, a new UUID will be generated)
      * @return ChannelLease A lease for the backup channel to receive real-time updates
      *
      * @throws \InvalidArgumentException If an invalid backup type is provided
      */
-    public function startBackup(string $type, object $user, ?string $uuid = null): ChannelLease
+    public function startBackup(BackupTypes $type, object $user, ?string $uuid = null): ChannelLease
     {
-        if (! in_array($type, [BackupJob::BACKUP_ONLY_DATABASES, BackupJob::BACKUP_ONLY_FILES, BackupJob::BACKUP_FULL])) {
-            throw new \InvalidArgumentException("Invalid backup type: {$type}");
-        }
-
         $channel = $this->createChannelId($uuid ?? Str::uuid());
 
         $lease = $this->openBackupChannelLease($channel, $user);

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Http\Controllers;
 
 Route::group(config('backup-manager.routes.all', []), function () {
@@ -16,7 +17,7 @@ Route::group(config('backup-manager.routes.all', []), function () {
             Route::get('/{type}/{uuid}', [Controllers\PerformBackupController::class, 'show'])
                 ->name('show')
                 ->middleware('signed')
-                ->whereIn('type', ['full', 'database', 'files'])
+                ->whereIn('type', BackupTypes::cases())
                 ->whereUuid('uuid');
         });
 

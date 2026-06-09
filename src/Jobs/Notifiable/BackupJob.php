@@ -2,13 +2,14 @@
 
 namespace SameOldNick\BackupManager\Jobs\Notifiable;
 
-use SameOldNick\BackupManager\Broadcasting\Notifiers\ProcessNotifier;
-use SameOldNick\BackupManager\SpatieBackup\BackupRunner;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use SameOldNick\BackupManager\Broadcasting\Notifiers\ProcessNotifier;
+use SameOldNick\BackupManager\Enums\BackupTypes;
+use SameOldNick\BackupManager\SpatieBackup\BackupRunner;
 use Spatie\Backup\Config\Config;
 use Spatie\Backup\Support\BackupLogger;
 
@@ -16,11 +17,13 @@ class BackupJob extends NotifiableJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    const BACKUP_FULL = BackupRunner::BACKUP_FULL;
+    const BACKUP_FULL = BackupTypes::Full->value;
 
-    const BACKUP_ONLY_FILES = BackupRunner::BACKUP_ONLY_FILES;
+    const BACKUP_ONLY_FILES = BackupTypes::Files->value;
 
-    const BACKUP_ONLY_DATABASES = BackupRunner::BACKUP_ONLY_DATABASES;
+    const BACKUP_ONLY_DATABASES = BackupTypes::Databases->value;
+
+    public readonly string $backupType;
 
     /**
      * Create a new job instance.
@@ -28,10 +31,12 @@ class BackupJob extends NotifiableJob implements ShouldQueue
     public function __construct(
         string $channel,
         object $notifiable,
-        public readonly string $backupType = self::BACKUP_FULL,
+        BackupTypes $backupType = BackupTypes::Full,
         public readonly ?array $disks = null,
     ) {
         parent::__construct($channel, $notifiable);
+
+        $this->backupType = $backupType->value;
     }
 
     /**
