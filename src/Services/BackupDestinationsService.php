@@ -27,7 +27,7 @@ class BackupDestinationsService
 
     public function getBackupDestinations(?bool $active = null, ?string $query = null): FilesystemConfigurationCollection
     {
-        $fsConfigQuery = FilesystemConfiguration::query()->with('file');
+        $fsConfigQuery = FilesystemConfiguration::query();
 
         if ($active !== null) {
             $fsConfigQuery->where('is_active', $active);
