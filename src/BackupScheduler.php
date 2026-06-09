@@ -2,14 +2,14 @@
 
 namespace SameOldNick\BackupManager;
 
+use Illuminate\Console\Scheduling\Event;
+use Illuminate\Support\Facades\Schedule;
 use SameOldNick\BackupManager\Concerns\TransformsCronExpression;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
-use Illuminate\Console\Scheduling\Event;
-use Illuminate\Support\Facades\Schedule;
 
 class BackupScheduler
 {
@@ -85,7 +85,7 @@ class BackupScheduler
      *
      * @return Event
      */
-    protected function scheduleJob($job, string $expression)
+    protected function scheduleJob(object $job, string $expression)
     {
         return Schedule::job($job)->cron($expression);
     }
