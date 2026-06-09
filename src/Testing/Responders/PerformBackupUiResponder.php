@@ -20,6 +20,10 @@ class PerformBackupUiResponder implements PerformBackupUiResponderContract
             'type' => $data->type,
             'uuid' => $data->uuid,
             'lease' => $data->lease,
+            'redirectUrl' => url()->temporarySignedRoute('backup.perform.show', now()->addMinutes(5), [
+                'type' => $data->type,
+                'uuid' => $data->uuid,
+            ]),
         ]);
     }
 
