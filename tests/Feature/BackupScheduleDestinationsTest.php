@@ -22,7 +22,7 @@ class BackupScheduleDestinationsTest extends TestCase
 
         $response = $this->actingAs($admin)->post(route('backup.schedules.backup.store'), [
             'name' => 'Daily Files',
-            'type' => 'only_files',
+            'type' => 'files',
             'cron_expression' => '0 0 * * *',
             'is_active' => true,
             'destination_ids' => [$destinationOne->id, $destinationTwo->id],
