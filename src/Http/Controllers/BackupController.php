@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Contracts\Responders\BackupsUiResponder;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\Backups\BackupsListViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\Backups\PerformBackupViewData;
+use SameOldNick\BackupManager\Enums\BackupStatus;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 use SameOldNick\BackupManager\Models\Backup;
 use SameOldNick\BackupManager\Services\BackupsService;
@@ -31,16 +32,16 @@ class BackupController
             'query' => ['sometimes', 'string'],
             'status' => ['sometimes', Rule::in([
                 'all',
-                Backup::STATUS_SUCCESSFUL,
-                Backup::STATUS_FAILED,
-                Backup::STATUS_DELETED,
-                Backup::STATUS_FILE_NOT_FOUND,
+                ...BackupStatus::cases(),
             ])],
         ]);
 
+        $status = $request->filled('status') && (string) $request->str('status') !== 'all' ? $request->enum('status', BackupStatus::class) : null;
+        $query = $request->filled('query') ? $request->str('query')->toString() : null;
+
         $backups = $this->service->getBackups(
-            status: $request->filled('status') ? $request->str('status')->toString() : null,
-            query: $request->filled('query') ? $request->str('query')->toString() : null,
+            status: $status,
+            query: $query,
         );
 
         return $this->ui->renderBackupsList(new BackupsListViewData(

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use SameOldNick\BackupManager\Enums\BackupStatus;
 use SameOldNick\BackupManager\Models\Collections\BackupCollection;
 use SameOldNick\BackupManager\Models\Factories\BackupFactory;
 use Spatie\Backup\BackupDestination\Backup as SpatieBackup;
@@ -21,7 +22,7 @@ use Spatie\Backup\BackupDestination\BackupDestination;
  * @property ?Carbon $created_at
  * @property ?Carbon $updated_at
  * @property ?Carbon $deleted_at
- * @property-read string $status One of STATUS_* constants
+ * @property-read BackupStatus $status
  */
 #[CollectedBy(BackupCollection::class)]
 #[UseFactory(BackupFactory::class)]
@@ -32,14 +33,6 @@ class Backup extends Model
 
     use HasUuids;
     use SoftDeletes;
-
-    const STATUS_SUCCESSFUL = 'successful';
-
-    const STATUS_FAILED = 'failed';
-
-    const STATUS_FILE_NOT_FOUND = 'file_not_found';
-
-    const STATUS_DELETED = 'deleted';
 
     /**
      * The primary key for the model.
@@ -126,10 +119,10 @@ class Backup extends Model
     {
         return new Attribute(
             get: fn () => match (true) {
-                $this->isDeleted() => static::STATUS_DELETED,
-                $this->isFailed() => static::STATUS_FAILED,
-                $this->isNotExists() => static::STATUS_FILE_NOT_FOUND,
-                default => static::STATUS_SUCCESSFUL
+                $this->isDeleted() => BackupStatus::Deleted,
+                $this->isFailed() => BackupStatus::Failed,
+                $this->isNotExists() => BackupStatus::FileNotFound,
+                default => BackupStatus::Successful
             }
         );
     }

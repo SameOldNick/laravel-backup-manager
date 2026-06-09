@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
+use SameOldNick\BackupManager\Enums\BackupStatus;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 use SameOldNick\BackupManager\Models\Backup;
 use SameOldNick\BackupManager\Models\Collections\BackupCollection;
@@ -23,16 +24,20 @@ class BackupsService
     /**
      * Filters backups based on status and search query.
      *
-     * @param  string|null  $status  Filter by backup status (e.g. "successful", "failed", "deleted", "file_not_found")
+     * @param  BackupStatus|null  $status  Filter by backup status (e.g. "successful", "failed", "deleted", "file_not_found")
      * @param  string|null  $query  Search query to filter by backup name or description
      * @return BackupCollection Filtered collection of backups
      */
-    public function getBackups(?string $status = null, ?string $query = null): BackupCollection
+    public function getBackups(?BackupStatus $status = null, ?string $query = null): BackupCollection
     {
-        $backupsQuery = Backup::query()->with('file');
+        $backupsQuery = Backup::query()->withTrashed()->with('file', function ($query) {
+            $query->withTrashed();
+        });
 
-        if ($status && $status !== 'all') {
-            $backupsQuery->where('status', $status);
+        if ($status !== null) {
+            $backupsQuery->afterQuery(function ($backups) use ($status) {
+                return $backups->filter(fn (Backup $backup) => $backup->status === $status);
+            });
         }
 
         if ($query) {
