@@ -38,9 +38,9 @@ trait UiResponderAssertions
      * The expected value can be an array, which will be compared to the response data using assertJson.
      * Alternatively, it can be a callable that receives an AssertableJson instance for more complex assertions.
      */
-    protected function assertResponseData(TestResponse $response, $value, $strict = false): void
+    protected function assertResponseData(TestResponse $response, $value, $strict = false, string $key = 'data', bool $interacted = true): void
     {
-        $data = $response->json('data');
+        $data = Arr::get($response->json(), $key);
 
         if (! is_array($data)) {
             $this->fail('Expected response data to be an array.');
@@ -51,11 +51,11 @@ trait UiResponderAssertions
 
             $value($assert);
 
-            if (Arr::isAssoc($assert->toArray())) {
+            if ($interacted && Arr::isAssoc($assert->toArray())) {
                 $assert->interacted();
             }
         } elseif (is_array($value)) {
-            $response->assertJson(['data' => $value], $strict);
+            $response->assertJson(Arr::undot([$key => $value]), $strict);
         } else {
             $this->fail('Expected value must be an array or a callable.');
         }
