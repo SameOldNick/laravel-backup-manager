@@ -55,8 +55,8 @@ class PerformBackupControllerTest extends TestCase
 
         Queue::assertPushedTimes(BackupJob::class, 1);
 
-        Queue::assertPushed(BackupJob::class, function ($job) {
-            return $job->backupType === 'full';
+        Queue::assertPushed(BackupJob::class, function (BackupJob $job) {
+            return $job->backupType === BackupJob::BACKUP_FULL;
         });
 
         $showPerformResponse = $this->actingAs($admin)->get($redirectUrl);
@@ -82,7 +82,7 @@ class PerformBackupControllerTest extends TestCase
         $admin = $this->createAdmin();
 
         $startResponse = $this->actingAs($admin)->post(route('backup.perform.start'), [
-            'type' => 'database',
+            'type' => 'databases',
         ]);
 
         $startResponse->assertOk();
@@ -90,7 +90,7 @@ class PerformBackupControllerTest extends TestCase
         $this->assertResponderUsed($startResponse, 'perform');
         $this->assertResponseId($startResponse, 'start');
         $this->assertResponseData($startResponse, fn (AssertableJson $json) => $json
-            ->where('type', 'database')
+            ->where('type', 'databases')
             ->has('uuid')
             ->has('redirectUrl'),
             interacted: false
@@ -102,8 +102,8 @@ class PerformBackupControllerTest extends TestCase
 
         Queue::assertPushedTimes(BackupJob::class, 1);
 
-        Queue::assertPushed(BackupJob::class, function ($job) {
-            return $job->backupType === 'only_databases';
+        Queue::assertPushed(BackupJob::class, function (BackupJob $job) {
+            return $job->backupType === BackupJob::BACKUP_ONLY_DATABASES;
         });
 
         $showPerformResponse = $this->actingAs($admin)->get($redirectUrl);
@@ -113,7 +113,7 @@ class PerformBackupControllerTest extends TestCase
         $this->assertResponderUsed($showPerformResponse, 'perform');
         $this->assertResponseId($showPerformResponse, 'perform');
         $this->assertResponseData($showPerformResponse, fn (AssertableJson $json) => $json
-            ->where('type', 'database')
+            ->where('type', 'databases')
             ->has('uuid'),
             interacted: false
         );
@@ -149,8 +149,8 @@ class PerformBackupControllerTest extends TestCase
 
         Queue::assertPushedTimes(BackupJob::class, 1);
 
-        Queue::assertPushed(BackupJob::class, function ($job) {
-            return $job->backupType === 'only_files';
+        Queue::assertPushed(BackupJob::class, function (BackupJob $job) {
+            return $job->backupType === BackupJob::BACKUP_ONLY_FILES;
         });
 
         $showPerformResponse = $this->actingAs($admin)->get($redirectUrl);
