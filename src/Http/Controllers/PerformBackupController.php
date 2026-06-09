@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Contracts\Responders\PerformBackupUiResponder;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\PerformBackup\InitializeBackupViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\PerformBackup\PerformBackupViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\PerformBackup\StartBackupViewData;
 use SameOldNick\BackupManager\Enums\BackupTypes;
@@ -23,7 +24,7 @@ class PerformBackupController
     /**
      * Performs a backup
      */
-    public function start(Request $request)
+    public function initialize(Request $request)
     {
         $request->validate([
             'type' => [
@@ -40,11 +41,49 @@ class PerformBackupController
 
         $type = BackupTypes::fromValue((string) $request->str('type'));
 
-        $lease = $this->service->startBackup(
-            type: $type,
+        $lease = $this->service->openBackupChannel(
             user: $request->user(),
             uuid: $uuid,
         );
+
+        return $this->ui->renderInitializeBackup(new InitializeBackupViewData(
+            type: $type,
+            uuid: $uuid,
+            lease: $lease,
+        ));
+    }
+
+    /**
+     * Starts the backup job.
+     */
+    public function start(Request $request)
+    {
+        $request->validate([
+            'type' => [
+                'required',
+                Rule::in(BackupTypes::acceptedValues()),
+            ],
+            'uuid' => [
+                'required',
+                'uuid',
+            ],
+        ]);
+
+        $uuid = $request->str('uuid');
+        $type = $request->str('type');
+        $user = $request->user();
+
+        $lease = $this->service->getBackupChannelLease($this->service->createChannelId($uuid));
+
+        if ($lease === null) {
+            abort(404, 'Backup channel not found');
+        }
+
+        if ($lease->notifiableKey !== (string) $user->getAuthIdentifier()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $this->service->dispatchBackupJob($lease, BackupTypes::fromValue($type), $user);
 
         return $this->ui->renderStartBackup(new StartBackupViewData(
             type: $type,
@@ -56,7 +95,7 @@ class PerformBackupController
     /**
      * Shows the perform backup page.
      */
-    public function show(string $type, string $uuid)
+    public function show(Request $request, string $type, string $uuid)
     {
         $lease = $this->service->getBackupChannelLease($this->service->createChannelId($uuid));
 

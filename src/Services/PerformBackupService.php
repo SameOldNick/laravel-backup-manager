@@ -2,11 +2,11 @@
 
 namespace SameOldNick\BackupManager\Services;
 
-use Illuminate\Support\Str;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
+use SameOldNick\BackupManager\Models\BackupRun;
 
 class PerformBackupService
 {
@@ -21,22 +21,41 @@ class PerformBackupService
     /**
      * Starts a backup process by dispatching a BackupJob and creating a channel lease for real-time updates.
      *
-     * @param  BackupTypes  $type  The type of backup to perform (e.g. "full", "database", "files")
+     * @param  string  $uuid  The UUID for the backup process (used for channel ID generation)
      * @param  object  $user  The user initiating the backup (used for channel lease)
-     * @param  string|null  $uuid  Optional UUID for the backup process (if not provided, a new UUID will be generated)
      * @return ChannelLease A lease for the backup channel to receive real-time updates
      *
      * @throws \InvalidArgumentException If an invalid backup type is provided
      */
-    public function startBackup(BackupTypes $type, object $user, ?string $uuid = null): ChannelLease
+    public function openBackupChannel(string $uuid, object $user): ChannelLease
     {
-        $channel = $this->createChannelId($uuid ?? Str::uuid());
+        $channel = $this->createChannelId($uuid);
 
         $lease = $this->openBackupChannelLease($channel, $user);
 
-        dispatch(new BackupJob($channel, $user, $type));
-
         return $lease;
+    }
+
+    /**
+     * Dispatches a backup job to perform the backup process and creates a BackupRun record.
+     *
+     * @param  ChannelLease  $lease  The channel lease for real-time updates during the backup process
+     * @param  BackupTypes  $type  The type of backup to perform (e.g. full, incremental)
+     * @param  object  $user  The user initiating the backup (used for job dispatching)
+     * @return BackupRun The created BackupRun record representing the backup process
+     *
+     * @throws \InvalidArgumentException If an invalid backup type is provided
+     */
+    public function dispatchBackupJob(ChannelLease $lease, BackupTypes $type, object $user): BackupRun
+    {
+        /** @var BackupRun $backupRun */
+        $backupRun = BackupRun::create([
+            'type' => $type,
+        ]);
+
+        dispatch(new BackupJob($backupRun->getKey(), $lease->channelId, $user, $type))->afterResponse();
+
+        return $backupRun;
     }
 
     /**

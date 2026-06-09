@@ -13,7 +13,13 @@ Route::group(config('backup-manager.routes.all', []), function () {
         });
 
         Route::prefix('/perform')->name('perform.')->group(function () {
-            Route::post('/', [Controllers\PerformBackupController::class, 'start'])->name('start');
+            Route::post('/', [Controllers\PerformBackupController::class, 'initialize'])
+                ->name('initialize');
+
+            Route::post('/start', [Controllers\PerformBackupController::class, 'start'])
+                ->name('start')
+                ->middleware('signed');
+
             Route::get('/{type}/{uuid}', [Controllers\PerformBackupController::class, 'show'])
                 ->name('show')
                 ->middleware('signed')

@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use SameOldNick\BackupManager\Broadcasting\Notifiers\ProcessNotifier;
 use SameOldNick\BackupManager\Enums\BackupTypes;
+use SameOldNick\BackupManager\Models\BackupRun;
 use SameOldNick\BackupManager\SpatieBackup\BackupRunner;
 use Spatie\Backup\Config\Config;
 use Spatie\Backup\Support\BackupLogger;
@@ -29,6 +30,7 @@ class BackupJob extends NotifiableJob implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
+        public readonly string $uuid,
         string $channel,
         object $notifiable,
         BackupTypes $backupType = BackupTypes::Full,
@@ -42,9 +44,14 @@ class BackupJob extends NotifiableJob implements ShouldQueue
     /**
      * Handle the job.
      */
-    public function handle(Config $config, BackupRunner $backupRunner, BackupLogger $backupLogger): void
+    public function handle(Config $config, BackupLogger $backupLogger): void
     {
-        $this->performJob(function () use ($backupRunner, $config, $backupLogger) {
+        $this->performJob(function () use ($config, $backupLogger) {
+            /** @var BackupRun $backupRun */
+            $backupRun = BackupRun::findOrFail($this->uuid);
+
+            $backupRunner = BackupRunner::create($backupRun);
+
             $notifier = ProcessNotifier::create($this->notifiable, $this->channel);
 
             $this->redirectBackupLoggerMessagesToNotifiable($backupLogger, $notifier);
