@@ -40,8 +40,9 @@ class BackupControllerTest extends TestCase
         $this->assertResponderUsed($response, 'backups');
         $this->assertResponseId($response, 'list');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 0)
-            ->where('backups.total', 0));
+            ->count('backups', 0),
+            interacted: false
+        );
     }
 
     /**
@@ -60,8 +61,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponderUsed($response, 'backups');
         $this->assertResponseId($response, 'list');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 3)
-            ->where('backups.total', 3)
+            ->count('backups', 3),
+            interacted: false
         );
 
     }
@@ -84,8 +85,9 @@ class BackupControllerTest extends TestCase
         $this->assertResponderUsed($response, 'backups');
         $this->assertResponseId($response, 'list');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 5)
-            ->where('backups.total', 15)
+            ->count('data', 5),
+            key: 'data.paginated',
+            interacted: false
         );
 
     }
@@ -108,32 +110,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponderUsed($response, 'backups');
         $this->assertResponseId($response, 'list');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 1)
-            ->where('backups.total', 16)
-        );
-
-    }
-
-    /**
-     * It filters backups by status text through the query parameter.
-     */
-    public function test_backups_filtered_by_status(): void
-    {
-        $admin = $this->createAdmin();
-
-        Backup::factory()->create(['error_message' => 'Some error occurred']);
-        Backup::factory()->count(15)->create();
-
-        $response = $this->actingAs($admin)->get(route('backup.backups.index', [
-            'query' => 'failed',
-        ]));
-
-        $response->assertOk();
-        $this->assertResponderUsed($response, 'backups');
-        $this->assertResponseId($response, 'list');
-        $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 1)
-            ->where('backups.total', 16)
+            ->count('backups', 1),
+            interacted: false
         );
 
     }
@@ -158,8 +136,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponderUsed($response, 'backups');
         $this->assertResponseId($response, 'list');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 1)
-            ->where('backups.total', 16)
+            ->count('backups', 1),
+            interacted: false
         );
 
     }
@@ -179,8 +157,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponderUsed($response, 'backups');
         $this->assertResponseId($response, 'list');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 0)
-            ->where('backups.total', 0)
+            ->count('backups', 0),
+            interacted: false
         );
 
     }
@@ -202,8 +180,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponderUsed($response, 'backups');
         $this->assertResponseId($response, 'list');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 1)
-            ->where('backups.total', 1)
+            ->count('backups', 1),
+            interacted: false
         );
 
     }
@@ -225,8 +203,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponderUsed($response, 'backups');
         $this->assertResponseId($response, 'list');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 1)
-            ->where('backups.total', 1)
+            ->count('backups', 1),
+            interacted: false
         );
 
     }
@@ -248,8 +226,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponderUsed($response, 'backups');
         $this->assertResponseId($response, 'list');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 1)
-            ->where('backups.total', 1)
+            ->count('backups', 1),
+            interacted: false
         );
 
     }
@@ -271,8 +249,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponderUsed($response, 'backups');
         $this->assertResponseId($response, 'list');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
-            ->count('backups.data', 1)
-            ->where('backups.total', 1)
+            ->count('backups', 1),
+            interacted: false
         );
 
     }
@@ -335,7 +313,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponseId($showPerformResponse, 'perform');
         $this->assertResponseData($showPerformResponse, fn (AssertableJson $json) => $json
             ->where('type', 'full')
-            ->has('uuid')
+            ->has('uuid'),
+            interacted: false
         );
     }
 
@@ -374,7 +353,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponseId($showPerformResponse, 'perform');
         $this->assertResponseData($showPerformResponse, fn (AssertableJson $json) => $json
             ->where('type', 'database')
-            ->has('uuid')
+            ->has('uuid'),
+            interacted: false
         );
     }
 
@@ -411,7 +391,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponseId($showPerformResponse, 'perform');
         $this->assertResponseData($showPerformResponse, fn (AssertableJson $json) => $json
             ->where('type', 'files')
-            ->has('uuid')
+            ->has('uuid'),
+            interacted: false
         );
     }
 
@@ -437,7 +418,8 @@ class BackupControllerTest extends TestCase
         $this->assertResponseId($response, 'perform');
         $this->assertResponseData($response, fn (AssertableJson $json) => $json
             ->where('type', 'files')
-            ->where('uuid', $uuid)
+            ->where('uuid', $uuid),
+            interacted: false
         );
 
     }

@@ -18,6 +18,7 @@ class BackupsUiResponder implements BackupsUiResponderContract
     {
         return $this->createTestResponse('list', [
             'backups' => $data->backups,
+            'paginated' => $data->backups->paginate(request()->input('per_page', 15), request()->integer('page', 1))->toArray(),
         ]);
     }
 
