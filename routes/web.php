@@ -8,9 +8,13 @@ Route::group(config('backup-manager.routes.all', []), function () {
         Route::prefix('/backups')->name('backups.')->group(function () {
             Route::get('/', [Controllers\BackupController::class, 'index'])->name('index');
             Route::get('/{backup}/download', [Controllers\BackupController::class, 'generateDownloadLink'])->name('download');
-            Route::post('/perform', [Controllers\BackupController::class, 'performBackup'])->name('perform');
-            Route::get('/perform/{type}/{uuid}', [Controllers\BackupController::class, 'showPerform'])
-                ->name('perform.show')
+
+        });
+
+        Route::prefix('/perform')->name('perform.')->group(function () {
+            Route::post('/', [Controllers\PerformBackupController::class, 'start'])->name('start');
+            Route::get('/{type}/{uuid}', [Controllers\PerformBackupController::class, 'show'])
+                ->name('show')
                 ->middleware('signed')
                 ->whereIn('type', ['full', 'database', 'files'])
                 ->whereUuid('uuid');

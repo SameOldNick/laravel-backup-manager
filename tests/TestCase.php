@@ -48,6 +48,7 @@ class TestCase extends Orchestra
         $app->bind(UiResponderContracts\BackupDestinationsUiResponder::class, TestResponders\BackupDestinationsUiResponder::class);
         $app->bind(UiResponderContracts\BackupSchedulesUiResponder::class, TestResponders\BackupSchedulesUiResponder::class);
         $app->bind(UiResponderContracts\BackupsUiResponder::class, TestResponders\BackupsUiResponder::class);
+        $app->bind(UiResponderContracts\PerformBackupUiResponder::class, TestResponders\PerformBackupUiResponder::class);
         $app->bind(UiResponderContracts\CleanupSchedulesUiResponder::class, TestResponders\CleanupSchedulesUiResponder::class);
         $app->bind(UiResponderContracts\SchedulesUiResponder::class, TestResponders\SchedulesUiResponder::class);
     }

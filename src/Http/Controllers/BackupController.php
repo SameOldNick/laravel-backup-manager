@@ -3,13 +3,10 @@
 namespace SameOldNick\BackupManager\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Contracts\Responders\BackupsUiResponder;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\Backups\BackupsListViewData;
-use SameOldNick\BackupManager\DataTransferObjects\Responders\Backups\PerformBackupViewData;
 use SameOldNick\BackupManager\Enums\BackupStatus;
-use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 use SameOldNick\BackupManager\Models\Backup;
 use SameOldNick\BackupManager\Services\BackupsService;
 
@@ -63,53 +60,5 @@ class BackupController
         $link = $this->service->createBackupDownloadLink($backup);
 
         return redirect($link);
-    }
-
-    /**
-     * Performs a backup
-     */
-    public function performBackup(Request $request)
-    {
-        $request->validate([
-            'type' => 'required|in:full,database,files',
-        ]);
-
-        /**
-         * The backup is run using a job.
-         * This allows it to run asynchronously (so websocket can handle it).
-         */
-        $uuid = Str::uuid();
-        $type = $request->str('type')->toString();
-
-        $backupType = match ($type) {
-            'database' => BackupJob::BACKUP_ONLY_DATABASES,
-            'files' => BackupJob::BACKUP_ONLY_FILES,
-            default => BackupJob::BACKUP_FULL,
-        };
-
-        $lease = $this->service->startBackup(
-            type: $backupType,
-            user: $request->user(),
-            uuid: $uuid,
-        );
-
-        return redirect()->temporarySignedRoute('backup.backups.perform.show', $lease->expiresAt, [
-            'type' => $type,
-            'uuid' => $uuid,
-        ]);
-    }
-
-    /**
-     * Shows the perform backup page.
-     */
-    public function showPerform(string $type, string $uuid)
-    {
-        $lease = $this->service->getBackupChannelLease($this->service->createChannelId($uuid));
-
-        return $this->ui->renderPerformBackup(new PerformBackupViewData(
-            type: $type,
-            uuid: $uuid,
-            lease: $lease,
-        ));
     }
 }

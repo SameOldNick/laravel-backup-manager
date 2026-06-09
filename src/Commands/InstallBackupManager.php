@@ -153,6 +153,7 @@ class InstallBackupManager extends Command
             $baseSource.'/Responders/BackupDestinationsUiResponder.php' => $stackDestination.'/Responders/BackupDestinationsUiResponder.php',
             $baseSource.'/Responders/BackupSchedulesUiResponder.php' => $stackDestination.'/Responders/BackupSchedulesUiResponder.php',
             $baseSource.'/Responders/BackupsUiResponder.php' => $stackDestination.'/Responders/BackupsUiResponder.php',
+            $baseSource.'/Responders/PerformBackupUiResponder.php' => $stackDestination.'/Responders/PerformBackupUiResponder.php',
             $baseSource.'/Responders/CleanupSchedulesUiResponder.php' => $stackDestination.'/Responders/CleanupSchedulesUiResponder.php',
             $baseSource.'/Responders/SchedulesUiResponder.php' => $stackDestination.'/Responders/SchedulesUiResponder.php',
         ];
@@ -172,6 +173,7 @@ class InstallBackupManager extends Command
             $baseSource.'/Responders/BackupDestinationsUiResponder.php' => $stackDestination.'/Responders/BackupDestinationsUiResponder.php',
             $baseSource.'/Responders/BackupSchedulesUiResponder.php' => $stackDestination.'/Responders/BackupSchedulesUiResponder.php',
             $baseSource.'/Responders/BackupsUiResponder.php' => $stackDestination.'/Responders/BackupsUiResponder.php',
+            $baseSource.'/Responders/PerformBackupUiResponder.php' => $stackDestination.'/Responders/PerformBackupUiResponder.php',
             $baseSource.'/Responders/CleanupSchedulesUiResponder.php' => $stackDestination.'/Responders/CleanupSchedulesUiResponder.php',
             $baseSource.'/Responders/SchedulesUiResponder.php' => $stackDestination.'/Responders/SchedulesUiResponder.php',
         ];
