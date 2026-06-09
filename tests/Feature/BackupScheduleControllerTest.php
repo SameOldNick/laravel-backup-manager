@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Tests\Feature;
 
 use SameOldNick\BackupManager\Enums\BackupTypes;
+use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Testing\Concerns;
@@ -10,6 +11,7 @@ use SameOldNick\BackupManager\Tests\TestCase;
 
 class BackupScheduleControllerTest extends TestCase
 {
+    use Concerns\SchedulerTestHelpers;
     use Concerns\UiResponderAssertions;
 
     public function test_creates_full_backup_schedule(): void
@@ -32,6 +34,13 @@ class BackupScheduleControllerTest extends TestCase
 
         $this->assertSame(BackupTypes::Full, $schedule->type);
         $this->assertTrue($schedule->is_active);
+
+        $this->assertSchedulerJobs(function (array $jobs) {
+            $this->assertCount(1, $jobs);
+            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
+        });
     }
 
     public function test_creates_databases_backup_schedule(): void
