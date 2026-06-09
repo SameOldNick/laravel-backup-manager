@@ -108,35 +108,46 @@ class BackupDestinationsService
             /** @var FilesystemConfigurationLocal|FilesystemConfigurationFTP|FilesystemConfigurationSFTP $configurable */
             $configurable = $destination->configurable;
             $diskType = $destination->disk_type;
-            $authType = $data->authType;
 
-            if (
-                $data->password !== null && (
-                    $authType &&
-                    ($diskType === 'ftp' || ($diskType === 'sftp' && $authType === UpdateBackupDestinationData::AUTH_TYPE_PASSWORD))
-                )
-            ) {
-                $configurable->private_key = null;
-                $configurable->passphrase = null;
-                $configurable->password = $data->password;
-            } elseif (
-                $data->privateKey !== null && (
-                    $authType && $diskType === 'sftp' && $authType === UpdateBackupDestinationData::AUTH_TYPE_KEY
-                )
-            ) {
-                $configurable->password = null;
-                $configurable->private_key = $data->privateKey;
-                $configurable->passphrase = $data->passphrase;
+            if ($diskType === 'local') {
+                if ($data->root !== null) {
+                    $configurable->root = $data->root;
+                }
+
+                $configurable->extra = $data->extra ?? $configurable->extra;
+            } elseif ($diskType === 'ftp') {
+                if ($data->password !== null) {
+                    $configurable->password = $data->password;
+                }
+
+                if ($data->root !== null) {
+                    $configurable->root = $data->root;
+                }
+
+                $configurable->host = $data->host ?? $configurable->host;
+                $configurable->port = $data->port ?? $configurable->port;
+                $configurable->username = $data->username ?? $configurable->username;
+                $configurable->extra = $data->extra ?? $configurable->extra;
+            } elseif ($diskType === 'sftp') {
+                if ($data->password !== null && $data->authType === UpdateBackupDestinationData::AUTH_TYPE_PASSWORD) {
+                    $configurable->private_key = null;
+                    $configurable->passphrase = null;
+                    $configurable->password = $data->password;
+                } elseif ($data->privateKey !== null && $data->authType === UpdateBackupDestinationData::AUTH_TYPE_KEY) {
+                    $configurable->password = null;
+                    $configurable->private_key = $data->privateKey;
+                    $configurable->passphrase = $data->passphrase;
+                }
+
+                if ($data->root !== null) {
+                    $configurable->root = $data->root;
+                }
+
+                $configurable->host = $data->host ?? $configurable->host;
+                $configurable->port = $data->port ?? $configurable->port;
+                $configurable->username = $data->username ?? $configurable->username;
+                $configurable->extra = $data->extra ?? $configurable->extra;
             }
-
-            if (in_array($diskType, ['local', 'ftp'], true) && $data->root !== null) {
-                $configurable->root = $data->root;
-            }
-
-            $configurable->host = $data->host ?? $configurable->host;
-            $configurable->port = $data->port ?? $configurable->port;
-            $configurable->username = $data->username ?? $configurable->username;
-            $configurable->extra = $data->extra ?? $configurable->extra;
 
             $configurable->save();
 
