@@ -52,7 +52,7 @@ class BackupJob extends NotifiableJob implements ShouldQueue
             try {
                 $notifier->begin();
 
-                $backupRunner->run($config, $this->backupType, $this->disks);
+                $backupRunner->run($config, BackupTypes::from($this->backupType), $this->disks);
 
                 $notifier->complete(0);
             } catch (\Exception $e) {

@@ -5,7 +5,6 @@ namespace SameOldNick\BackupManager;
 use Illuminate\Console\Scheduling\Event;
 use Illuminate\Support\Facades\Schedule;
 use SameOldNick\BackupManager\Concerns\TransformsCronExpression;
-use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
@@ -47,11 +46,6 @@ class BackupScheduler
 
         foreach ($schedules as $schedule) {
             $expression = $this->transformCronExpression($schedule->cron_expression);
-            $backupType = match ($schedule->type) {
-                BackupTypes::Databases => BackupJob::BACKUP_ONLY_DATABASES,
-                BackupTypes::Files => BackupJob::BACKUP_ONLY_FILES,
-                default => BackupJob::BACKUP_FULL,
-            };
 
             $disks = $schedule->filesystemConfigurations
                 ->filter(fn (FilesystemConfiguration $config) => $config->is_active)
@@ -60,7 +54,7 @@ class BackupScheduler
                 ->all();
 
             // Keep legacy schedules working by falling back to default disk resolution.
-            $this->scheduleJob(new BackupJob($backupType, count($disks) > 0 ? $disks : null), $expression);
+            $this->scheduleJob(new BackupJob($schedule->type, count($disks) > 0 ? $disks : null), $expression);
         }
     }
 
