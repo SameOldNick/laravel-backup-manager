@@ -20,7 +20,7 @@ class UpdateBackupScheduleData
     {
         return new self(
             name: $data['name'] ?? null,
-            type: $data['type'] ? BackupTypes::tryFrom($data['type']) : null,
+            type: isset($data['type']) ? BackupTypes::tryFrom($data['type']) : null,
             cronExpression: $data['cron_expression'] ?? null,
             isActive: $data['is_active'] ?? null,
             destinationIds: $data['destination_ids'] ?? null,
