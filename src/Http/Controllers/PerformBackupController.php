@@ -69,8 +69,8 @@ class PerformBackupController
             ],
         ]);
 
-        $uuid = $request->str('uuid');
-        $type = $request->str('type');
+        $uuid = (string) $request->str('uuid');
+        $type = (string) $request->str('type');
         $user = $request->user();
 
         $lease = $this->service->getBackupChannelLease($this->service->createChannelId($uuid));
@@ -79,16 +79,21 @@ class PerformBackupController
             abort(404, 'Backup channel not found');
         }
 
-        if ($lease->notifiableKey !== (string) $user->getAuthIdentifier()) {
+        if ($lease->notifiableClass !== $user::class || $lease->notifiableKey !== (string) $user->getAuthIdentifier()) {
             abort(403, 'Unauthorized');
         }
 
-        $this->service->dispatchBackupJob($lease, BackupTypes::fromValue($type), $user);
+        $started = $this->service->dispatchBackupJobOnce($lease, BackupTypes::fromValue($type), $user, $uuid);
+
+        if ($started === null) {
+            abort(409, 'Backup has already been started for this channel');
+        }
 
         return $this->ui->renderStartBackup(new StartBackupViewData(
             type: $type,
             uuid: $uuid,
             lease: $lease,
+            backupRun: $started,
         ));
     }
 

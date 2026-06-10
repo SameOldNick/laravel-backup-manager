@@ -53,7 +53,39 @@ class PerformBackupService
             'type' => $type,
         ]);
 
-        dispatch(new BackupJob($backupRun->getKey(), $lease->channelId, $user, $type))->afterResponse();
+        dispatch(new BackupJob($backupRun->getKey(), $lease->channelId, $user, $type));
+
+        return $backupRun;
+    }
+
+    /**
+     * Dispatches a backup job only once for a given UUID.
+     *
+     * Returns null when the run was already created for this UUID.
+     */
+    public function dispatchBackupJobOnce(ChannelLease $lease, BackupTypes $type, object $user, string $uuid): ?BackupRun
+    {
+        /**
+         * A insertOrIgnore is used to ensure that only one BackupRun is created for a given UUID, even if this method is called multiple times concurrently.
+         * The channel lease is used to ensure that the backup job is only dispatched once for a given UUID, even if this method is called multiple times concurrently across different instances of the application (e.g. multiple web servers).
+         */
+
+        /** @var int $inserted */
+        $inserted = BackupRun::query()->insertOrIgnore([
+            'id' => $uuid,
+            'type' => $type->value,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        if ($inserted === 0) {
+            return null;
+        }
+
+        /** @var BackupRun $backupRun */
+        $backupRun = BackupRun::query()->findOrFail($uuid);
+
+        dispatch(new BackupJob($backupRun->getKey(), $lease->channelId, $user, $type));
 
         return $backupRun;
     }
