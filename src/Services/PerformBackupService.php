@@ -39,6 +39,11 @@ class PerformBackupService
         return $lease;
     }
 
+    public function getBackupChannelLease(string $uuid): ?ChannelLease
+    {
+        return $this->getChannelLease($this->createChannelId($uuid));
+    }
+
     /**
      * Dispatches a backup job to perform the backup process and creates a BackupRun record.
      *
@@ -66,8 +71,18 @@ class PerformBackupService
      *
      * Returns null when the run was already created for this UUID.
      */
-    public function dispatchBackupJobOnce(ChannelLease $lease, BackupTypes $type, object $user, string $uuid): ?BackupRun
+    public function dispatchBackupJobOnce(BackupTypes $type, object $user, string $uuid): ?BackupRun
     {
+        $lease = $this->getChannelLease($this->createChannelId($uuid));
+
+        if ($lease === null) {
+            throw new \RuntimeException('Backup channel lease not found for UUID: '.$uuid);
+        }
+
+        if ($lease->notifiableClass !== $user::class || $lease->notifiableKey !== (string) $user->getAuthIdentifier()) {
+            throw new \RuntimeException('Unauthorized access to backup channel lease for UUID: '.$uuid);
+        }
+
         /**
          * A insertOrIgnore is used to ensure that only one BackupRun is created for a given UUID, even if this method is called multiple times concurrently.
          * The channel lease is used to ensure that the backup job is only dispatched once for a given UUID, even if this method is called multiple times concurrently across different instances of the application (e.g. multiple web servers).
