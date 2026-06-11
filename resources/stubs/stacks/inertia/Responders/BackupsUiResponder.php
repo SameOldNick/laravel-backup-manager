@@ -16,7 +16,7 @@ class BackupsUiResponder implements BackupsUiResponderContract
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'backups',
             'action' => 'list',
-            'backups' => $data->backups->paginate(request()->query('per_page', 15))->withQueryString(),
+            'backups' => $data->backups,
         ]);
     }
 }
