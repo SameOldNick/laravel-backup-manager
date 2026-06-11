@@ -39,6 +39,12 @@ class PerformBackupService
         return $lease;
     }
 
+    /**
+     * Retrieves the channel lease for a given UUID.
+     *
+     * @param  string  $uuid  The UUID for the backup process (used for channel ID generation)
+     * @return ChannelLease|null The channel lease if found and valid, or null if not found or expired
+     */
     public function getBackupChannelLease(string $uuid): ?ChannelLease
     {
         return $this->getChannelLease($this->createChannelId($uuid));
@@ -73,7 +79,7 @@ class PerformBackupService
      */
     public function dispatchBackupJobOnce(BackupTypes $type, object $user, string $uuid): ?BackupRun
     {
-        $lease = $this->getChannelLease($this->createChannelId($uuid));
+        $lease = $this->getBackupChannelLease($uuid);
 
         if ($lease === null) {
             throw new \RuntimeException('Backup channel lease not found for UUID: '.$uuid);
@@ -108,6 +114,9 @@ class PerformBackupService
         return $backupRun;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function getChannelIdPrefix(): string
     {
         return 'backups';
