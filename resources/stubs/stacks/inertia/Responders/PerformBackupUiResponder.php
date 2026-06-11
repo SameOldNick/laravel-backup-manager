@@ -40,7 +40,7 @@ class PerformBackupUiResponder implements PerformBackupUiResponderContract
             abort(404, __('backup::messages.backup_job_not_found'));
         }
 
-        $startUrl = url()->temporarySignedRoute('backup.perform.start', [
+        $startUrl = url()->temporarySignedRoute('backup.perform.start', $data->lease->expiresAt, [
             'type' => $data->type,
             'uuid' => $data->uuid,
         ], false);
