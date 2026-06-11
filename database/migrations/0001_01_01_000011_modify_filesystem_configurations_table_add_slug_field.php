@@ -55,6 +55,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('filesystem_configurations', function (Blueprint $table) {
+            $table->dropUnique('filesystem_configurations_slug_unique');
             $table->dropColumn('slug');
         });
     }
