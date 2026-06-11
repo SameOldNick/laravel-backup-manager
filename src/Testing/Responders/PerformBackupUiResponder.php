@@ -21,8 +21,8 @@ class PerformBackupUiResponder implements PerformBackupUiResponderContract
             'type' => $data->type,
             'uuid' => $data->uuid,
             'lease' => $data->lease,
-            'startUrl' => url()->temporarySignedRoute('backup.perform.start', [], false),
-            'showUrl' => url()->temporarySignedRoute('backup.perform.show', now()->addMinutes(5), [
+            'startUrl' => url()->temporarySignedRoute('backup.perform.start', $data->lease->expiresAt, []),
+            'showUrl' => url()->temporarySignedRoute('backup.perform.show', $data->lease->expiresAt, [
                 'type' => $data->type,
                 'uuid' => $data->uuid,
             ]),
