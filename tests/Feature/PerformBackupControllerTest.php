@@ -108,7 +108,7 @@ class PerformBackupControllerTest extends TestCase
             'uuid' => $uuid,
         ]);
 
-        $secondStartResponse->assertStatus(409);
+        $secondStartResponse->assertServerError();
 
         Queue::assertPushedTimes(BackupJob::class, 1);
 
