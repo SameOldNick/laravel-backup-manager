@@ -111,63 +111,9 @@ $lease = $service->openBackupChannel($uuid, $user);
 $backupRun = $service->dispatchBackupJob($lease, BackupTypes::Full, $user);
 ```
 
-## Configuration
+## Additional Information
 
-### `config/backup-manager.php`
-
-| Key                            | Description                                              |
-| ------------------------------ | -------------------------------------------------------- |
-| `routes.enabled`               | Enable or disable the web routes (default: `true`)       |
-| `routes.all.middleware`        | Middleware applied to all routes (default: `web`)        |
-| `routes.all.prefix`            | URL prefix (default: `/backup`)                          |
-| `routes.management.middleware` | Extra middleware for management routes (default: `auth`) |
-| `routes.download.middleware`   | Middleware for download routes (default: `signed`)       |
-
-### `config/backup.php`
-
-The standard Spatie Backup configuration. The package reads source files, database connections, destination disks, and notification settings from this file.
-
-## Route Overview
-
-All routes are prefixed with `/backup` by default.
-
-| Method     | URI                                | Description                     |
-| ---------- | ---------------------------------- | ------------------------------- |
-| `GET`      | `/backups`                         | List backups                    |
-| `GET`      | `/backups/{backup}/download`       | Generate signed download link   |
-| `GET`      | `/files/{file}`                    | Download a backup file (signed) |
-| `POST`     | `/perform`                         | Initialize a backup run         |
-| `POST`     | `/perform/start`                   | Start a backup run (signed)     |
-| `GET`      | `/perform/{type}/{uuid}`           | Monitor backup run status       |
-| `GET`      | `/destinations`                    | List storage destinations       |
-| `GET/POST` | `/destinations/create`             | Create a destination            |
-| `GET/PUT`  | `/destinations/{destination}`      | Edit/update a destination       |
-| `POST`     | `/destinations/{destination}/test` | Test destination connectivity   |
-| `DELETE`   | `/destinations/{destination}`      | Delete a destination            |
-| `GET`      | `/schedules`                       | View all schedules              |
-| `CRUD`     | `/schedules/backup`                | Manage backup schedules         |
-| `CRUD`     | `/schedules/cleanup`               | Manage cleanup schedules        |
-
-## CLI Commands
-
-### `backup-manager:install`
-
-Scaffolds stack-specific responder classes into your application.
-
-```bash
-php artisan backup-manager:install --stack=inertia
-```
-
-Options:
-
-| Option                | Description                                        |
-| --------------------- | -------------------------------------------------- |
-| `--stack=`            | Responder stack preset: `inertia` or `custom`      |
-| `--path=`             | Destination path (default: `app/BackupManager`)    |
-| `--app-namespace=`    | Root namespace (default: `App\`)                   |
-| `--force`             | Overwrite existing files                           |
-| `--skip-provider`     | Skip generating the service provider               |
-| `--skip-registration` | Skip auto-registering in `bootstrap/providers.php` |
+The GitHub [wiki](/wiki) contains additional information about Laravel Backup Manager.
 
 ## Testing
 
