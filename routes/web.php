@@ -18,8 +18,6 @@ Route::group(config('backup-manager.routes.all', []), function () {
 
             Route::post('/start', [Controllers\PerformBackupController::class, 'start'])
                 ->name('start')
-                ->whereIn('type', BackupTypes::cases())
-                ->whereUuid('uuid')
                 ->middleware('signed');
 
             Route::get('/{type}/{uuid}', [Controllers\PerformBackupController::class, 'show'])
