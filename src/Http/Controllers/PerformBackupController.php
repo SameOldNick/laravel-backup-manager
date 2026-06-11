@@ -58,17 +58,21 @@ class PerformBackupController
      */
     public function start(Request $request)
     {
-        $type = (string) $request->str('type');
-        $uuid = (string) $request->str('uuid');
+        $validated = $request->validate([
+            'type' => [
+                'required',
+                Rule::in(BackupTypes::acceptedValues()),
+            ],
+            'uuid' => [
+                'required',
+                'string',
+                'uuid',
+            ],
+        ]);
+
+        $type = (string) $validated['type'];
+        $uuid = (string) $validated['uuid'];
         $user = $request->user();
-
-        if (! BackupTypes::fromValue($type)) {
-            abort(400, 'Invalid backup type');
-        }
-
-        if (! Str::isUuid($uuid)) {
-            abort(400, 'Invalid UUID');
-        }
 
         try {
             $run = $this->service->dispatchBackupJobOnce(BackupTypes::fromValue($type), $user, $uuid);
