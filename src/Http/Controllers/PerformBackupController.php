@@ -70,7 +70,7 @@ class PerformBackupController
             abort(400, 'Invalid UUID');
         }
 
-        $lease = $this->service->getBackupChannelLease($this->service->createChannelId($uuid));
+        $lease = $this->service->getChannelLease($this->service->createChannelId($uuid));
 
         if ($lease === null) {
             abort(404, 'Backup channel not found');
@@ -99,7 +99,7 @@ class PerformBackupController
      */
     public function show(Request $request, string $type, string $uuid)
     {
-        $lease = $this->service->getBackupChannelLease($this->service->createChannelId($uuid));
+        $lease = $this->service->getChannelLease($this->service->createChannelId($uuid));
 
         return $this->ui->renderPerformBackup(new PerformBackupViewData(
             type: $type,
