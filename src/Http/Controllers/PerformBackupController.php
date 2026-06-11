@@ -56,21 +56,8 @@ class PerformBackupController
     /**
      * Starts the backup job.
      */
-    public function start(Request $request)
+    public function start(Request $request, string $type, string $uuid)
     {
-        $request->validate([
-            'type' => [
-                'required',
-                Rule::in(BackupTypes::acceptedValues()),
-            ],
-            'uuid' => [
-                'required',
-                'uuid',
-            ],
-        ]);
-
-        $uuid = (string) $request->str('uuid');
-        $type = (string) $request->str('type');
         $user = $request->user();
 
         $lease = $this->service->getBackupChannelLease($this->service->createChannelId($uuid));
