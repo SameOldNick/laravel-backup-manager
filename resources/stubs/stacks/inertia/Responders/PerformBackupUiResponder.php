@@ -43,7 +43,7 @@ class PerformBackupUiResponder implements PerformBackupUiResponderContract
         $startUrl = url()->temporarySignedRoute('backup.perform.start', $data->lease->expiresAt, [
             'type' => $data->type,
             'uuid' => $data->uuid,
-        ], false);
+        ]);
 
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'backups',
