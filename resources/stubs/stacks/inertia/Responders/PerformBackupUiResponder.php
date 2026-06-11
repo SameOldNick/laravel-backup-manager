@@ -15,15 +15,9 @@ class PerformBackupUiResponder implements PerformBackupUiResponderContract
      */
     public function renderInitializeBackup(InitializeBackupViewData $data)
     {
-        $startUrl = url()->temporarySignedRoute('backup.perform.start', [
-            'type' => $data->type,
-            'uuid' => $data->uuid,
-        ], false);
-
         return redirect()->temporarySignedRoute('backup.perform.show', $data->lease->expiresAt, [
             'type' => $data->type,
             'uuid' => $data->uuid,
-            'start_url' => $startUrl,
         ]);
     }
 
@@ -46,12 +40,18 @@ class PerformBackupUiResponder implements PerformBackupUiResponderContract
             abort(404, __('backup::messages.backup_job_not_found'));
         }
 
+        $startUrl = url()->temporarySignedRoute('backup.perform.start', [
+            'type' => $data->type,
+            'uuid' => $data->uuid,
+        ], false);
+
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'backups',
             'action' => 'list',
             'performing_backup' => [
                 'uuid' => $data->uuid,
                 'type' => $data->type,
+                'start_url' => $startUrl,
             ],
         ]);
     }
