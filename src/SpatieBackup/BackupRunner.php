@@ -13,21 +13,32 @@ use Spatie\Backup\Tasks\Backup\BackupJobFactory;
 
 class BackupRunner
 {
+    protected readonly mixed $onStartedCallback;
+
+    protected readonly mixed $onSuccessCallback;
+
+    protected readonly mixed $onFailedCallback;
+
+    protected readonly mixed $onCompletedCallback;
+
     /**
      * BackupRunner constructor.
      *
      * @param  ?callable  $onStartedCallback  Optional callback to execute when the backup starts
      * @param  ?callable  $onSuccessCallback  Optional callback to execute when the backup succeeds
-     * @param  ?callable  $onFailedCallback   Optional callback to execute when the backup fails
-     * @param  ?callable  $onCompletedCallback Optional callback to execute when the backup completes (regardless of success or failure)
+     * @param  ?callable  $onFailedCallback  Optional callback to execute when the backup fails
+     * @param  ?callable  $onCompletedCallback  Optional callback to execute when the backup completes (regardless of success or failure)
      */
     public function __construct(
-        protected readonly ?callable $onStartedCallback = null,
-        protected readonly ?callable $onSuccessCallback = null,
-        protected readonly ?callable $onFailedCallback = null,
-        protected readonly ?callable $onCompletedCallback = null,
+        ?callable $onStartedCallback = null,
+        ?callable $onSuccessCallback = null,
+        ?callable $onFailedCallback = null,
+        ?callable $onCompletedCallback = null,
     ) {
-        //
+        $this->onStartedCallback = $onStartedCallback;
+        $this->onSuccessCallback = $onSuccessCallback;
+        $this->onFailedCallback = $onFailedCallback;
+        $this->onCompletedCallback = $onCompletedCallback;
     }
 
     /**
@@ -56,7 +67,7 @@ class BackupRunner
                 call_user_func($this->onCompletedCallback);
             }
         }
-        
+
     }
 
     /**
