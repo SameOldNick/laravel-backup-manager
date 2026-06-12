@@ -4,8 +4,8 @@ namespace SameOldNick\BackupManager\Models\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
-use SameOldNick\BackupManager\Enums\BackupRunStatus;
 use SameOldNick\BackupManager\Enums\BackupTypes;
+use SameOldNick\BackupManager\Enums\RunStatus;
 use SameOldNick\BackupManager\Models\BackupRun;
 
 /**
@@ -30,7 +30,7 @@ class BackupRunFactory extends Factory
         return [
             'type' => $this->faker->randomElement(BackupTypes::cases())->value,
             'disks' => null,
-            'status' => BackupRunStatus::Pending->value,
+            'status' => RunStatus::Pending->value,
         ];
     }
 }
