@@ -48,7 +48,7 @@ class FilesystemConfigurationTestJob extends NotifiableJob implements ShouldQueu
             $testRunner = BackupDestinationTestRunner::forTestRun($testRun);
 
             // If an exception is thrown, Laravel will handle the rest...
-            $testRunner->run($disk);
+            $testRunner($disk);
         });
     }
 }
