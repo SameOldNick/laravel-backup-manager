@@ -127,7 +127,8 @@ class ServiceProvider extends BaseServiceProvider
         // In some environments (CI, parallel tests) provider registration order
         // can differ, leaving Config unbound when extend() would otherwise fail.
         if (! $this->app->bound(Config::class)) {
-            Config::rebind();
+            // This is the same as the Config::rebind() method, but extracted here to avoid a hard dependency on an internal method.
+            $this->app->scoped(Config::class, fn (): Config => Config::fromArray(config('backup')));
         }
 
         $hasReset = false;
