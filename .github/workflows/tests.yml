@@ -34,7 +34,7 @@ jobs:
       - name: Execute tests (Unit and Feature tests) via PHPUnit/Pest
         env:
           XDEBUG_MODE: coverage
-        run: composer test -- --coverage-clover coverage.xml --log-junit junit.xml
+        run: composer test -- --parallel --coverage-clover coverage.xml --log-junit junit.xml
         continue-on-error: true
 
       - name: Upload coverage reports to Codecov
