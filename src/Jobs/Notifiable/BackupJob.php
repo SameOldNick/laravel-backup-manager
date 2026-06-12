@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use SameOldNick\BackupManager\Broadcasting\Notifiers\ProcessNotifier;
+use SameOldNick\BackupManager\Enums\BackupRunStatus;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Models\BackupRun;
 use SameOldNick\BackupManager\SpatieBackup\BackupRunner;
@@ -50,7 +51,7 @@ class BackupJob extends NotifiableJob implements ShouldQueue
             /** @var BackupRun $backupRun */
             $backupRun = BackupRun::findOrFail($this->uuid);
 
-            $backupRunner = BackupRunner::create($backupRun);
+            $backupRunner = $this->createBackupRunner($backupRun);
 
             $notifier = ProcessNotifier::create($this->notifiable, $this->channel);
 
@@ -68,6 +69,19 @@ class BackupJob extends NotifiableJob implements ShouldQueue
                 throw $e;
             }
         });
+    }
+
+    /**
+     * Creates a BackupRunner instance with callbacks to update the BackupRun status.
+     */
+    protected function createBackupRunner(BackupRun $backupRun): BackupRunner
+    {
+        return new BackupRunner(
+            onStartedCallback: fn () => $backupRun->update(['status' => BackupRunStatus::Running, 'started_at' => now()]),
+            onSuccessCallback: fn () => $backupRun->update(['status' => BackupRunStatus::Successful]),
+            onFailedCallback: fn () => $backupRun->update(['status' => BackupRunStatus::Failed]),
+            onCompletedCallback: fn () => $backupRun->update(['completed_at' => now()]),
+        );
     }
 
     /**
