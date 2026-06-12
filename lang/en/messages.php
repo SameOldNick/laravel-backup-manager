@@ -13,6 +13,7 @@ return [
     'cleanup_schedule_created' => 'Cleanup schedule created successfully.',
     'cleanup_schedule_updated' => 'Cleanup schedule updated successfully.',
     'cleanup_schedule_deleted' => 'Cleanup schedule deleted successfully.',
-    'backup_job_started' => 'Backup started successfully.',
+    'backup_started' => 'Backup started successfully.',
     'backup_job_not_found' => 'Backup job not found.',
+    'backup_destination_test_started' => 'Backup destination test started successfully.',
 ];
