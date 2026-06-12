@@ -77,7 +77,7 @@ class PerformBackupService
      *
      * Returns null when the run was already created for this UUID.
      */
-    public function dispatchBackupJobOnce(BackupTypes $type, object $user, string $uuid): ?BackupRun
+    public function dispatchBackupJobOnce(BackupTypes $type, object $user, string $uuid): BackupRun
     {
         $lease = $this->getBackupChannelLease($uuid);
 
@@ -103,7 +103,8 @@ class PerformBackupService
         ]);
 
         if ($inserted === 0) {
-            return null;
+            // No rows were inserted, which means a BackupRun with this UUID already exists
+            throw new \RuntimeException('Backup run already exists for UUID: '.$uuid);
         }
 
         /** @var BackupRun $backupRun */
