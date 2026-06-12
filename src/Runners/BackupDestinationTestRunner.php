@@ -15,7 +15,7 @@ class BackupDestinationTestRunner extends Runner
      *
      * @throws \Exception If any of the filesystem operations fail
      */
-    public function run(Filesystem $disk): void
+    public function __invoke(Filesystem $disk): void
     {
         $this->executeWithCallbacks(function () use ($disk) {
             $this->performFilesystemTest($disk);

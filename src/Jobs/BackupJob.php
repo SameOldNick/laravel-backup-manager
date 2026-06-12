@@ -41,6 +41,6 @@ class BackupJob implements ShouldQueue
      */
     public function handle(Config $config, BackupRunner $backupRunner): void
     {
-        $backupRunner->run($config, BackupTypes::from($this->backupType), $this->disks);
+        $backupRunner($config, BackupTypes::from($this->backupType), $this->disks);
     }
 }

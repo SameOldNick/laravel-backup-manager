@@ -31,7 +31,7 @@ class BackupRunnerTest extends TestCase
             },
         );
 
-        $runner->run(Mockery::mock(Config::class));
+        $runner(Mockery::mock(Config::class));
 
         $this->assertTrue($successCalled, 'onSuccessCallback should be called on success.');
     }
@@ -53,7 +53,7 @@ class BackupRunnerTest extends TestCase
         );
 
         try {
-            $runner->run(Mockery::mock(Config::class));
+            $runner(Mockery::mock(Config::class));
         } catch (Exception) {
             // Exception is expected to propagate
         }
@@ -78,7 +78,7 @@ class BackupRunnerTest extends TestCase
         );
 
         try {
-            $runner->run(Mockery::mock(Config::class));
+            $runner(Mockery::mock(Config::class));
         } catch (Exception) {
             // Expected to propagate
         }
@@ -101,7 +101,7 @@ class BackupRunnerTest extends TestCase
             },
         );
 
-        $runner->run(Mockery::mock(Config::class));
+        $runner(Mockery::mock(Config::class));
 
         $this->assertTrue($completedCalled, 'onCompletedCallback should be called after a successful backup.');
     }
@@ -122,7 +122,7 @@ class BackupRunnerTest extends TestCase
         );
 
         try {
-            $runner->run(Mockery::mock(Config::class));
+            $runner(Mockery::mock(Config::class));
         } catch (Exception) {
             // Expected to propagate
         }
@@ -138,7 +138,7 @@ class BackupRunnerTest extends TestCase
 
         $runner = $this->createPartialMockedRunner(mockBackupJob: $mockBackupJob);
 
-        $runner->run(Mockery::mock(Config::class));
+        $runner(Mockery::mock(Config::class));
 
         // Mockery will automatically verify the 'run' expectation via its destructor.
         // If 'run' is not called, the test will fail.
@@ -166,7 +166,7 @@ class BackupRunnerTest extends TestCase
 
         $caught = false;
         try {
-            $runner->run(Mockery::mock(Config::class));
+            $runner(Mockery::mock(Config::class));
         } catch (Exception $e) {
             $caught = true;
             $this->assertSame($expectedException, $e);
@@ -192,7 +192,7 @@ class BackupRunnerTest extends TestCase
         );
 
         try {
-            $runner->run(Mockery::mock(Config::class));
+            $runner(Mockery::mock(Config::class));
         } catch (Exception) {
             // Expected to propagate
         }
@@ -215,7 +215,7 @@ class BackupRunnerTest extends TestCase
             },
         );
 
-        $runner->run(Mockery::mock(Config::class));
+        $runner(Mockery::mock(Config::class));
 
         $this->assertFalse($failedCalled, 'onFailedCallback should not be called on success.');
     }
@@ -229,7 +229,7 @@ class BackupRunnerTest extends TestCase
         $runner = $this->createPartialMockedRunner(mockBackupJob: $mockBackupJob);
 
         // Should not throw any errors when callbacks are null
-        $runner->run(Mockery::mock(Config::class));
+        $runner(Mockery::mock(Config::class));
 
         $this->addToAssertionCount(1);
     }
@@ -243,7 +243,7 @@ class BackupRunnerTest extends TestCase
         $runner = $this->createPartialMockedRunner(mockBackupJob: $mockBackupJob);
 
         try {
-            $runner->run(Mockery::mock(Config::class));
+            $runner(Mockery::mock(Config::class));
         } catch (Exception) {
             // Expected to propagate
         }

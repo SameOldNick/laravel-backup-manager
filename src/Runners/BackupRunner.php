@@ -18,7 +18,7 @@ class BackupRunner extends Runner
      *
      * @param  ?array<int, string>  $disks
      */
-    public function run(Config $config, BackupTypes $backupType = BackupTypes::Full, ?array $disks = null): void
+    public function __invoke(Config $config, BackupTypes $backupType = BackupTypes::Full, ?array $disks = null): void
     {
         $this->executeWithCallbacks(function () use ($config, $backupType, $disks) {
             $backupJob = $this->createBackupJob($config, $backupType, $disks);
