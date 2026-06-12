@@ -4,6 +4,8 @@ namespace SameOldNick\BackupManager\SpatieBackup;
 
 use Illuminate\Support\Collection;
 use SameOldNick\BackupManager\Enums\BackupTypes;
+use SameOldNick\BackupManager\Enums\RunStatus;
+use SameOldNick\BackupManager\Models\BackupRun;
 use Spatie\Backup\BackupDestination\BackupDestination;
 use Spatie\Backup\Config\Config;
 use Spatie\Backup\Tasks\Backup\BackupJob as SpatieBackupJob;
@@ -99,5 +101,18 @@ class BackupRunner
     {
         return collect($disks)
             ->map(fn (string $filesystemName) => BackupDestination::create($filesystemName, $backupName));
+    }
+
+    /**
+     * Create a BackupRunner with callbacks wired to update the given BackupRun model.
+     */
+    public static function forBackupRun(BackupRun $backupRun): self
+    {
+        return new self(
+            onStartedCallback: static fn () => $backupRun->update(['status' => RunStatus::Running, 'started_at' => now()]),
+            onSuccessCallback: static fn () => $backupRun->update(['status' => RunStatus::Successful]),
+            onFailedCallback: static fn () => $backupRun->update(['status' => RunStatus::Failed]),
+            onCompletedCallback: static fn () => $backupRun->update(['completed_at' => now()]),
+        );
     }
 }

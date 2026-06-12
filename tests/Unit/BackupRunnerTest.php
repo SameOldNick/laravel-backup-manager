@@ -259,7 +259,7 @@ class BackupRunnerTest extends TestCase
             'started_at' => null,
         ]);
 
-        $runner = BackupRunner::create($backupRun);
+        $runner = BackupRunner::forBackupRun($backupRun);
 
         $callback = $this->getCallbackFromRunner($runner, 'onStartedCallback');
 
@@ -281,7 +281,7 @@ class BackupRunnerTest extends TestCase
             'status' => RunStatus::Running,
         ]);
 
-        $runner = BackupRunner::create($backupRun);
+        $runner = BackupRunner::forBackupRun($backupRun);
         $callback = $this->getCallbackFromRunner($runner, 'onSuccessCallback');
 
         $this->assertIsCallable($callback);
@@ -299,7 +299,7 @@ class BackupRunnerTest extends TestCase
             'status' => RunStatus::Running,
         ]);
 
-        $runner = BackupRunner::create($backupRun);
+        $runner = BackupRunner::forBackupRun($backupRun);
         $callback = $this->getCallbackFromRunner($runner, 'onFailedCallback');
 
         $this->assertIsCallable($callback);
@@ -317,7 +317,7 @@ class BackupRunnerTest extends TestCase
             'completed_at' => null,
         ]);
 
-        $runner = BackupRunner::create($backupRun);
+        $runner = BackupRunner::forBackupRun($backupRun);
         $callback = $this->getCallbackFromRunner($runner, 'onCompletedCallback');
 
         $this->assertIsCallable($callback);
