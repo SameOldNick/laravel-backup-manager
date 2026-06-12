@@ -44,11 +44,18 @@ class FilesystemConfigurationTestJob extends NotifiableJob implements ShouldQueu
             $testRun = BackupDestinationTestRun::findOrFail($this->uuid);
 
             $disk = Storage::disk($testRun->filesystemConfiguration->driver_name);
-
-            $testRunner = BackupDestinationTestRunner::forTestRun($testRun);
+            $testRunner = $this->createTestRunner($testRun);
 
             // If an exception is thrown, Laravel will handle the rest...
             $testRunner($disk);
         });
+    }
+
+    /**
+     * Create a test runner for the given test run.
+     */
+    protected function createTestRunner(BackupDestinationTestRun $testRun): BackupDestinationTestRunner
+    {
+        return BackupDestinationTestRunner::forTestRun($testRun);
     }
 }
