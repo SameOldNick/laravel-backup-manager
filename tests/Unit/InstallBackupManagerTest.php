@@ -17,6 +17,20 @@ class InstallBackupManagerTest extends TestCase
     /** @var array<string, string> */
     private array $writtenFiles = [];
 
+    private array $expectedProviderFiles = [
+        'BackupManagerServiceProvider.php',
+    ];
+
+    private array $expectedResponderFiles = [
+        'BackupDestinationsUiResponder.php',
+        'BackupDestinationTestUiResponder.php',
+        'BackupSchedulesUiResponder.php',
+        'BackupsUiResponder.php',
+        'PerformBackupUiResponder.php',
+        'CleanupSchedulesUiResponder.php',
+        'SchedulesUiResponder.php',
+    ];
+
     private Filesystem $realFilesystem;
 
     protected function setUp(): void
@@ -51,16 +65,7 @@ class InstallBackupManagerTest extends TestCase
             '--skip-registration' => true,
         ]);
 
-        $expectedFiles = [
-            'BackupDestinationsUiResponder.php',
-            'BackupSchedulesUiResponder.php',
-            'BackupsUiResponder.php',
-            'PerformBackupUiResponder.php',
-            'CleanupSchedulesUiResponder.php',
-            'SchedulesUiResponder.php',
-        ];
-
-        foreach ($expectedFiles as $file) {
+        foreach ($this->expectedResponderFiles as $file) {
             $this->assertArrayHasKeyEndingWith(
                 $file,
                 $this->writtenFiles,
@@ -79,16 +84,7 @@ class InstallBackupManagerTest extends TestCase
             '--skip-registration' => true,
         ]);
 
-        $expectedFiles = [
-            'BackupDestinationsUiResponder.php',
-            'BackupSchedulesUiResponder.php',
-            'BackupsUiResponder.php',
-            'PerformBackupUiResponder.php',
-            'CleanupSchedulesUiResponder.php',
-            'SchedulesUiResponder.php',
-        ];
-
-        foreach ($expectedFiles as $file) {
+        foreach ($this->expectedResponderFiles as $file) {
             $this->assertArrayHasKeyEndingWith(
                 $file,
                 $this->writtenFiles,
@@ -136,7 +132,11 @@ class InstallBackupManagerTest extends TestCase
                 || str_contains($path, 'BackupManagerServiceProvider')
         );
 
-        $this->assertCount(7, $responderWrites, 'All 6 responders + provider should be overwritten when forced.');
+        $this->assertCount(
+            count($this->expectedResponderFiles) + count($this->expectedProviderFiles),
+            $responderWrites,
+            'All responders + provider should be overwritten when forced.'
+        );
     }
 
     // ──── Provider Generation ────────────────────────────────────────
@@ -295,7 +295,7 @@ class InstallBackupManagerTest extends TestCase
         );
 
         $this->assertCount(
-            6,
+            count($this->expectedResponderFiles),
             $responderWrites,
             'All 6 responders should be written to the custom path.'
         );
