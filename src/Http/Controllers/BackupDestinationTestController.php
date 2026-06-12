@@ -54,7 +54,7 @@ class BackupDestinationTestController
         }
 
         try {
-            $this->service->startBackupDestinationTest($destination, $uuid, $user);
+            $this->service->dispatchTestJobOnce($destination, $user, $uuid);
 
             return $this->ui->renderStartBackupDestinationTest(new StartBackupDestinationTestViewData(
                 configuration: $destination,

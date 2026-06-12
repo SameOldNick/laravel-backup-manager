@@ -9,6 +9,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
+use SameOldNick\BackupManager\Models\BackupDestinationTestRun;
+use SameOldNick\BackupManager\Runners\BackupDestinationTestRunner;
 
 class FilesystemConfigurationTestJob extends NotifiableJob implements ShouldQueue
 {
@@ -25,9 +27,9 @@ class FilesystemConfigurationTestJob extends NotifiableJob implements ShouldQueu
      * Create a new job instance.
      */
     public function __construct(
+        public readonly string $uuid,
         string $channel,
         object $notifiable,
-        public string $diskName,
     ) {
         parent::__construct($channel, $notifiable);
     }
@@ -38,27 +40,15 @@ class FilesystemConfigurationTestJob extends NotifiableJob implements ShouldQueu
     public function handle(): void
     {
         $this->performJob(function () {
-            $disk = Storage::disk($this->diskName);
+            /** @var BackupDestinationTestRun $testRun */
+            $testRun = BackupDestinationTestRun::findOrFail($this->uuid);
 
-            // Test putting a file
-            $testFileName = 'backup_test_'.time().'.txt';
-            $content = 'This is a test file for backup destination configuration.';
-            if (! $disk->put($testFileName, $content)) {
-                throw new Exception("Failed to write test file \"$testFileName\" during filesystem configuration test.");
-            }
+            $disk = Storage::disk($testRun->filesystemConfiguration->driver_name);
 
-            // Test getting the file content
-            $retrievedContent = $disk->get($testFileName);
-            if ($retrievedContent !== $content) {
-                throw new Exception("File content mismatch for \"$testFileName\" during filesystem configuration test.");
-            }
-
-            // Test deleting the file
-            if (! $disk->delete($testFileName)) {
-                throw new Exception("Failed to delete test file \"$testFileName\" during filesystem configuration test.");
-            }
+            $testRunner = BackupDestinationTestRunner::forTestRun($testRun);
 
             // If an exception is thrown, Laravel will handle the rest...
+            $testRunner->run($disk);
         });
     }
 }

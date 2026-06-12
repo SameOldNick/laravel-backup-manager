@@ -4,7 +4,9 @@ namespace SameOldNick\BackupManager\Services;
 
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Concerns;
+use SameOldNick\BackupManager\Enums\RunStatus;
 use SameOldNick\BackupManager\Jobs\Notifiable\FilesystemConfigurationTestJob;
+use SameOldNick\BackupManager\Models\BackupDestinationTestRun;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 
 class BackupDestinationTestService
@@ -37,15 +39,24 @@ class BackupDestinationTestService
     }
 
     /**
-     * Starts a backup destination test by dispatching a FilesystemConfigurationTestJob.
+     * Dispatches test job
+     */
+    public function dispatchTestJob(BackupDestinationTestRun $testRun, ChannelLease $lease, object $user): void
+    {
+        dispatch(new FilesystemConfigurationTestJob($testRun->getKey(), $lease->channelId, $user));
+    }
+
+    /**
+     * Dispatches a backup destination test job if one has not already been dispatched for the given UUID.
      *
      * @param  FilesystemConfiguration  $destination  The filesystem configuration to test
-     * @param  string  $uuid  The UUID for the backup destination test (used for channel ID generation)
      * @param  object  $user  The user initiating the test (used for job dispatching)
+     * @param  string  $uuid  The UUID for the backup destination test (used for channel ID generation and test run tracking)
+     * @return BackupDestinationTestRun The created BackupDestinationTestRun record representing the test process
      *
-     * @throws \RuntimeException If the channel lease is not found or if the user is unauthorized to use the lease
+     * @throws \RuntimeException If a test run already exists for the given UUID or if the channel lease is not found or unauthorized
      */
-    public function startBackupDestinationTest(FilesystemConfiguration $destination, string $uuid, object $user): void
+    public function dispatchTestJobOnce(FilesystemConfiguration $destination, object $user, string $uuid): BackupDestinationTestRun
     {
         $lease = $this->getBackupDestinationTestChannelLease($uuid);
 
@@ -57,7 +68,26 @@ class BackupDestinationTestService
             throw new \RuntimeException('Unauthorized access to backup destination test channel lease for UUID: '.$uuid);
         }
 
-        dispatch(new FilesystemConfigurationTestJob($this->createChannelId($uuid), $user, $destination->driver_name));
+        /** @var int $inserted */
+        $inserted = BackupDestinationTestRun::query()->insertOrIgnore([
+            'id' => $uuid,
+            'filesystem_configuration_id' => $destination->id,
+            'status' => RunStatus::Pending->value,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        if ($inserted === 0) {
+            // No rows were inserted, which means a BackupDestinationTestRun with this UUID already exists
+            throw new \RuntimeException('Test run already exists for UUID: '.$uuid);
+        }
+
+        /** @var BackupDestinationTestRun $testRun */
+        $testRun = BackupDestinationTestRun::query()->findOrFail($uuid);
+
+        $this->dispatchTestJob($testRun, $lease, $user);
+
+        return $testRun;
     }
 
     /**
