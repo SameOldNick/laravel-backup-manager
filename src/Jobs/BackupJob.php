@@ -8,7 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use SameOldNick\BackupManager\Enums\BackupTypes;
-use SameOldNick\BackupManager\SpatieBackup\BackupRunner;
+use SameOldNick\BackupManager\Runners\BackupRunner;
 use Spatie\Backup\Config\Config;
 
 class BackupJob implements ShouldQueue

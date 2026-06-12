@@ -4,13 +4,14 @@ namespace SameOldNick\BackupManager\Jobs\Notifiable;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use SameOldNick\BackupManager\Broadcasting\Notifiers\ProcessNotifier;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Models\BackupRun;
-use SameOldNick\BackupManager\SpatieBackup\BackupRunner;
+use SameOldNick\BackupManager\Runners\BackupRunner;
 use Spatie\Backup\Config\Config;
 use Spatie\Backup\Support\BackupLogger;
 
@@ -50,10 +51,7 @@ class BackupJob extends NotifiableJob implements ShouldQueue
     public function handle(Config $config, BackupLogger $backupLogger): void
     {
         $this->performJob(function () use ($config, $backupLogger) {
-            /** @var BackupRun $backupRun */
-            $backupRun = BackupRun::findOrFail($this->uuid);
-
-            $backupRunner = BackupRunner::forBackupRun($backupRun);
+            $backupRunner = $this->createBackupRunner();
 
             $notifier = ProcessNotifier::create($this->notifiable, $this->channel);
 
@@ -85,5 +83,18 @@ class BackupJob extends NotifiableJob implements ShouldQueue
                 default => $notifier->getProcessOutput()->info($message),
             };
         });
+    }
+
+    /**
+     * Creates the BackupRunner instance for this job's backup run.
+     *
+     * @throws ModelNotFoundException if the BackupRun with the given UUID does not exist
+     */
+    protected function createBackupRunner(): BackupRunner
+    {
+        /** @var BackupRun $backupRun */
+        $backupRun = BackupRun::findOrFail($this->uuid);
+
+        return BackupRunner::forBackupRun($backupRun);
     }
 }
