@@ -53,23 +53,16 @@ class PerformBackupService
     /**
      * Dispatches a backup job to perform the backup process and creates a BackupRun record.
      *
+     * @param  BackupRun  $backupRun  The created BackupRun record representing the backup process
      * @param  ChannelLease  $lease  The channel lease for real-time updates during the backup process
      * @param  BackupTypes  $type  The type of backup to perform (e.g. full, incremental)
      * @param  object  $user  The user initiating the backup (used for job dispatching)
-     * @return BackupRun The created BackupRun record representing the backup process
      *
      * @throws \InvalidArgumentException If an invalid backup type is provided
      */
-    public function dispatchBackupJob(ChannelLease $lease, BackupTypes $type, object $user): BackupRun
+    public function dispatchBackupJob(BackupRun $backupRun, ChannelLease $lease, BackupTypes $type, object $user): void
     {
-        /** @var BackupRun $backupRun */
-        $backupRun = BackupRun::create([
-            'type' => $type,
-        ]);
-
         dispatch(new BackupJob($backupRun->getKey(), $lease->channelId, $user, $type));
-
-        return $backupRun;
     }
 
     /**
@@ -110,7 +103,7 @@ class PerformBackupService
         /** @var BackupRun $backupRun */
         $backupRun = BackupRun::query()->findOrFail($uuid);
 
-        dispatch(new BackupJob($backupRun->getKey(), $lease->channelId, $user, $type));
+        $this->dispatchBackupJob($backupRun, $lease, $type, $user);
 
         return $backupRun;
     }
