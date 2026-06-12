@@ -33,12 +33,18 @@ Route::group(config('backup-manager.routes.all', []), function () {
             Route::post('/', [Controllers\BackupDestinationsController::class, 'store'])->name('store');
             Route::get('/{destination}', [Controllers\BackupDestinationsController::class, 'show'])->name('show');
             Route::put('/{destination}', [Controllers\BackupDestinationsController::class, 'update'])->name('update');
-            Route::post('/{destination}/test', [Controllers\BackupDestinationsController::class, 'test'])->name('test');
-            Route::get('/{destination}/test/{uuid}', [Controllers\BackupDestinationsController::class, 'showTestResult'])
-                ->name('test.result')
-                ->middleware('signed')
-                ->whereUuid('uuid');
             Route::delete('/{destination}', [Controllers\BackupDestinationsController::class, 'destroy'])->name('destroy');
+
+            Route::prefix('/{destination}/test')->name('test.')->group(function () {
+                Route::post('/initialize', [Controllers\BackupDestinationTestController::class, 'initialize'])->name('initialize');
+                Route::post('/start', [Controllers\BackupDestinationTestController::class, 'start'])
+                    ->name('start')
+                    ->middleware('signed');
+                Route::get('/{uuid}', [Controllers\BackupDestinationTestController::class, 'show'])
+                    ->name('show')
+                    ->middleware('signed')
+                    ->whereUuid('uuid');
+            });
         });
 
         Route::resource('schedules', Controllers\ScheduleController::class)->only(['index']);

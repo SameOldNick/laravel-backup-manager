@@ -5,7 +5,6 @@ namespace VendorName\BackupManager\Responders;
 use Inertia\Inertia;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder as BackupDestinationsUiResponderContract;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationsListViewData;
-use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationTestResultViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\DestroyBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\EditBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\StoreBackupDestinationViewData;
@@ -54,20 +53,6 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
             'action' => 'edit',
             'destination' => $data->configuration,
             'enabled' => $data->configuration->isEnabled($data->backupConfig),
-        ]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function renderBackupDestinationTestResult(BackupDestinationTestResultViewData $data)
-    {
-        return inertia('dashboard/settings/backups/page', [
-            'tab' => 'destinations',
-            'action' => 'edit',
-            'destination' => $data->configuration,
-            'enabled' => $data->configuration->isEnabled($data->backupConfig),
-            'testUuid' => $data->uuid,
         ]);
     }
 

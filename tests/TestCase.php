@@ -46,6 +46,7 @@ class TestCase extends Orchestra
     protected function registerUiResponders(Application $app)
     {
         $app->bind(UiResponderContracts\BackupDestinationsUiResponder::class, TestResponders\BackupDestinationsUiResponder::class);
+        $app->bind(UiResponderContracts\BackupDestinationTestUiResponder::class, TestResponders\BackupDestinationTestUiResponder::class);
         $app->bind(UiResponderContracts\BackupSchedulesUiResponder::class, TestResponders\BackupSchedulesUiResponder::class);
         $app->bind(UiResponderContracts\BackupsUiResponder::class, TestResponders\BackupsUiResponder::class);
         $app->bind(UiResponderContracts\PerformBackupUiResponder::class, TestResponders\PerformBackupUiResponder::class);

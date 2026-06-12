@@ -4,7 +4,6 @@ namespace VendorName\BackupManager\Responders;
 
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder as BackupDestinationsUiResponderContract;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationsListViewData;
-use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationTestResultViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\DestroyBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\EditBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\StoreBackupDestinationViewData;
@@ -40,14 +39,6 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
      * {@inheritDoc}
      */
     public function renderEditBackupDestination(EditBackupDestinationViewData $data)
-    {
-        //
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function renderBackupDestinationTestResult(BackupDestinationTestResultViewData $data)
     {
         //
     }

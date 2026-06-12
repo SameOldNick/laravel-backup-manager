@@ -27,7 +27,7 @@ class FilesystemConfigurationTestJob extends NotifiableJob implements ShouldQueu
     public function __construct(
         string $channel,
         object $notifiable,
-        protected string $diskName,
+        public string $diskName,
     ) {
         parent::__construct($channel, $notifiable);
     }

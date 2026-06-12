@@ -3,11 +3,9 @@
 namespace SameOldNick\BackupManager\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationsListViewData;
-use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationTestResultViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\DestroyBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\EditBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\StoreBackupDestinationViewData;
@@ -94,37 +92,6 @@ class BackupDestinationsController
         return $this->ui->renderEditBackupDestination(new EditBackupDestinationViewData(
             backupConfig: $backupConfig,
             configuration: $destination,
-        ));
-    }
-
-    /**
-     * Test the destination works.
-     *
-     * @return mixed
-     */
-    public function test(FilesystemConfiguration $destination)
-    {
-        $uuid = Str::uuid();
-
-        $lease = $this->service->startBackupDestinationTest($destination, $uuid);
-
-        return redirect()->temporarySignedRoute('backup.destinations.test.result', $lease->expiresAt, [
-            'destination' => $destination->id,
-            'uuid' => $uuid,
-        ]);
-    }
-
-    /**
-     * Show the result of a test.
-     *
-     * @return mixed
-     */
-    public function showTestResult(Config $backupConfig, FilesystemConfiguration $destination, string $uuid)
-    {
-        return $this->ui->renderBackupDestinationTestResult(new BackupDestinationTestResultViewData(
-            backupConfig: $backupConfig,
-            configuration: $destination,
-            uuid: $uuid,
         ));
     }
 

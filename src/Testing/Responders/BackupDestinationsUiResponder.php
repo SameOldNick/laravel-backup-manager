@@ -4,7 +4,6 @@ namespace SameOldNick\BackupManager\Testing\Responders;
 
 use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationsUiResponder as BackupDestinationsUiResponderContract;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationsListViewData;
-use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationTestResultViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\DestroyBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\EditBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\StoreBackupDestinationViewData;
@@ -52,19 +51,6 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
             'backupConfig' => $data->backupConfig,
             'configuration' => $data->configuration,
             'enabled' => $data->configuration->isEnabled($data->backupConfig),
-        ]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function renderBackupDestinationTestResult(BackupDestinationTestResultViewData $data)
-    {
-        return $this->createTestResponse('test-result', [
-            'backupConfig' => $data->backupConfig,
-            'configuration' => $data->configuration,
-            'enabled' => $data->configuration->isEnabled($data->backupConfig),
-            'uuid' => $data->uuid,
         ]);
     }
 

@@ -4,11 +4,8 @@ namespace SameOldNick\BackupManager\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
-use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\DataTransferObjects\Services\CreateBackupDestinationData;
 use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateBackupDestinationData;
-use SameOldNick\BackupManager\Jobs\Notifiable\FilesystemConfigurationTestJob;
 use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Models\FilesystemConfigurationFTP;
@@ -159,31 +156,5 @@ class BackupDestinationsService
     {
         $destination->configurable->delete();
         $destination->delete();
-    }
-
-    public function startBackupDestinationTest(FilesystemConfiguration $destination, ?string $uuid = null): ChannelLease
-    {
-        $channel = $this->createChannelId($uuid ?? Str::uuid());
-        $user = request()->user();
-
-        $lease = $this->openBackupDestinationTestChannelLease($channel, $user);
-
-        dispatch(new FilesystemConfigurationTestJob($channel, $user, $destination->driver_name));
-
-        return $lease;
-    }
-
-    public function createChannelId(string $uuid): string
-    {
-        return app(ChannelAccessManager::class)->createChannelId('test-destination', $uuid);
-    }
-
-    public function openBackupDestinationTestChannelLease(string $channel, object $user): ChannelLease
-    {
-        return app(ChannelAccessManager::class)->open(
-            channelId: $channel,
-            notifiable: $user,
-            expiresAt: now()->addHours(3),
-        );
     }
 }

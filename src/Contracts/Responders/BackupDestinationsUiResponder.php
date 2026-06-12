@@ -3,7 +3,6 @@
 namespace SameOldNick\BackupManager\Contracts\Responders;
 
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationsListViewData;
-use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\BackupDestinationTestResultViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\DestroyBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\EditBackupDestinationViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinations\StoreBackupDestinationViewData;
@@ -38,13 +37,6 @@ interface BackupDestinationsUiResponder
      * @return mixed
      */
     public function renderEditBackupDestination(EditBackupDestinationViewData $data);
-
-    /**
-     * Renders the response after testing a backup destination.
-     *
-     * @return mixed
-     */
-    public function renderBackupDestinationTestResult(BackupDestinationTestResultViewData $data);
 
     /**
      * Renders the response after updating a backup destination.
