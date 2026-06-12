@@ -19,16 +19,32 @@ class BackupSchedulesService
         //
     }
 
+    /**
+     * Retrieves a collection of backup schedules.
+     *
+     * @return BackupScheduleCollection A collection of BackupSchedule models representing the backup schedules
+     */
     public function getBackupSchedules(): BackupScheduleCollection
     {
         return BackupSchedule::all();
     }
 
+    /**
+     * Retrieves a collection of available backup destinations that can be associated with backup schedules.
+     *
+     * @return FilesystemConfigurationCollection A collection of FilesystemConfiguration models representing the available backup destinations
+     */
     public function getAvailableDestinations(): FilesystemConfigurationCollection
     {
         return BackupSchedule::availableDestinations();
     }
 
+    /**
+     * Creates a new backup schedule based on the provided data.
+     *
+     * @param  CreateBackupScheduleData  $data  The data for creating the backup schedule
+     * @return BackupSchedule The created backup schedule
+     */
     public function createBackupSchedule(CreateBackupScheduleData $data): BackupSchedule
     {
         $schedule = BackupSchedule::create([
@@ -45,6 +61,13 @@ class BackupSchedulesService
         return $schedule;
     }
 
+    /**
+     * Updates an existing backup schedule with the provided data.
+     *
+     * @param  BackupSchedule  $schedule  The backup schedule to update
+     * @param  UpdateBackupScheduleData  $data  The data for updating the backup schedule
+     * @return BackupSchedule The updated backup schedule
+     */
     public function updateBackupSchedule(BackupSchedule $schedule, UpdateBackupScheduleData $data): BackupSchedule
     {
         return DB::transaction(function () use ($schedule, $data) {
@@ -76,6 +99,11 @@ class BackupSchedulesService
         });
     }
 
+    /**
+     * Removes a backup schedule.
+     *
+     * @param  BackupSchedule  $schedule  The backup schedule to remove
+     */
     public function removeBackupSchedule(BackupSchedule $schedule): void
     {
         $schedule->delete();

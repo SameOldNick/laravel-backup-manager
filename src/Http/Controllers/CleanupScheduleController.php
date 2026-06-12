@@ -16,6 +16,12 @@ use SameOldNick\BackupManager\Services\CleanupSchedulesService;
 
 class CleanupScheduleController
 {
+    /**
+     * CleanupScheduleController constructor.
+     *
+     * @param  CleanupSchedulesService  $service  The service responsible for handling cleanup schedule operations
+     * @param  CleanupSchedulesUiResponder  $ui  The UI responder responsible for rendering responses for cleanup schedule operations
+     */
     public function __construct(
         protected readonly CleanupSchedulesService $service,
         protected readonly CleanupSchedulesUiResponder $ui

@@ -4,12 +4,24 @@ namespace SameOldNick\BackupManager\Runners;
 
 abstract class Runner
 {
+    /**
+     * @var callable|null The callback to execute when the runner starts
+     */
     protected readonly mixed $onStartedCallback;
 
+    /**
+     * @var callable|null The callback to execute when the runner succeeds
+     */
     protected readonly mixed $onSuccessCallback;
 
+    /**
+     * @var callable|null The callback to execute when the runner fails
+     */
     protected readonly mixed $onFailedCallback;
 
+    /**
+     * @var callable|null The callback to execute when the runner completes (regardless of success or failure)
+     */
     protected readonly mixed $onCompletedCallback;
 
     /**

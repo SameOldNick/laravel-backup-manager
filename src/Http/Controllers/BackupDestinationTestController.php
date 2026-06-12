@@ -14,6 +14,12 @@ use Spatie\Backup\Config\Config;
 
 class BackupDestinationTestController
 {
+    /**
+     * BackupDestinationTestController constructor.
+     *
+     * @param  BackupDestinationTestService  $service  The service responsible for handling backup destination tests
+     * @param  BackupDestinationTestUiResponder  $ui  The UI responder responsible for rendering responses for backup destination tests
+     */
     public function __construct(
         protected readonly BackupDestinationTestService $service,
         protected readonly BackupDestinationTestUiResponder $ui

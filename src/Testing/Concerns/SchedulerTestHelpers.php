@@ -6,6 +6,11 @@ use SameOldNick\BackupManager\BackupScheduler;
 
 trait SchedulerTestHelpers
 {
+    /**
+     * Creates a spy instance of the BackupScheduler class that records scheduled jobs and commands.
+     *
+     * @return object An instance of the anonymous class that extends BackupScheduler and records scheduled jobs and commands
+     */
     protected function makeSchedulerSpy(): object
     {
         return new class extends BackupScheduler
@@ -36,6 +41,11 @@ trait SchedulerTestHelpers
         };
     }
 
+    /**
+     * Asserts that the expected jobs were scheduled by the BackupScheduler.
+     *
+     * @param  callable  $callback  A callback function that receives the array of scheduled jobs for making assertions
+     */
     protected function assertSchedulerJobs(callable $callback): void
     {
         $scheduler = $this->makeSchedulerSpy();
@@ -46,6 +56,11 @@ trait SchedulerTestHelpers
         $callback($scheduler->jobs);
     }
 
+    /**
+     * Asserts that the expected commands were scheduled by the BackupScheduler.
+     *
+     * @param  callable  $callback  A callback function that receives the array of scheduled commands for making assertions
+     */
     protected function assertSchedulerCommands(callable $callback): void
     {
         $scheduler = $this->makeSchedulerSpy();

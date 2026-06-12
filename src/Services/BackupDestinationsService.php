@@ -22,6 +22,13 @@ class BackupDestinationsService
         //
     }
 
+    /**
+     * Retrieves a collection of backup destinations, optionally filtered by active status and search query.
+     *
+     * @param  bool|null  $active  Optional filter to retrieve only active or inactive backup destinations
+     * @param  string|null  $query  Optional search query to filter backup destinations by name, type, or host
+     * @return FilesystemConfigurationCollection A collection of FilesystemConfiguration models matching the specified criteria
+     */
     public function getBackupDestinations(?bool $active = null, ?string $query = null): FilesystemConfigurationCollection
     {
         $fsConfigQuery = FilesystemConfiguration::query();
@@ -41,6 +48,12 @@ class BackupDestinationsService
         return new FilesystemConfigurationCollection($fsConfigQuery->latest()->get());
     }
 
+    /**
+     * Creates a new backup destination based on the provided data.
+     *
+     * @param  CreateBackupDestinationData  $data  The data for creating the backup destination
+     * @return FilesystemConfiguration The created backup destination
+     */
     public function createBackupDestination(CreateBackupDestinationData $data): FilesystemConfiguration
     {
         return DB::transaction(function () use ($data) {
@@ -83,6 +96,13 @@ class BackupDestinationsService
         });
     }
 
+    /**
+     * Updates an existing backup destination with the provided data.
+     *
+     * @param  FilesystemConfiguration  $destination  The backup destination to update
+     * @param  UpdateBackupDestinationData  $data  The data for updating the backup destination
+     * @return FilesystemConfiguration The updated backup destination
+     */
     public function updateBackupDestination(FilesystemConfiguration $destination, UpdateBackupDestinationData $data): FilesystemConfiguration
     {
         return DB::transaction(function () use ($destination, $data) {
@@ -152,6 +172,11 @@ class BackupDestinationsService
         });
     }
 
+    /**
+     * Removes a backup destination.
+     *
+     * @param  FilesystemConfiguration  $destination  The backup destination to remove
+     */
     public function removeBackupDestination(FilesystemConfiguration $destination): void
     {
         $destination->configurable->delete();

@@ -11,6 +11,11 @@ class BackupFileController
 {
     private const STREAM_CHUNK_SIZE = 1024 * 1024;
 
+    /**
+     * BackupFileController constructor.
+     *
+     * @param  BackupDownloadService  $service  The service responsible for handling backup file downloads
+     */
     public function __construct(
         protected readonly BackupDownloadService $service,
     ) {

@@ -14,6 +14,12 @@ use SameOldNick\BackupManager\Services\PerformBackupService;
 
 class PerformBackupController
 {
+    /**
+     * PerformBackupController constructor.
+     *
+     * @param  PerformBackupService  $service  The service responsible for handling backup operations
+     * @param  PerformBackupUiResponder  $ui  The UI responder responsible for rendering responses for backup operations
+     */
     public function __construct(
         protected readonly PerformBackupService $service,
         protected readonly PerformBackupUiResponder $ui

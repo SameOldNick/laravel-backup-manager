@@ -17,6 +17,12 @@ use SameOldNick\BackupManager\Services\BackupSchedulesService;
 
 class BackupScheduleController
 {
+    /**
+     * BackupScheduleController constructor.
+     *
+     * @param  BackupSchedulesService  $service  The service responsible for handling backup schedule operations
+     * @param  BackupSchedulesUiResponder  $ui  The UI responder responsible for rendering responses for backup schedule operations
+     */
     public function __construct(
         protected readonly BackupSchedulesService $service,
         protected readonly BackupSchedulesUiResponder $ui

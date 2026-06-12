@@ -20,6 +20,12 @@ use Spatie\Backup\Config\Config;
 
 class BackupDestinationsController
 {
+    /**
+     * BackupDestinationsController constructor.
+     *
+     * @param  BackupDestinationsService  $service  The service responsible for handling backup destination operations
+     * @param  BackupDestinationsUiResponder  $ui  The UI responder responsible for rendering responses for backup destination operations
+     */
     public function __construct(
         protected readonly BackupDestinationsService $service,
         protected readonly BackupDestinationsUiResponder $ui

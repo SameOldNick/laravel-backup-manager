@@ -2,12 +2,12 @@
 
 namespace SameOldNick\BackupManager\Jobs\Notifiable;
 
-use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
-use SameOldNick\BackupManager\Broadcasting\Notifiers\JobStatusNotifier;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
+use SameOldNick\BackupManager\Broadcasting\Notifiers\JobStatusNotifier;
 use Throwable;
 
 abstract class NotifiableJob
@@ -26,6 +26,9 @@ abstract class NotifiableJob
      */
     protected object $notifiable;
 
+    /**
+     * @var JobStatusNotifier|null A notifier for sending job status updates to the notifiable, initialized lazily when needed
+     */
     protected ?JobStatusNotifier $jobStatusNotifier = null;
 
     /**

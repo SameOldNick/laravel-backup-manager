@@ -24,6 +24,9 @@ class BackupJob extends NotifiableJob implements ShouldQueue
 
     const BACKUP_ONLY_DATABASES = BackupTypes::Databases->value;
 
+    /**
+     * @var string The type of backup to perform, represented as a string value of the BackupTypes enum
+     */
     public readonly string $backupType;
 
     /**
