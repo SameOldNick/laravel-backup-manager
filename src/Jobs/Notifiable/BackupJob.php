@@ -8,8 +8,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use SameOldNick\BackupManager\Broadcasting\Notifiers\ProcessNotifier;
-use SameOldNick\BackupManager\Enums\BackupRunStatus;
 use SameOldNick\BackupManager\Enums\BackupTypes;
+use SameOldNick\BackupManager\Enums\RunStatus;
 use SameOldNick\BackupManager\Models\BackupRun;
 use SameOldNick\BackupManager\SpatieBackup\BackupRunner;
 use Spatie\Backup\Config\Config;
@@ -77,9 +77,9 @@ class BackupJob extends NotifiableJob implements ShouldQueue
     protected function createBackupRunner(BackupRun $backupRun): BackupRunner
     {
         return new BackupRunner(
-            onStartedCallback: fn () => $backupRun->update(['status' => BackupRunStatus::Running, 'started_at' => now()]),
-            onSuccessCallback: fn () => $backupRun->update(['status' => BackupRunStatus::Successful]),
-            onFailedCallback: fn () => $backupRun->update(['status' => BackupRunStatus::Failed]),
+            onStartedCallback: fn () => $backupRun->update(['status' => RunStatus::Running, 'started_at' => now()]),
+            onSuccessCallback: fn () => $backupRun->update(['status' => RunStatus::Successful]),
+            onFailedCallback: fn () => $backupRun->update(['status' => RunStatus::Failed]),
             onCompletedCallback: fn () => $backupRun->update(['completed_at' => now()]),
         );
     }

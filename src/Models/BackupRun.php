@@ -7,15 +7,15 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use SameOldNick\BackupManager\Enums\BackupRunStatus;
 use SameOldNick\BackupManager\Enums\BackupTypes;
+use SameOldNick\BackupManager\Enums\RunStatus;
 use SameOldNick\BackupManager\Models\Factories\BackupRunFactory;
 
 /**
  * @property string $id
  * @property BackupTypes $type
  * @property ?array $disks
- * @property BackupRunStatus $status
+ * @property RunStatus $status
  * @property ?Carbon $created_at
  * @property ?Carbon $updated_at
  * @property ?Carbon $started_at
@@ -55,7 +55,7 @@ class BackupRun extends Model
     protected $casts = [
         'type' => BackupTypes::class,
         'disks' => 'array',
-        'status' => BackupRunStatus::class,
+        'status' => RunStatus::class,
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];

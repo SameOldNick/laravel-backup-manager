@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use SameOldNick\BackupManager\Enums\BackupRunStatus;
+use SameOldNick\BackupManager\Enums\RunStatus;
 use SameOldNick\BackupManager\Models\BackupRun;
 use SameOldNick\BackupManager\SpatieBackup\BackupRunner;
 use SameOldNick\BackupManager\Tests\TestCase;
@@ -255,7 +255,7 @@ class BackupRunnerTest extends TestCase
     public function create_factory_sets_started_callback_that_updates_backup_run(): void
     {
         $backupRun = BackupRun::factory()->create([
-            'status' => BackupRunStatus::Pending,
+            'status' => RunStatus::Pending,
             'started_at' => null,
         ]);
 
@@ -270,7 +270,7 @@ class BackupRunnerTest extends TestCase
         Model::reguard();
 
         $backupRun->refresh();
-        $this->assertEquals(BackupRunStatus::Running, $backupRun->status);
+        $this->assertEquals(RunStatus::Running, $backupRun->status);
         $this->assertNotNull($backupRun->started_at);
     }
 
@@ -278,7 +278,7 @@ class BackupRunnerTest extends TestCase
     public function create_factory_sets_success_callback_that_updates_backup_run(): void
     {
         $backupRun = BackupRun::factory()->create([
-            'status' => BackupRunStatus::Running,
+            'status' => RunStatus::Running,
         ]);
 
         $runner = BackupRunner::create($backupRun);
@@ -289,14 +289,14 @@ class BackupRunnerTest extends TestCase
         call_user_func($callback);
 
         $backupRun->refresh();
-        $this->assertEquals(BackupRunStatus::Successful, $backupRun->status);
+        $this->assertEquals(RunStatus::Successful, $backupRun->status);
     }
 
     #[Test]
     public function create_factory_sets_failed_callback_that_updates_backup_run(): void
     {
         $backupRun = BackupRun::factory()->create([
-            'status' => BackupRunStatus::Running,
+            'status' => RunStatus::Running,
         ]);
 
         $runner = BackupRunner::create($backupRun);
@@ -307,7 +307,7 @@ class BackupRunnerTest extends TestCase
         call_user_func($callback);
 
         $backupRun->refresh();
-        $this->assertEquals(BackupRunStatus::Failed, $backupRun->status);
+        $this->assertEquals(RunStatus::Failed, $backupRun->status);
     }
 
     #[Test]
