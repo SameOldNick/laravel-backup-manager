@@ -6,13 +6,13 @@ use SameOldNick\BackupManager\Http\Controllers;
 
 Route::group(config('backup-manager.routes.all', []), function () {
     Route::group(config('backup-manager.routes.management', []), function () {
-        Route::prefix('/backups')->name('backups.')->group(function () {
+        Route::group(config('backup-manager.routes.backups', []), function () {
             Route::get('/', [Controllers\BackupController::class, 'index'])->name('index');
             Route::get('/{backup}/download', [Controllers\BackupController::class, 'generateDownloadLink'])->name('download');
 
         });
 
-        Route::prefix('/perform')->name('perform.')->group(function () {
+        Route::group(config('backup-manager.routes.perform', []), function () {
             Route::post('/', [Controllers\PerformBackupController::class, 'initialize'])
                 ->name('initialize');
 
@@ -27,7 +27,7 @@ Route::group(config('backup-manager.routes.all', []), function () {
                 ->whereUuid('uuid');
         });
 
-        Route::prefix('/destinations')->name('destinations.')->group(function () {
+        Route::group(config('backup-manager.routes.destinations', []), function () {
             Route::get('/', [Controllers\BackupDestinationsController::class, 'index'])->name('index');
             Route::get('/create', [Controllers\BackupDestinationsController::class, 'create'])->name('create');
             Route::post('/', [Controllers\BackupDestinationsController::class, 'store'])->name('store');
@@ -47,30 +47,22 @@ Route::group(config('backup-manager.routes.all', []), function () {
             });
         });
 
-        Route::resource('schedules', Controllers\ScheduleController::class)->only(['index']);
+        Route::group(config('backup-manager.routes.schedules', []), function () {
+            Route::get('/', [Controllers\ScheduleController::class, 'index'])->name('index');
 
-        Route::resource('schedules/backup', Controllers\BackupScheduleController::class)->parameters([
-            'backup' => 'schedule',
-        ])->names([
-            'create' => 'schedules.backup.create',
-            'store' => 'schedules.backup.store',
-            'edit' => 'schedules.backup.edit',
-            'update' => 'schedules.backup.update',
-            'destroy' => 'schedules.backup.destroy',
-        ])->only(['create', 'store', 'edit', 'update', 'destroy']);
+            Route::resource('backup', Controllers\BackupScheduleController::class)->parameters([
+                'backup' => 'schedule',
+            ])->only(['create', 'store', 'edit', 'update', 'destroy']);
 
-        Route::resource('schedules/cleanup', Controllers\CleanupScheduleController::class)->parameters([
-            'cleanup' => 'schedule',
-        ])->names([
-            'create' => 'schedules.cleanup.create',
-            'store' => 'schedules.cleanup.store',
-            'edit' => 'schedules.cleanup.edit',
-            'update' => 'schedules.cleanup.update',
-            'destroy' => 'schedules.cleanup.destroy',
-        ])->only(['create', 'store', 'edit', 'update', 'destroy']);
+            Route::resource('cleanup', Controllers\CleanupScheduleController::class)->parameters([
+                'cleanup' => 'schedule',
+            ])->only(['create', 'store', 'edit', 'update', 'destroy']);
+        });
     });
 
     Route::group(config('backup-manager.routes.download', []), function () {
-        Route::get('/files/{file}', [Controllers\BackupFileController::class, 'retrieve'])->name('file');
+        Route::group(config('backup-manager.routes.files', []), function () {
+            Route::get('/{file}', [Controllers\BackupFileController::class, 'retrieve'])->name('file');
+        });
     });
 });

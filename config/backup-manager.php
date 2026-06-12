@@ -35,6 +35,30 @@ return [
                 'signed',
             ],
         ],
+
+        'backups' => [
+            'prefix' => '/backups',
+            'as' => 'backups.',
+        ],
+
+        'perform' => [
+            'prefix' => '/perform',
+            'as' => 'perform.',
+        ],
+
+        'destinations' => [
+            'prefix' => '/destinations',
+            'as' => 'destinations.',
+        ],
+
+        'schedules' => [
+            'prefix' => '/schedules',
+            'as' => 'schedules.',
+        ],
+
+        'files' => [
+            'prefix' => '/files',
+        ],
     ],
 
     /*
