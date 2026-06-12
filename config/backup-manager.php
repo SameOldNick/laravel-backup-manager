@@ -1,5 +1,7 @@
 <?php
 
+use SameOldNick\BackupManager\DbDumper\MySqlPHP;
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -33,5 +35,15 @@ return [
                 'signed',
             ],
         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Database Dumper Extenders
+    |--------------------------------------------------------------------------
+    | Here you can specify the classes that will be used to extend the Spatie\DbDumper package.
+     */
+    'db_dumper_extenders' => [
+        'mysql' => MySqlPHP::class,
     ],
 ];

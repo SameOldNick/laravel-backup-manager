@@ -182,9 +182,17 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function bootDbDumperExtender()
     {
-        DbDumperFactory::extend('mysql', function () {
-            return new MySqlPHP;
-        });
+        $extenders = config('backup-manager.db_dumper_extenders', []);
+
+        if (! is_array($extenders) || empty($extenders)) {
+            return;
+        }
+
+        foreach ($extenders as $type => $class) {
+            DbDumperFactory::extend($type, function () use ($class) {
+                return $this->app->make($class);
+            });
+        }
     }
 
     /**
