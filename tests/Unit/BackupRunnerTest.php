@@ -9,7 +9,7 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use SameOldNick\BackupManager\Enums\RunStatus;
 use SameOldNick\BackupManager\Models\BackupRun;
-use SameOldNick\BackupManager\SpatieBackup\BackupRunner;
+use SameOldNick\BackupManager\Runners\BackupRunner;
 use SameOldNick\BackupManager\Tests\TestCase;
 use Spatie\Backup\Config\Config;
 use Spatie\Backup\Tasks\Backup\BackupJob as SpatieBackupJob;
