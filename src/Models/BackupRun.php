@@ -30,13 +30,6 @@ class BackupRun extends Model
     use HasUuids;
 
     /**
-     * The primary key for the model.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

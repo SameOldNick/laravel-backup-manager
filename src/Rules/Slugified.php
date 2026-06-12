@@ -9,8 +9,6 @@ use Illuminate\Translation\PotentiallyTranslatedString;
 
 class Slugified implements ValidationRule
 {
-    public function __construct() {}
-
     /**
      * Run the validation rule.
      *
