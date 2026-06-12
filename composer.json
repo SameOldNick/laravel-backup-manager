@@ -89,7 +89,8 @@
   "extra": {
     "laravel": {
       "providers": [
-        "SameOldNick\\BackupManager\\ServiceProvider"
+        "SameOldNick\\BackupManager\\ServiceProvider",
+        "SameOldNick\\BackupManager\\DeferredServiceProvider"
       ],
       "aliases": {
         "BackupManager": "SameOldNick\\BackupManager\\Facades\\BackupManager"

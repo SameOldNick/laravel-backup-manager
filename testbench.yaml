@@ -2,6 +2,7 @@ laravel: "@testbench"
 
 providers:
   - SameOldNick\BackupManager\ServiceProvider
+  - SameOldNick\BackupManager\DeferredServiceProvider
   - Workbench\App\Providers\WorkbenchServiceProvider
 
 migrations:
