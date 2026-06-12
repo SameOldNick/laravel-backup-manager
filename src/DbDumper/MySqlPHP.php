@@ -29,7 +29,6 @@ class MySqlPHP extends MySql
      */
     protected function createMysqlDump(): Mysqldump
     {
-        // TODO: Move to seperate factory class.
         return new Mysqldump($this->createMysqlDumpDsn(), $this->userName, $this->password, $this->createMysqlDumpSettings());
     }
 

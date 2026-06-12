@@ -2,7 +2,6 @@
 
 namespace SameOldNick\BackupManager\Models;
 
-use App\Models\User;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -28,7 +27,7 @@ use SameOldNick\BackupManager\Models\Factories\BackupFileFactory;
  * @property ?Carbon $created_at
  * @property ?Carbon $updated_at
  * @property ?Carbon $deleted_at
- * @property-read ?User $user
+ * @property-read ?object $user
  * @property-read ?Model $fileable
  * @property-read array $path_info
  */
@@ -40,20 +39,6 @@ final class BackupFile extends Model
 
     use HasUuids;
     use SoftDeletes;
-
-    /**
-     * The "type" of the primary key ID.
-     *
-     * @var string
-     */
-    protected $keyType = 'string';
-
-    /**
-     * Indicates if the IDs are auto-incrementing.
-     *
-     * @var bool
-     */
-    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
@@ -220,7 +205,7 @@ final class BackupFile extends Model
      * @param  string  $path  Path of file
      * @param  string|null  $name  Filename. If null, filename is generated from path. (default: null)
      * @param  string  $disk  Name of the disk (default: null)
-     * @return static
+     * @return self The created BackupFile instance
      */
     public static function createFromFilePath(string $path, ?string $name = null, ?string $disk = null): self
     {

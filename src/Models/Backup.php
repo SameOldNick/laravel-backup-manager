@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use SameOldNick\BackupManager\Enums\BackupStatus;
@@ -70,20 +71,16 @@ class Backup extends Model
 
     /**
      * Gets the BackupFile for this Model.
-     *
-     * @return MorphOne
      */
-    public function file()
+    public function file(): MorphOne
     {
         return $this->morphOne(BackupFile::class, 'fileable');
     }
 
     /**
      * Checks if file should be removed when model is deleted.
-     *
-     * @return bool
      */
-    public function removeFileOnDelete()
+    public function removeFileOnDelete(): bool
     {
         return true;
     }

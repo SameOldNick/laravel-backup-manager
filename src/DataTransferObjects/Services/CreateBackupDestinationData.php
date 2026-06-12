@@ -27,6 +27,11 @@ class CreateBackupDestinationData
         //
     }
 
+    /**
+     * Creates CreateBackupDestinationData from array
+     *
+     * @param  array  $data  Data to create CreateBackupDestinationData from
+     */
     public static function fromArray(array $data): self
     {
         return new self(

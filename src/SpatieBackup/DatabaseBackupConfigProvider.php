@@ -6,6 +6,11 @@ use Spatie\Backup\Config\BackupConfig;
 
 class DatabaseBackupConfigProvider extends BackupConfig
 {
+    /**
+     * Create a new DatabaseBackupConfigProvider instance.
+     *
+     * @param  BackupConfig  $original  The original BackupConfig instance to wrap
+     */
     public function __construct(protected readonly BackupConfig $original)
     {
         parent::__construct(

@@ -11,6 +11,11 @@ use Spatie\Backup\Config\NotificationsConfig;
 
 class DatabaseConfigProvider extends Config implements ConfigProvider
 {
+    /**
+     * Create a new DatabaseConfigProvider instance.
+     *
+     * @param  Config  $original  The original Config instance to wrap
+     */
     public function __construct(
         protected readonly Config $original
     ) {

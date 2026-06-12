@@ -8,6 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Models\Collections\BackupScheduleCollection;
 
+/**
+ * @property string $id
+ * @property string $name
+ * @property BackupTypes $type
+ * @property string $cron_expression
+ * @property bool $is_active
+ * @property ?\DateTimeInterface $created_at
+ * @property ?\DateTimeInterface $updated_at
+ * @property ?\DateTimeInterface $deleted_at
+ * @property-read ?\DateTimeInterface $next_run
+ */
 #[CollectedBy(BackupScheduleCollection::class)]
 class BackupSchedule extends AbstractSchedule
 {

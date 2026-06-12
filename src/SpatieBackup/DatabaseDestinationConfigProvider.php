@@ -9,6 +9,11 @@ class DatabaseDestinationConfigProvider extends DestinationConfig
 {
     use UsesBackupConfigurationProvider;
 
+    /**
+     * Create a new DatabaseDestinationConfigProvider instance.
+     *
+     * @param  DestinationConfig  $original  The original DestinationConfig instance to wrap
+     */
     public function __construct(protected readonly DestinationConfig $original)
     {
         parent::__construct(

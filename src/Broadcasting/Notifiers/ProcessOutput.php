@@ -21,6 +21,9 @@ class ProcessOutput extends Output
         'debug' => 'comment',
     ];
 
+    /**
+     * Initializes ProcessOutput with a notifier.
+     */
     public function __construct(
         public readonly ProcessNotifier $notifier,
     ) {

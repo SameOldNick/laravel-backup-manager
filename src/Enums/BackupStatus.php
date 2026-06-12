@@ -10,7 +10,7 @@ enum BackupStatus: string
     case FileNotFound = 'file_not_found';
 
     /**
-     * Get a human-friendly label for the permission.
+     * Get a human-friendly label.
      */
     public function label(): string
     {

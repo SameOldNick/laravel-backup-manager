@@ -6,6 +6,16 @@ use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Model;
 use SameOldNick\BackupManager\Models\Collections\CleanupScheduleCollection;
 
+/**
+ * @property string $id
+ * @property string $name
+ * @property string $cron_expression
+ * @property bool $is_active
+ * @property ?\DateTimeInterface $created_at
+ * @property ?\DateTimeInterface $updated_at
+ * @property ?\DateTimeInterface $deleted_at
+ * @property-read ?\DateTimeInterface $next_run
+ */
 #[CollectedBy(CleanupScheduleCollection::class)]
 class CleanupSchedule extends AbstractSchedule
 {

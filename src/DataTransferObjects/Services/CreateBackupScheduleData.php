@@ -16,6 +16,11 @@ class CreateBackupScheduleData
         //
     }
 
+    /**
+     * Creates CreateBackupScheduleData from array
+     *
+     * @param  array  $data  Data to create CreateBackupScheduleData from
+     */
     public static function fromArray(array $data): self
     {
         return new self(

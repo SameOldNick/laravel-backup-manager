@@ -85,12 +85,22 @@ class ServiceProvider extends BaseServiceProvider
         $this->subscribeToEvents();
     }
 
+    /**
+     * Registers routes.
+     *
+     * @return void
+     */
     protected function registerRoutes()
     {
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
     }
 
+    /**
+     * Subscribes to events.
+     *
+     * @return void
+     */
     protected function subscribeToEvents()
     {
         Event::subscribe(Listeners\BackupProjectionSubscriber::class);

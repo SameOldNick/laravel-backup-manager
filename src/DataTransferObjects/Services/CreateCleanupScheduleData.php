@@ -12,6 +12,11 @@ class CreateCleanupScheduleData
         //
     }
 
+    /**
+     * Creates CreateCleanupScheduleData from array
+     *
+     * @param  array  $data  Data to create CreateCleanupScheduleData from
+     */
     public static function fromArray(array $data): self
     {
         return new self(

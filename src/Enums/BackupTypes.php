@@ -9,7 +9,7 @@ enum BackupTypes: string
     case Databases = 'databases';
 
     /**
-     * Get a human-friendly label for the permission.
+     * Get a human-friendly label.
      */
     public function label(): string
     {

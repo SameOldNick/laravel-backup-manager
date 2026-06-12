@@ -2,10 +2,10 @@
 
 namespace SameOldNick\BackupManager\Broadcasting\Notifiers;
 
-use SameOldNick\BackupManager\Broadcasting\Notifications\ProcessOutputNotification;
-use SameOldNick\BackupManager\Broadcasting\Notifications\ProcessStatusNotification;
 use DateTimeInterface;
 use Illuminate\Broadcasting\BroadcastException;
+use SameOldNick\BackupManager\Broadcasting\Notifications\ProcessOutputNotification;
+use SameOldNick\BackupManager\Broadcasting\Notifications\ProcessStatusNotification;
 
 /**
  * Broadcasts events related to a process.

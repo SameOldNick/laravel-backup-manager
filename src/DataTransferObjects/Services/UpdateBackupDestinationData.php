@@ -25,6 +25,11 @@ class UpdateBackupDestinationData
         //
     }
 
+    /**
+     * Creates UpdateBackupDestinationData from array
+     *
+     * @param  array  $data  Data to create UpdateBackupDestinationData from
+     */
     public static function fromArray(array $data): self
     {
         return new self(
