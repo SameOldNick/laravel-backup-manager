@@ -67,10 +67,6 @@ class ServiceProvider extends BaseServiceProvider
             $this->registerRoutes();
         }
 
-        $this->app->extend(Config::class, function (Config $config, Container $app) {
-            return $this->isDatabaseSetup(['filesystem_configurations']) ? $app->make(DatabaseConfigProvider::class, ['original' => $config]) : $config;
-        });
-
         $this->publishes([
             __DIR__.'/../config/backup-manager.php' => $this->app->configPath('backup-manager.php'),
         ], 'backup-manager-config');
@@ -121,34 +117,33 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * Rebinds Spate Backup Config instance
+     * Rebinds Spatie Backup Config to use database-driven configuration when available.
+     *
+     * Uses a two-layer strategy to handle unknown provider registration order:
+     *   1. scoped() — ensures Config is always bound (fallback if Spatie hasn't run yet).
+     *   2. extend() — wraps the final resolved instance with DatabaseConfigProvider when
+     *      the database is ready.  extend() callbacks survive rebinding, so even if
+     *      Spatie's provider runs after ours and replaces the scoped binding, the
+     *      extender still fires at resolution time.
      *
      * @return void
      */
     protected function rebindSpatieBackupConfig()
     {
-        // Guard: ensure the scoped binding from spatie/laravel-backup exists.
-        // In some environments (CI, parallel tests) provider registration order
-        // can differ, leaving Config unbound when extend() would otherwise fail.
-        //if (! $this->app->bound(Config::class)) {
-            // This is the same as the Config::rebind() method, but extracted here to avoid a hard dependency on an internal method.
-            //$this->app->scoped(Config::class, fn (): Config => Config::fromArray(config('backup')));
-        //}
+        // Ensure a base binding exists, regardless of whether Spatie's provider has run.
+        // If Spatie already bound it, this is a no-op (scoped replaces, but same result).
+        if (! $this->app->bound(Config::class)) {
+            $this->app->scoped(Config::class, fn (): Config => Config::fromArray(config('backup')));
+        }
 
-        $hasReset = false;
-
-        /**
-         * Spatie registers Config as scoped, which makes it a singleton.
-         * This causes the same values from the config file to be pulled,
-         * even if the database has become available. So, we will forget
-         * the instance and re-save it when the database becomes available.
-         */
-        $this->app->beforeResolving(Config::class, function ($abstract, $params, $app) use (&$hasReset) {
-            if ($this->isDatabaseSetup(['filesystem_configurations']) && ! $hasReset) {
-                $app->forgetInstance(Config::class);
-
-                $hasReset = true;
+        // Extenders are stored on the abstract and applied at resolution time.
+        // They survive subsequent rebinds, so this works regardless of provider order.
+        $this->app->extend(Config::class, function (Config $config, Container $app): Config {
+            if ($this->isDatabaseSetup(['filesystem_configurations'])) {
+                return $app->make(DatabaseConfigProvider::class, ['original' => $config]);
             }
+
+            return $config;
         });
     }
 
