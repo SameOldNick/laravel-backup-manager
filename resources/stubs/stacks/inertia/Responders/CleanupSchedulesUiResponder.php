@@ -29,7 +29,7 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
     {
         return redirect()
             ->route('backup-manager.schedules.index')
-            ->with('success', __('backup::messages.cleanup_schedule_created'));
+            ->with('success', __('backup-manager::messages.cleanup_schedule_created'));
     }
 
     /**
@@ -51,7 +51,7 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
     {
         return redirect()
             ->route('backup-manager.schedules.index')
-            ->with('success', __('backup::messages.cleanup_schedule_updated'));
+            ->with('success', __('backup-manager::messages.cleanup_schedule_updated'));
     }
 
     /**
@@ -61,6 +61,6 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
     {
         return redirect()
             ->route('backup-manager.schedules.index')
-            ->with('success', __('backup::messages.cleanup_schedule_deleted'));
+            ->with('success', __('backup-manager::messages.cleanup_schedule_deleted'));
     }
 }

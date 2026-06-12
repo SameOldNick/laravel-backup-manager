@@ -37,7 +37,7 @@ class BackupFileController
                 'error_message' => $e->getMessage(),
             ]);
 
-            abort(404, __('backup::messages.file_not_found'));
+            abort(404, __('backup-manager::messages.file_not_found'));
         }
 
         return response()->streamDownload(function () use ($stream): void {

@@ -42,7 +42,7 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     {
         return redirect()
             ->route('backup.destinations.show', ['destination' => $data->configuration])
-            ->with('success', __('backup::messages.destination_created'));
+            ->with('success', __('backup-manager::messages.destination_created'));
     }
 
     /**
@@ -64,7 +64,7 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     public function renderUpdateBackupDestination(UpdateBackupDestinationViewData $data)
     {
         return back()
-            ->with('success', __('backup::messages.destination_updated'));
+            ->with('success', __('backup-manager::messages.destination_updated'));
     }
 
     /**
@@ -73,6 +73,6 @@ class BackupDestinationsUiResponder implements BackupDestinationsUiResponderCont
     public function renderDestroyBackupDestination(DestroyBackupDestinationViewData $data)
     {
         return back()
-            ->with('success', __('backup::messages.destination_deleted'));
+            ->with('success', __('backup-manager::messages.destination_deleted'));
     }
 }

@@ -92,7 +92,7 @@ class BackupDestinationsController
         $config = $destination->configurable;
 
         if (! $config) {
-            return response()->json(['message' => __('backup::messages.destination_unconfigured')], 404);
+            return response()->json(['message' => __('backup-manager::messages.destination_unconfigured')], 404);
         }
 
         return $this->ui->renderEditBackupDestination(new EditBackupDestinationViewData(
@@ -111,7 +111,7 @@ class BackupDestinationsController
         $config = $destination->configurable;
 
         if (! $config) {
-            abort(404, __('backup::messages.destination_not_found'));
+            abort(404, __('backup-manager::messages.destination_not_found'));
         }
 
         $destination = $this->service->updateBackupDestination(

@@ -26,7 +26,7 @@ class BackupDestinationTestUiResponder implements BackupDestinationTestUiRespond
     public function renderStartBackupDestinationTest(StartBackupDestinationTestViewData $data)
     {
         return [
-            'message' => __('backup::messages.backup_destination_test_started'),
+            'message' => __('backup-manager::messages.backup_destination_test_started'),
         ];
     }
 

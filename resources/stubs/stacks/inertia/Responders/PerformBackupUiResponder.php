@@ -27,7 +27,7 @@ class PerformBackupUiResponder implements PerformBackupUiResponderContract
     public function renderStartBackup(StartBackupViewData $data)
     {
         return [
-            'message' => __('backup::messages.backup_started'),
+            'message' => __('backup-manager::messages.backup_started'),
         ];
     }
 
@@ -37,7 +37,7 @@ class PerformBackupUiResponder implements PerformBackupUiResponderContract
     public function renderPerformBackup(PerformBackupViewData $data)
     {
         if (! $data->lease) {
-            abort(404, __('backup::messages.backup_job_not_found'));
+            abort(404, __('backup-manager::messages.backup_job_not_found'));
         }
 
         $startUrl = url()->temporarySignedRoute('backup.perform.start', $data->lease->expiresAt, [

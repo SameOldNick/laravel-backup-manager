@@ -60,7 +60,7 @@ class BackupController
     public function generateDownloadLink(Backup $backup)
     {
         if (! $backup->file) {
-            abort(404, __('backup::messages.file_not_found'));
+            abort(404, __('backup-manager::messages.file_not_found'));
         }
 
         $link = $this->service->createBackupDownloadLink($backup);
