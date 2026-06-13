@@ -52,12 +52,16 @@ class BackupDestinationTestController
      */
     public function start(Request $request, FilesystemConfiguration $destination)
     {
-        $uuid = (string) $request->str('uuid');
-        $user = $request->user();
+        $validated = $request->validate([
+            'uuid' => [
+                'required',
+                'string',
+                'uuid',
+            ],
+        ]);
 
-        if (! Str::isUuid($uuid)) {
-            abort(400, 'Invalid UUID');
-        }
+        $uuid = (string) $validated['uuid'];
+        $user = $request->user();
 
         try {
             $this->service->dispatchTestJobOnce($destination, $user, $uuid);
