@@ -2,11 +2,11 @@
 
 namespace SameOldNick\BackupManager\Filesystem;
 
-use SameOldNick\BackupManager\Contracts\FilesystemConfiguration as FilesystemConfigurationContract;
-use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Support\Str;
+use SameOldNick\BackupManager\Contracts\FilesystemConfiguration as FilesystemConfigurationContract;
+use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 
 class DynamicFilesystemManager extends FilesystemManager
 {
