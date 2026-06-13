@@ -161,16 +161,20 @@ final class BackupFile extends Model
         $defaults = [];
 
         return Attribute::get(function ($value, $attributes = []) use ($defaults) {
+            if (! $this->file_exists) {
+                return $defaults;
+            }
+
             $disk = $this->getStorageDisk();
 
-            return $this->file_exists ? [
+            return [
                 'size' => $disk->size($attributes['path']),
                 'last_modified' => Carbon::parse($disk->lastModified($attributes['path'])),
                 // Don't use the Storage facade to get the mime type, as it will try to download
                 // the file, which can cause issues with large files or remote disks. Instead, we
                 // will use a custom method to determine the mime type.
                 'mime_type' => self::determineMimeType($attributes['path']),
-            ] : $defaults;
+            ];
         });
     }
 
