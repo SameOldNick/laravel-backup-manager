@@ -5,7 +5,6 @@ namespace SameOldNick\BackupManager;
 use Exception;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Container\Container;
-use Illuminate\Contracts\Filesystem\Factory as FactoryContract;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -14,7 +13,6 @@ use SameOldNick\BackupManager\Broadcasting\Access\Stores\CacheStore;
 use SameOldNick\BackupManager\Contracts\BackupConfigurationProvider;
 use SameOldNick\BackupManager\Contracts\ChannelAccessStore;
 use SameOldNick\BackupManager\Contracts\ConfigProvider;
-use SameOldNick\BackupManager\Filesystem\DynamicFilesystemManager;
 use SameOldNick\BackupManager\Providers\BackupDatabaseConfigurationProvider;
 use SameOldNick\BackupManager\SpatieBackup\DatabaseConfigProvider;
 use Spatie\Backup\Config\Config;
@@ -36,7 +34,6 @@ class DeferredServiceProvider extends BaseServiceProvider implements DeferrableP
     public function register()
     {
         $this->rebindSpatieBackupConfig();
-        $this->extendFilesystemManager();
         $this->bindContracts();
         $this->bindChannelServices();
     }
@@ -50,7 +47,6 @@ class DeferredServiceProvider extends BaseServiceProvider implements DeferrableP
     {
         return [
             Config::class,
-            FactoryContract::class,
             ConfigProvider::class,
             BackupConfigurationProvider::class,
             ChannelAccessStore::class,
@@ -98,16 +94,6 @@ class DeferredServiceProvider extends BaseServiceProvider implements DeferrableP
             }
 
             return $config;
-        });
-    }
-
-    /**
-     * Extends the Filesystem Manager with dynamic disk resolution.
-     */
-    protected function extendFilesystemManager(): void
-    {
-        $this->app->extend(FactoryContract::class, function (FactoryContract $manager, Container $app) {
-            return new DynamicFilesystemManager($app);
         });
     }
 

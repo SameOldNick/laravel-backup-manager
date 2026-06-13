@@ -3,11 +3,14 @@
 namespace SameOldNick\BackupManager;
 
 use Exception;
+use Illuminate\Contracts\Container\Container;
+use Illuminate\Contracts\Filesystem\Factory as FactoryContract;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use SameOldNick\BackupManager\Commands\InstallBackupManager;
 use SameOldNick\BackupManager\DbDumper\MySqlPHP;
+use SameOldNick\BackupManager\Filesystem\DynamicFilesystemManager;
 use Spatie\Backup\Tasks\Backup\DbDumperFactory;
 
 class ServiceProvider extends BaseServiceProvider
@@ -22,7 +25,21 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        //
+        $this->extendFilesystemManager();
+    }
+
+    /**
+     * Extends the Filesystem Manager with dynamic disk resolution.
+     *
+     * Must be registered eagerly — not in a deferred provider — to ensure
+     * the extend callback is in place before any code resolves 'filesystem'
+     * from the container.
+     */
+    protected function extendFilesystemManager(): void
+    {
+        $this->app->extend(FactoryContract::class, function (FactoryContract $manager, Container $app) {
+            return new DynamicFilesystemManager($app);
+        });
     }
 
     /**
