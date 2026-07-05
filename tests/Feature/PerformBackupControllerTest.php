@@ -9,6 +9,7 @@ use Illuminate\Testing\Fluent\AssertableJson;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 use SameOldNick\BackupManager\Models\Backup;
 use SameOldNick\BackupManager\Models\BackupRun;
+use SameOldNick\BackupManager\Services\PerformBackupService;
 use SameOldNick\BackupManager\Testing\Concerns;
 use SameOldNick\BackupManager\Tests\TestCase;
 
@@ -115,6 +116,61 @@ class PerformBackupControllerTest extends TestCase
         $this->assertDatabaseHas((new BackupRun)->getTable(), [
             'id' => $uuid,
         ]);
+    }
+
+    public function test_fails_when_starting_backup_with_invalid_lease(): void
+    {
+        Queue::fake();
+
+        $admin = $this->createAdmin();
+
+        $initializeResponse = $this->actingAs($admin)->post(route('backup.perform.initialize'), [
+            'type' => 'full',
+        ]);
+
+        $initializeResponse->assertOk();
+
+        $startUrl = $initializeResponse->json('data.startUrl');
+        $uuid = $initializeResponse->json('data.uuid');
+
+        // Simulate an invalid lease by deleting the backup run record
+        app(PerformBackupService::class)->getBackupChannelLease($uuid)?->close();
+
+        $startResponse = $this->actingAs($admin)->post($startUrl, [
+            'type' => 'full',
+            'uuid' => $uuid,
+        ]);
+
+        $startResponse->assertNotFound();
+
+        Queue::assertNothingPushed();
+    }
+
+    public function test_fails_when_starting_backup_with_invalid_lease_user(): void
+    {
+        Queue::fake();
+
+        $admin = $this->createAdmin();
+        $other = $this->createAdmin();
+
+        $initializeResponse = $this->actingAs($admin)->post(route('backup.perform.initialize'), [
+            'type' => 'full',
+        ]);
+
+        $initializeResponse->assertOk();
+
+        $startUrl = $initializeResponse->json('data.startUrl');
+        $uuid = $initializeResponse->json('data.uuid');
+
+        // Simulate an invalid lease by attempting to start the backup with a different user
+        $startResponse = $this->actingAs($other)->post($startUrl, [
+            'type' => 'full',
+            'uuid' => $uuid,
+        ]);
+
+        $startResponse->assertForbidden();
+
+        Queue::assertNothingPushed();
     }
 
     /**
