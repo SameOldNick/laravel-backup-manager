@@ -5,6 +5,9 @@ namespace SameOldNick\BackupManager\Services;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Concerns;
 use SameOldNick\BackupManager\Enums\BackupTypes;
+use SameOldNick\BackupManager\Exceptions\BackupChannelLeaseNotFoundException;
+use SameOldNick\BackupManager\Exceptions\BackupChannelLeaseUnauthorizedException;
+use SameOldNick\BackupManager\Exceptions\BackupRunAlreadyExistsException;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 use SameOldNick\BackupManager\Models\BackupRun;
 
@@ -74,12 +77,12 @@ class PerformBackupService
     {
         $lease = $this->getBackupChannelLease($uuid);
 
-        if ($lease === null) {
-            throw new \RuntimeException('Backup channel lease not found for UUID: '.$uuid);
+        if (! $lease) {
+            throw new BackupChannelLeaseNotFoundException($uuid);
         }
 
         if ($lease->notifiableClass !== $user::class || $lease->notifiableKey !== (string) $user->getAuthIdentifier()) {
-            throw new \RuntimeException('Unauthorized access to backup channel lease for UUID: '.$uuid);
+            throw new BackupChannelLeaseUnauthorizedException($uuid);
         }
 
         /**
@@ -97,7 +100,7 @@ class PerformBackupService
 
         if ($inserted === 0) {
             // No rows were inserted, which means a BackupRun with this UUID already exists
-            throw new \RuntimeException('Backup run already exists for UUID: '.$uuid);
+            throw new BackupRunAlreadyExistsException($uuid);
         }
 
         /** @var BackupRun $backupRun */
