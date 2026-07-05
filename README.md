@@ -113,7 +113,7 @@ $backupRun = $service->dispatchBackupJob($lease, BackupTypes::Full, $user);
 
 ## Additional Information
 
-The GitHub [wiki](/wiki) contains additional information about Laravel Backup Manager.
+The GitHub [wiki](https://github.com/SameOldNick/laravel-backup-manager/wiki) contains additional information about Laravel Backup Manager.
 
 ## Testing
 
