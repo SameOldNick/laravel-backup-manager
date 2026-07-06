@@ -16,4 +16,6 @@ return [
     'backup_started' => 'Backup started successfully.',
     'backup_job_not_found' => 'Backup job not found.',
     'backup_destination_test_started' => 'Backup destination test started successfully.',
+    'backup_channel_lease_not_found' => 'Backup channel lease not found.',
+    'backup_destination_test_channel_lease_not_found' => 'Backup destination test channel lease not found.',
 ];
