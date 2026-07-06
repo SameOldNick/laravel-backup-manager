@@ -97,6 +97,9 @@ class FilesystemConfiguration extends Model implements FilesystemConfigurationCo
         return in_array($this->driver_name, $enabled, true);
     }
 
+    /**
+     * Determine if the destination is valid based on the existence of the configurable type.
+     */
     protected function isValid(): Attribute
     {
         return Attribute::get(fn () => class_exists($this->configurable_type));
