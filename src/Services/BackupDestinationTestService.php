@@ -33,7 +33,7 @@ class BackupDestinationTestService
     {
         $channel = $this->createChannelId($uuid);
 
-        $lease = $this->openChannelLease($channel, $user, now()->addMinutes(config('backup-manager.channel_leases.test_backup_destination.ttl', 180)));
+        $lease = $this->openChannelLease($channel, $user);
 
         return $lease;
     }
@@ -107,5 +107,14 @@ class BackupDestinationTestService
     protected function getChannelIdPrefix(): string
     {
         return config('backup-manager.channel_leases.test_backup_destination.prefix', 'test-destination');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getChannelLeaseExpirationMinutes(): int
+    {
+
+        return config('backup-manager.channel_leases.test_backup_destination.ttl', 180);
     }
 }

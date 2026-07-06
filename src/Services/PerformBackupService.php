@@ -37,7 +37,7 @@ class PerformBackupService
     {
         $channel = $this->createChannelId($uuid);
 
-        $lease = $this->openChannelLease($channel, $user, now()->addMinutes(config('backup-manager.channel_leases.perform_backup.ttl', 180)));
+        $lease = $this->openChannelLease($channel, $user);
 
         return $lease;
     }
@@ -117,5 +117,13 @@ class PerformBackupService
     protected function getChannelIdPrefix(): string
     {
         return config('backup-manager.channel_leases.perform_backup.prefix', 'backups');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getChannelLeaseExpirationMinutes(): int
+    {
+        return config('backup-manager.channel_leases.perform_backup.ttl', 180);
     }
 }
