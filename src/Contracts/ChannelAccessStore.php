@@ -11,9 +11,9 @@ interface ChannelAccessStore
      *
      * @param  string  $channelId  Channel ID (e.g. "jobs.{uuid}")
      * @param  object  $notifiable  The notifiable instance
-     * @param  DateTimeInterface|null  $expiresAt  When channel expires
+     * @param  DateTimeInterface  $expiresAt  When channel expires
      */
-    public function open(string $channelId, object $notifiable, ?DateTimeInterface $expiresAt = null): array;
+    public function open(string $channelId, object $notifiable, DateTimeInterface $expiresAt): array;
 
     /**
      * Closes the channel.

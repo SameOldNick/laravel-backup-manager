@@ -2,10 +2,10 @@
 
 namespace SameOldNick\BackupManager\Broadcasting\Access;
 
-use SameOldNick\BackupManager\Contracts\ChannelAccessStore;
 use Carbon\CarbonInterface;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
+use SameOldNick\BackupManager\Contracts\ChannelAccessStore;
 
 class ChannelAccessManager
 {
@@ -48,7 +48,7 @@ class ChannelAccessManager
      *
      * @param  string  $channelId  Channel ID (e.g. "jobs.{uuid}")
      * @param  object  $notifiable  The notifiable instance
-     * @param  DateTimeInterface|null  $expiresAt  When channel expires
+     * @param  DateTimeInterface  $expiresAt  When channel expires
      * @return ChannelLease The created channel lease
      */
     public function open(
@@ -63,7 +63,7 @@ class ChannelAccessManager
             channelId: $channelId,
             notifiableClass: $data['notifiable_class'],
             notifiableKey: $data['notifiable_key'],
-            expiresAt: $expiresAt,
+            expiresAt: $expiresAt
         );
     }
 

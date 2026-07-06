@@ -29,9 +29,9 @@ class CacheStore implements ChannelAccessStore
      * @param  DateTimeInterface|null  $expiresAt  When channel expires
      * @return array{channel:string, notifiable_class:string, notifiable_key:string, expires_at:DateTimeInterface} Channel data
      */
-    public function open(string $channelId, object $notifiable, ?DateTimeInterface $expiresAt = null): array
+    public function open(string $channelId, object $notifiable, DateTimeInterface $expiresAt): array
     {
-        $expiresAt = Carbon::instance($expiresAt ?? now()->addHours(3));
+        $expiresAt = Carbon::instance($expiresAt);
 
         $data = [
             'channel' => $channelId,

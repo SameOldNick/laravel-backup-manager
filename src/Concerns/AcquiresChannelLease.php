@@ -12,10 +12,10 @@ trait AcquiresChannelLease
      *
      * @param  string  $channel  The channel ID to open (e.g. "backups.{uuid}")
      * @param  object  $user  The user for whom to open the channel lease
-     * @param  ?\DateTimeInterface  $expiresAt  The date and time when the lease expires
+     * @param  \DateTimeInterface  $expiresAt  The date and time when the lease expires
      * @return ChannelLease A lease for the opened channel
      */
-    public function openChannelLease(string $channel, object $user, ?\DateTimeInterface $expiresAt): ChannelLease
+    public function openChannelLease(string $channel, object $user, \DateTimeInterface $expiresAt): ChannelLease
     {
         return app(ChannelAccessManager::class)->open(
             channelId: $channel,
