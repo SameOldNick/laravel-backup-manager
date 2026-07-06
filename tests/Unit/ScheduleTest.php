@@ -1,6 +1,6 @@
 <?php
 
-namespace SameOldNick\BackupManager\Tests\Feature;
+namespace SameOldNick\BackupManager\Tests\Unit;
 
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
