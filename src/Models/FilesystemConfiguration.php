@@ -52,15 +52,6 @@ class FilesystemConfiguration extends Model implements FilesystemConfigurationCo
     ];
 
     /**
-     * The relations to eager load on every query.
-     *
-     * @var array
-     */
-    protected $with = [
-        'configurable',
-    ];
-
-    /**
      * Get the owning configurable model.
      */
     public function configurable()
@@ -104,6 +95,11 @@ class FilesystemConfiguration extends Model implements FilesystemConfigurationCo
         $enabled = $backupConfig->backup->destination->disks;
 
         return in_array($this->driver_name, $enabled, true);
+    }
+
+    protected function isValid(): Attribute
+    {
+        return Attribute::get(fn () => class_exists($this->configurable_type));
     }
 
     /**

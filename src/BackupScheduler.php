@@ -48,7 +48,7 @@ class BackupScheduler
             $expression = $this->transformCronExpression($schedule->cron_expression);
 
             $disks = $schedule->filesystemConfigurations
-                ->filter(fn (FilesystemConfiguration $config) => $config->is_active)
+                ->filter(fn (FilesystemConfiguration $config) => $config->is_active && $config->is_valid)
                 ->map(fn (FilesystemConfiguration $config) => $config->driver_name)
                 ->values()
                 ->all();

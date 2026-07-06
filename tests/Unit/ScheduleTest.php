@@ -5,6 +5,7 @@ namespace SameOldNick\BackupManager\Tests\Unit;
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
+use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Testing\Concerns;
 use SameOldNick\BackupManager\Tests\TestCase;
 
@@ -105,6 +106,34 @@ class ScheduleTest extends TestCase
             $this->assertCount(1, $commands);
             $this->assertSame('0 7 * * *', $commands[0]['expression']);
             $this->assertSame('backup:clean', $commands[0]['command']);
+        });
+    }
+
+    public function test_schedule_backup_skips_configurations_with_invalid_morph_class(): void
+    {
+        $schedule = $this->createBackupSchedule('Schedule', 'full', '0 0 * * *', true);
+
+        // Create a FilesystemConfiguration with a non-existent morph class
+        $config = new FilesystemConfiguration([
+            'name' => 'Broken Destination',
+            'slug' => 'broken-destination',
+            'disk_type' => 'local',
+            'is_active' => true,
+        ]);
+
+        // Directly set the morph fields to a class that does not exist
+        $config->forceFill([
+            'configurable_type' => 'App\\Models\\NonExistentConfig',
+            'configurable_id' => 999,
+        ])->save();
+
+        // Attach to the schedule via the pivot table
+        $schedule->filesystemConfigurations()->attach($config);
+
+        $this->assertSchedulerJobs(function (array $jobs) {
+            $this->assertCount(1, $jobs);
+            // The broken config should be skipped, falling back to default disk resolution
+            $this->assertNull($jobs[0]['job']->disks);
         });
     }
 
