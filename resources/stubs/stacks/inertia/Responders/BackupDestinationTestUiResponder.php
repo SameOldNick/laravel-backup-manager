@@ -35,6 +35,10 @@ class BackupDestinationTestUiResponder implements BackupDestinationTestUiRespond
      */
     public function renderShowBackupDestinationTest(ShowBackupDestinationTestViewData $data)
     {
+        if (! $data->lease) {
+            return redirect()->route('backup.destinations.index')->with('error', __('backup-manager::messages.backup_destination_test_channel_lease_not_found'));
+        }
+
         $startUrl = url()->temporarySignedRoute('backup.destinations.test.start', $data->lease->expiresAt, [
             'destination' => $data->configuration,
         ]);

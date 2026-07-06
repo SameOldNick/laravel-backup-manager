@@ -37,7 +37,7 @@ class PerformBackupUiResponder implements PerformBackupUiResponderContract
     public function renderPerformBackup(PerformBackupViewData $data)
     {
         if (! $data->lease) {
-            abort(404, __('backup-manager::messages.backup_job_not_found'));
+            return redirect()->route('backup.backups.index')->with('error', __('backup-manager::messages.backup_channel_lease_not_found'));
         }
 
         $startUrl = url()->temporarySignedRoute('backup.perform.start', $data->lease->expiresAt, [
