@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Models;
 
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use SameOldNick\BackupManager\Enums\BackupTypes;
@@ -49,7 +50,6 @@ class BackupSchedule extends AbstractSchedule
      * @var array<string, string>
      */
     protected $casts = [
-        'type' => BackupTypes::class,
         'is_active' => 'boolean',
     ];
 
@@ -61,6 +61,14 @@ class BackupSchedule extends AbstractSchedule
     public function filesystemConfigurations(): BelongsToMany
     {
         return $this->belongsToMany(FilesystemConfiguration::class);
+    }
+
+    /**
+     * Get the backup type as an enum.
+     */
+    protected function type(): Attribute
+    {
+        return Attribute::get(fn ($value) => BackupTypes::tryFrom($value));
     }
 
     /**

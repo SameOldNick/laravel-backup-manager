@@ -24,6 +24,6 @@ trait TransformsCronExpression
         }
 
         // Otherwise, return the expression as is
-        return $expression;
+        return CronExpression::isValidExpression($expression) ? $expression : null;
     }
 }

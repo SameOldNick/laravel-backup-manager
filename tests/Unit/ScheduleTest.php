@@ -137,6 +137,34 @@ class ScheduleTest extends TestCase
         });
     }
 
+    public function test_schedule_backup_skips_with_invalid_type(): void
+    {
+        $schedule1 = $this->createBackupSchedule('Valid Schedule', 'full', '0 0 * * *', true);
+        $schedule2 = $this->createBackupSchedule('Invalid Schedule', 'full', '0 1 * * *', true);
+
+        $schedule2->forceFill(['type' => 'invalid_type'])->save();
+
+        $this->assertSchedulerJobs(function (array $jobs) {
+            $this->assertCount(1, $jobs);
+            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
+        });
+    }
+
+    public function test_schedule_backup_skips_with_invalid_schedule(): void
+    {
+        $this->createBackupSchedule('Valid Schedule', 'full', '0 0 * * *', true);
+        $this->createBackupSchedule('Invalid Schedule', 'full', 'invalid schedule', true);
+
+        $this->assertSchedulerJobs(function (array $jobs) {
+            $this->assertCount(1, $jobs);
+            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
+        });
+    }
+
     private function createBackupSchedule(string $name, string $type, string $cronExpression, bool $isActive): BackupSchedule
     {
         return BackupSchedule::create([

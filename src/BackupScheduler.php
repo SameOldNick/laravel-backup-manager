@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager;
 
 use Illuminate\Console\Scheduling\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
 use SameOldNick\BackupManager\Concerns\TransformsCronExpression;
 use SameOldNick\BackupManager\Jobs\BackupJob;
@@ -47,6 +48,20 @@ class BackupScheduler
         foreach ($schedules as $schedule) {
             $expression = $this->transformCronExpression($schedule->cron_expression);
 
+            // Skip schedules with invalid cron expressions
+            if (! $expression) {
+                Log::error("Invalid cron expression for backup schedule '{$schedule->name}': '{$schedule->cron_expression}'");
+
+                continue;
+            }
+
+            // Skip schedules with invalid backup types
+            if (! $backupType = $schedule->type) {
+                Log::error("Invalid backup type for schedule '{$schedule->name}': '{$schedule->getRawOriginal('type')}'");
+
+                continue;
+            }
+
             $disks = $schedule->filesystemConfigurations
                 ->filter(fn (FilesystemConfiguration $config) => $config->is_active && $config->is_valid)
                 ->map(fn (FilesystemConfiguration $config) => $config->driver_name)
@@ -54,7 +69,7 @@ class BackupScheduler
                 ->all();
 
             // Keep legacy schedules working by falling back to default disk resolution.
-            $this->scheduleJob(new BackupJob($schedule->type, count($disks) > 0 ? $disks : null), $expression);
+            $this->scheduleJob(new BackupJob($backupType, count($disks) > 0 ? $disks : null), $expression);
         }
     }
 
