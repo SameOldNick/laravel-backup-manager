@@ -70,7 +70,7 @@ class FilesystemConfiguration extends Model implements FilesystemConfigurationCo
             [];
 
         return [
-            'name' => Str::slug($this->name),
+            'name' => $this->slug,
             'driver' => $this->disk_type,
             ...$options,
         ];
@@ -112,6 +112,15 @@ class FilesystemConfiguration extends Model implements FilesystemConfigurationCo
     protected function driverName(): Attribute
     {
         return Attribute::get(fn () => 'dynamic-'.$this->getFilesystemConfig()['name']);
+    }
+
+    /**
+     * Gets the slug for the filesystem configuration.
+     * If the slug is not set, it will be generated from the name.
+     */
+    protected function slug(): Attribute
+    {
+        return Attribute::get(fn (?string $value) => $value ?? Str::slug($this->name));
     }
 
     /**
