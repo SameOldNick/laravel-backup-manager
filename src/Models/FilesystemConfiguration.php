@@ -62,12 +62,6 @@ class FilesystemConfiguration extends Model implements FilesystemConfigurationCo
             }
         });
 
-        static::updating(function (self $configuration) {
-            if (is_null($configuration->slug)) {
-                $configuration->slug = Str::slug($configuration->name);
-            }
-        });
-
         static::saving(function (self $configuration) {
             if ($configuration->isDirty('name') && ! $configuration->isDirty('slug') && ! is_null($configuration->slug)) {
                 $configuration->slug = Str::slug($configuration->name);
