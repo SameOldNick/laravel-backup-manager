@@ -32,7 +32,7 @@ class DynamicFilesystemManager extends FilesystemManager
     protected function getDynamicFilesystemConfiguration(string $name): ?FilesystemConfigurationContract
     {
         // Expecting name to be in format "dynamic-{disk_name}"
-        return FilesystemConfiguration::active()->where('slug', Str::substr($name, 8))->first();
+        return FilesystemConfiguration::active()->byDriverName($name)->first();
     }
 
     /**

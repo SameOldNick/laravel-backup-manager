@@ -151,6 +151,15 @@ class FilesystemConfiguration extends Model implements FilesystemConfigurationCo
     }
 
     /**
+     * Scope a query to only include configurations by driver name.
+     */
+    #[Scope]
+    protected function byDriverName(Builder $query, string $driverName): void
+    {
+        $query->where('slug', Str::after($driverName, 'dynamic-'));
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function toArray()
