@@ -52,6 +52,30 @@ class FilesystemConfiguration extends Model implements FilesystemConfigurationCo
     ];
 
     /**
+     * Attaches model event listeners for creating, updating, and saving events to ensure the slug is generated from the name if not provided.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $configuration) {
+            if (is_null($configuration->slug)) {
+                $configuration->slug = Str::slug($configuration->name);
+            }
+        });
+
+        static::updating(function (self $configuration) {
+            if (is_null($configuration->slug)) {
+                $configuration->slug = Str::slug($configuration->name);
+            }
+        });
+
+        static::saving(function (self $configuration) {
+            if ($configuration->isDirty('name') && ! $configuration->isDirty('slug') && ! is_null($configuration->slug)) {
+                $configuration->slug = Str::slug($configuration->name);
+            }
+        });
+    }
+
+    /**
      * Get the owning configurable model.
      */
     public function configurable()
@@ -141,6 +165,7 @@ class FilesystemConfiguration extends Model implements FilesystemConfigurationCo
             $this->getKeyName() => $this->getKey(),
             'is_active' => $this->is_active,
             'name' => $this->name,
+            'slug' => $this->slug,
             'type' => $this->disk_type,
             ...$this->configurable->toArray(),
         ];
