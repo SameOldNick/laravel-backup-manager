@@ -2,6 +2,18 @@
 
 All notable changes will be documented in this file.
 
+## v1.1.1 - 2026-07-09
+
+### Fixed
+
+- `FilesystemConfiguration` slug is now automatically generated on create and kept in sync on save
+- Backup destinations now use the stored `slug` to find the storage disk, fixing failures where the auto-generated slug didn't match the expected filesystem name
+- Exposed `slug` in `FilesystemConfiguration` array representation
+
+### Refactored
+
+- Added `byDriverName` scope to `FilesystemConfiguration` and replaced magic number string manipulation in `DynamicFilesystemManager`
+
 ## v1.1.0 - 2026-07-06
 
 ### Added
