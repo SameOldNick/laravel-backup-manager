@@ -44,11 +44,7 @@ php artisan backup-manager:install --stack=inertia
 
 Supported stacks: `inertia`, `custom`
 
-2. **Create a storage destination** through the UI at `/backup/destinations` (or programmatically).
-
-3. **Create a backup schedule** — choose the backup type, cron expression, and target storage disks.
-
-4. **Run your first backup** from the UI or let the scheduler handle it.
+2. **Implement the frontend** — Follow the [Building React UI](https://github.com/SameOldNick/laravel-backup-manager/wiki/Building-React-UI) guide or explore the [demo repo](https://github.com/SameOldNick/laravel-backup-manager-demo) for a working example.
 
 ## Features
 
