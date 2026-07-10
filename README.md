@@ -7,7 +7,7 @@ A database-driven backup management package for Laravel that centralizes backup 
 
 ## Demo
 
-The [demo repository](https://github.com/SameOldNick/backup-manager-demo) shows the package wired up in a real Laravel application with Inertia and React.
+The [demo repository](https://github.com/SameOldNick/laravel-backup-manager-demo) shows the package wired up in a real Laravel application with Inertia and React.
 
 ## Requirements
 
