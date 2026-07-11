@@ -8,6 +8,7 @@ use Spatie\Backup\Config\CleanupConfig;
 use Spatie\Backup\Config\Config;
 use Spatie\Backup\Config\MonitoredBackupsConfig;
 use Spatie\Backup\Config\NotificationsConfig;
+use SameOldNick\BackupManager\SpatieBackup\DatabaseMonitoredBackupsConfigProvider;
 
 class DatabaseConfigProvider extends Config implements ConfigProvider
 {
@@ -48,7 +49,7 @@ class DatabaseConfigProvider extends Config implements ConfigProvider
      */
     public function getMonitoredBackups(): MonitoredBackupsConfig
     {
-        return $this->original->monitoredBackups;
+        return new DatabaseMonitoredBackupsConfigProvider($this->original->monitoredBackups);
     }
 
     /**
