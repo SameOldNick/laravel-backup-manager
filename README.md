@@ -52,10 +52,6 @@ Supported stacks: `inertia`, `custom`
 
 Backup and cleanup schedules live in the database — no hard-coded entries in `routes/console.php`. Each backup schedule links to one or more storage destinations.
 
-- **Backup schedules**: Type (`full`, `files`, `databases`), cron expression, active/inactive
-- **Cleanup schedules**: Cron expression, active/inactive
-- Schedules are automatically registered with Laravel's task scheduler
-
 ### Dynamic Storage Destinations
 
 Storage destinations (local, FTP, SFTP) are stored as database records and resolved at runtime. You can add, edit, test, and remove destinations without touching config files.
