@@ -46,6 +46,14 @@ Route::group(config('backup-manager.routes.all', []), function () {
                     ->whereUuid('uuid');
             });
         });
+        Route::group(config('backup-manager.routes.monitors', []), function () {
+                Route::get('/', [Controllers\BackupMonitorController::class, 'index'])->name('index');
+                Route::get('/create', [Controllers\BackupMonitorController::class, 'create'])->name('create');
+                Route::post('/', [Controllers\BackupMonitorController::class, 'store'])->name('store');
+                Route::get('/{monitor}/edit', [Controllers\BackupMonitorController::class, 'edit'])->name('edit');
+                Route::put('/{monitor}', [Controllers\BackupMonitorController::class, 'update'])->name('update');
+                Route::delete('/{monitor}', [Controllers\BackupMonitorController::class, 'destroy'])->name('destroy');
+            });
 
         Route::group(config('backup-manager.routes.schedules', []), function () {
             Route::get('/', [Controllers\ScheduleController::class, 'index'])->name('index');
