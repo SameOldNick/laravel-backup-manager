@@ -11,7 +11,7 @@ class DatabaseMonitoredBackupsConfigProvider extends MonitoredBackupsConfig
     public function __construct(protected readonly MonitoredBackupsConfig $original)
     {
         parent::__construct(
-            monitoredBackups: $this->getMonitoredBackupConfigs(),
+            monitorBackups: $this->getMonitoredBackupConfigs(),
         );
     }
 
@@ -20,15 +20,15 @@ class DatabaseMonitoredBackupsConfigProvider extends MonitoredBackupsConfig
         $monitors = BackupMonitor::query()->where('is_active', true)->get();
 
         if ($monitors->isEmpty()) {
-            return $this->original->monitoredBackups;
+            return $this->original->monitorBackups;
         }
 
         return $monitors->map(function (BackupMonitor $monitor) {
-            return new MonitoredBackupConfig(
-                name: $monitor->name,
-                disks: $monitor->disks,
-                healthChecks: $monitor->getHealthChecks(),
-            );
+            return MonitoredBackupConfig::fromArray([
+                'name' => $monitor->name,
+                'disks' => $monitor->disks,
+                'healthChecks' => $monitor->getHealthChecks(),
+            ]);
         })->all();
     }
 }
