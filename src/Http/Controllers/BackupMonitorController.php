@@ -22,12 +22,13 @@ class BackupMonitorController
         protected readonly BackupMonitorsService $service,
         protected readonly BackupMonitorsUiResponder $responder,
     ) {
+        //
     }
 
     public function index(Request $request)
     {
         $monitors = $this->service->getBackupMonitors(
-            active: $request->boolean('active', null),
+            active: $request->has('active') ? $request->boolean('active') : null,
             query: $request->string('query')->toString() ?: null,
         );
 
