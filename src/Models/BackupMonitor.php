@@ -8,6 +8,11 @@ use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes;
 
 class BackupMonitor extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
         'disks',
@@ -16,6 +21,11 @@ class BackupMonitor extends Model
         'is_active',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'disks' => 'array',
         'maximum_age_in_days' => 'integer',
@@ -23,11 +33,17 @@ class BackupMonitor extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Determine if the backup monitor is enabled.
+     */
     public function isEnabled(): bool
     {
         return $this->is_active;
     }
 
+    /**
+     * Get the health checks for the backup monitor.
+     */
     public function getHealthChecks(): array
     {
         return array_filter([
