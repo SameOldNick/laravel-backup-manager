@@ -18,4 +18,7 @@ return [
     'backup_destination_test_started' => 'Backup destination test started successfully.',
     'backup_channel_lease_not_found' => 'Backup channel lease not found.',
     'backup_destination_test_channel_lease_not_found' => 'Backup destination test channel lease not found.',
+    'monitor_created' => 'Backup monitor created successfully.',
+    'monitor_updated' => 'Backup monitor updated successfully.',
+    'monitor_deleted' => 'Backup monitor deleted successfully.',
 ];
