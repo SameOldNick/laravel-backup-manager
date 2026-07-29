@@ -89,7 +89,7 @@ class DeferredServiceProvider extends BaseServiceProvider implements DeferrableP
         }
 
         $this->app->extend(Config::class, function (Config $config, Container $app): Config {
-            if ($this->isDatabaseSetup(['filesystem_configurations'])) {
+            if ($this->isDatabaseSetup(['filesystem_configurations', 'backup_monitors'])) {
                 return $app->make(DatabaseConfigProvider::class, ['original' => $config]);
             }
 
