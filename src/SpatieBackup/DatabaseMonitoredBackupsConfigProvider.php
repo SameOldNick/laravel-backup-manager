@@ -24,9 +24,11 @@ class DatabaseMonitoredBackupsConfigProvider extends MonitoredBackupsConfig
         }
 
         return $monitors->map(function (BackupMonitor $monitor) {
+            $disks = $monitor->filesystemConfigurations()->where('is_active', true)->pluck('driver_name')->toArray();
+
             return MonitoredBackupConfig::fromArray([
                 'name' => $monitor->name,
-                'disks' => $monitor->disks,
+                'disks' => $disks,
                 'healthChecks' => $monitor->getHealthChecks(),
             ]);
         })->all();

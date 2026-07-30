@@ -33,13 +33,18 @@ class BackupMonitorsService
     public function createBackupMonitor(CreateBackupMonitorData $data): BackupMonitor
     {
         return DB::transaction(function () use ($data) {
-            return BackupMonitor::create([
+            $monitor = BackupMonitor::create([
                 'name' => $data->name,
-                'disks' => $data->disks,
                 'maximum_age_in_days' => $data->maximumAgeInDays,
                 'maximum_storage_in_megabytes' => $data->maximumStorageInMegabytes,
                 'is_active' => $data->enabled,
             ]);
+
+            if ($data->destinationIds) {
+                $monitor->filesystemConfigurations()->sync($data->destinationIds);
+            }
+
+            return $monitor;
         });
     }
 
@@ -49,8 +54,8 @@ class BackupMonitorsService
             if ($data->name !== null) {
                 $monitor->name = $data->name;
             }
-            if ($data->disks !== null) {
-                $monitor->disks = $data->disks;
+            if ($data->destinationIds !== null) {
+                $monitor->filesystemConfigurations()->sync($data->destinationIds);
             }
             if ($data->maximumAgeInDays !== null) {
                 $monitor->maximum_age_in_days = $data->maximumAgeInDays;

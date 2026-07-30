@@ -20,7 +20,7 @@ class BackupMonitorController
 {
     public function __construct(
         protected readonly BackupMonitorsService $service,
-        protected readonly BackupMonitorsUiResponder $responder,
+        protected readonly BackupMonitorsUiResponder $responder
     ) {
         //
     }
@@ -47,7 +47,7 @@ class BackupMonitorController
         $monitor = $this->service->createBackupMonitor(
             new CreateBackupMonitorData(
                 name: $request->validated('name'),
-                disks: $request->validated('disks'),
+                destinationIds: $request->validated('destination_ids'),
                 maximumAgeInDays: $request->validated('maximum_age_in_days'),
                 maximumStorageInMegabytes: $request->validated('maximum_storage_in_megabytes'),
                 enabled: $request->boolean('enabled', true),
@@ -72,7 +72,7 @@ class BackupMonitorController
             $monitor,
             new UpdateBackupMonitorData(
                 name: $request->validated('name'),
-                disks: $request->validated('disks'),
+                destinationIds: $request->validated('destination_ids'),
                 maximumAgeInDays: $request->validated('maximum_age_in_days'),
                 maximumStorageInMegabytes: $request->validated('maximum_storage_in_megabytes'),
                 enabled: $request->has('enabled') ? $request->boolean('enabled') : null,

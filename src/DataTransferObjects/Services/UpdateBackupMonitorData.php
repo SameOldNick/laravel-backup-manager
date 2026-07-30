@@ -6,10 +6,11 @@ class UpdateBackupMonitorData
 {
     public function __construct(
         public readonly ?string $name = null,
-        public readonly ?array $disks = null,
+        public readonly ?array $destinationIds = null,
         public readonly ?int $maximumAgeInDays = null,
         public readonly ?int $maximumStorageInMegabytes = null,
         public readonly ?bool $enabled = null,
     ) {
+        //
     }
 }

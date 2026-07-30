@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes;
 
@@ -15,7 +16,6 @@ class BackupMonitor extends Model
      */
     protected $fillable = [
         'name',
-        'disks',
         'maximum_age_in_days',
         'maximum_storage_in_megabytes',
         'is_active',
@@ -27,7 +27,6 @@ class BackupMonitor extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'disks' => 'array',
         'maximum_age_in_days' => 'integer',
         'maximum_storage_in_megabytes' => 'integer',
         'is_active' => 'boolean',
@@ -39,6 +38,20 @@ class BackupMonitor extends Model
     public function isEnabled(): bool
     {
         return $this->is_active;
+    }
+
+    /**
+     * Get the filesystem configurations associated with the backup monitor.
+     */
+    public function filesystemConfigurations(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            FilesystemConfiguration::class,
+            'backup_monitor_filesystem_configuration',
+            'backup_monitor_id',
+            'filesystem_configuration_id'
+        )
+            ->withTimestamps();
     }
 
     /**

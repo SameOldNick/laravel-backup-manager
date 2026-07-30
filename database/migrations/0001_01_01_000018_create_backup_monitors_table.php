@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('backup_monitors', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->json('disks');
             $table->integer('maximum_age_in_days')->nullable();
             $table->integer('maximum_storage_in_megabytes')->nullable();
             $table->boolean('is_active')->default(true);
