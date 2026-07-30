@@ -29,7 +29,7 @@ class DatabaseMonitoredBackupsConfigProvider extends MonitoredBackupsConfig
             return MonitoredBackupConfig::fromArray([
                 'name' => $monitor->name,
                 'disks' => $disks,
-                'healthChecks' => $monitor->getHealthChecks(),
+                'health_checks' => $monitor->getHealthChecks(),
             ]);
         })->all();
     }
