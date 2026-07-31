@@ -41,36 +41,47 @@ class BackupScheduler
      */
     public function scheduleBackup()
     {
-        $scheduleQuery = BackupSchedule::active()->with('filesystemConfigurations');
+        try {
+            $scheduleQuery = BackupSchedule::active()->with('filesystemConfigurations');
 
-        $schedules = $scheduleQuery->get();
+            $schedules = $scheduleQuery->get();
 
-        foreach ($schedules as $schedule) {
-            $expression = $this->transformCronExpression($schedule->cron_expression);
+            foreach ($schedules as $schedule) {
+                try {
+                    $expression = $this->transformCronExpression($schedule->cron_expression);
 
-            // Skip schedules with invalid cron expressions
-            if (! $expression) {
-                Log::error("Invalid cron expression for backup schedule '{$schedule->name}': '{$schedule->cron_expression}'");
+                    // Skip schedules with invalid cron expressions
+                    if (! $expression) {
+                        Log::error("Invalid cron expression for backup schedule '{$schedule->name}': '{$schedule->cron_expression}'");
 
-                continue;
+                        continue;
+                    }
+
+                    // Skip schedules with invalid backup types
+                    if (! $backupType = $schedule->type) {
+                        Log::error("Invalid backup type for schedule '{$schedule->name}': '{$schedule->getRawOriginal('type')}'");
+
+                        continue;
+                    }
+
+                    $disks = $schedule->filesystemConfigurations
+                        ->filter(fn (FilesystemConfiguration $config) => $config->is_active && $config->is_valid)
+                        ->map(fn (FilesystemConfiguration $config) => $config->driver_name)
+                        ->values()
+                        ->all();
+
+                    // Keep legacy schedules working by falling back to default disk resolution.
+                    $this->scheduleJob(new BackupJob($backupType, count($disks) > 0 ? $disks : null), $expression);
+                } catch (\Throwable $e) {
+                    $name = $schedule->getRawOriginal('name') ?? 'Unknown Schedule';
+                    Log::error("Error scheduling backup for schedule '{$name}': ".$e->getMessage());
+                }
             }
 
-            // Skip schedules with invalid backup types
-            if (! $backupType = $schedule->type) {
-                Log::error("Invalid backup type for schedule '{$schedule->name}': '{$schedule->getRawOriginal('type')}'");
-
-                continue;
-            }
-
-            $disks = $schedule->filesystemConfigurations
-                ->filter(fn (FilesystemConfiguration $config) => $config->is_active && $config->is_valid)
-                ->map(fn (FilesystemConfiguration $config) => $config->driver_name)
-                ->values()
-                ->all();
-
-            // Keep legacy schedules working by falling back to default disk resolution.
-            $this->scheduleJob(new BackupJob($backupType, count($disks) > 0 ? $disks : null), $expression);
+        } catch (\Throwable $e) {
+            Log::error('Error retrieving backup schedules: '.$e->getMessage());
         }
+
     }
 
     /**
