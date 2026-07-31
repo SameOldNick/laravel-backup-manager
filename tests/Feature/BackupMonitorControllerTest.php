@@ -4,6 +4,7 @@ namespace SameOldNick\BackupManager\Tests\Feature;
 
 use Illuminate\Testing\Fluent\AssertableJson;
 use SameOldNick\BackupManager\Models\BackupMonitor;
+use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Testing\Concerns;
 use SameOldNick\BackupManager\Tests\TestCase;
 
@@ -161,9 +162,12 @@ class BackupMonitorControllerTest extends TestCase
     {
         $admin = $this->createAdmin();
 
+        $destinationOne = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+        $destinationTwo = FilesystemConfiguration::factory()->ftp()->create(['is_active' => true]);
+
         $response = $this->actingAs($admin)->post(route('backup.monitors.store'), [
             'name' => 'Local Monitor',
-            'disks' => ['local', 's3'],
+            'destination_ids' => [$destinationOne->id, $destinationTwo->id],
             'maximum_age_in_days' => 5,
             'maximum_storage_in_megabytes' => 2048,
             'enabled' => true,
@@ -176,7 +180,10 @@ class BackupMonitorControllerTest extends TestCase
 
         $monitor = BackupMonitor::query()->where('name', 'Local Monitor')->firstOrFail();
 
-        $this->assertSame(['local', 's3'], $monitor->disks);
+        $fsConfigs = $monitor->filesystemConfigurations()->get()->pluck('id')->toArray();
+
+        $this->assertContains($destinationOne->id, $fsConfigs);
+        $this->assertContains($destinationTwo->id, $fsConfigs);
         $this->assertSame(5, $monitor->maximum_age_in_days);
         $this->assertSame(2048, $monitor->maximum_storage_in_megabytes);
         $this->assertTrue($monitor->is_active);
@@ -186,9 +193,11 @@ class BackupMonitorControllerTest extends TestCase
     {
         $admin = $this->createAdmin();
 
+        $destination = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+
         $response = $this->actingAs($admin)->post(route('backup.monitors.store'), [
             'name' => 'Default Enabled Monitor',
-            'disks' => ['local'],
+            'destination_ids' => [$destination->id],
             'maximum_age_in_days' => 10,
             'maximum_storage_in_megabytes' => 1024,
         ]);
@@ -206,7 +215,7 @@ class BackupMonitorControllerTest extends TestCase
 
         $monitor = BackupMonitor::query()->create([
             'name' => 'Edit Me',
-            'disks' => ['local'],
+            'destination_ids' => [],
             'maximum_age_in_days' => 2,
             'maximum_storage_in_megabytes' => 256,
             'is_active' => true,
@@ -226,15 +235,21 @@ class BackupMonitorControllerTest extends TestCase
 
         $monitor = BackupMonitor::query()->create([
             'name' => 'Old Monitor Name',
-            'disks' => ['local'],
+            'destination_ids' => [],
             'maximum_age_in_days' => 7,
             'maximum_storage_in_megabytes' => 512,
             'is_active' => true,
         ]);
 
+        $destinationOne = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+        $destinationTwo = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+
         $response = $this->actingAs($admin)->put(route('backup.monitors.update', $monitor), [
             'name' => 'Updated Monitor Name',
-            'disks' => ['s3'],
+            'destination_ids' => [
+                $destinationOne->id,
+                $destinationTwo->id,
+            ],
             'maximum_age_in_days' => 14,
             'maximum_storage_in_megabytes' => 4096,
             'enabled' => false,
@@ -246,9 +261,11 @@ class BackupMonitorControllerTest extends TestCase
         $this->assertResponseId($response, 'update');
 
         $monitor->refresh();
+        $fsConfigs = $monitor->filesystemConfigurations()->get()->pluck('id')->toArray();
 
         $this->assertSame('Updated Monitor Name', $monitor->name);
-        $this->assertSame(['s3'], $monitor->disks);
+        $this->assertContains($destinationOne->id, $fsConfigs);
+        $this->assertContains($destinationTwo->id, $fsConfigs);
         $this->assertSame(14, $monitor->maximum_age_in_days);
         $this->assertSame(4096, $monitor->maximum_storage_in_megabytes);
         $this->assertFalse($monitor->is_active);
@@ -258,9 +275,11 @@ class BackupMonitorControllerTest extends TestCase
     {
         $admin = $this->createAdmin();
 
+        $destination = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+
         $monitor = BackupMonitor::query()->create([
             'name' => 'Keep Enabled State',
-            'disks' => ['local'],
+            'destination_ids' => [$destination->id],
             'maximum_age_in_days' => 7,
             'maximum_storage_in_megabytes' => 512,
             'is_active' => false,
@@ -282,9 +301,11 @@ class BackupMonitorControllerTest extends TestCase
     {
         $admin = $this->createAdmin();
 
+        $destination = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+
         $monitor = BackupMonitor::query()->create([
             'name' => 'Delete Me',
-            'disks' => ['local'],
+            'destination_ids' => [$destination->id],
             'maximum_age_in_days' => 7,
             'maximum_storage_in_megabytes' => 512,
             'is_active' => true,
