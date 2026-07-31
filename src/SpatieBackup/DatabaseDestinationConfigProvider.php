@@ -2,13 +2,12 @@
 
 namespace SameOldNick\BackupManager\SpatieBackup;
 
-use SameOldNick\BackupManager\Concerns\UsesBackupConfigurationProvider;
+use Illuminate\Support\Facades\Log;
+use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use Spatie\Backup\Config\DestinationConfig;
 
 class DatabaseDestinationConfigProvider extends DestinationConfig
 {
-    use UsesBackupConfigurationProvider;
-
     /**
      * Create a new DatabaseDestinationConfigProvider instance.
      *
@@ -30,6 +29,14 @@ class DatabaseDestinationConfigProvider extends DestinationConfig
      */
     public function getDisks(): array
     {
-        return $this->getConfigurationProvider()->getDisks();
+        try {
+            return FilesystemConfiguration::where('is_active', true)->get()->map(
+                fn (FilesystemConfiguration $config) => $config->driver_name
+            )->toArray();
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch active filesystem configurations for backup disks: '.$e->getMessage());
+
+            return [];
+        }
     }
 }

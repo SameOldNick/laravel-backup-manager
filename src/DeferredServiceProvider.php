@@ -10,10 +10,8 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
 use SameOldNick\BackupManager\Broadcasting\Access\Stores\CacheStore;
-use SameOldNick\BackupManager\Contracts\BackupConfigurationProvider;
 use SameOldNick\BackupManager\Contracts\ChannelAccessStore;
 use SameOldNick\BackupManager\Contracts\ConfigProvider;
-use SameOldNick\BackupManager\Providers\BackupDatabaseConfigurationProvider;
 use SameOldNick\BackupManager\SpatieBackup\DatabaseConfigProvider;
 use Spatie\Backup\Config\Config;
 
@@ -48,7 +46,6 @@ class DeferredServiceProvider extends BaseServiceProvider implements DeferrableP
         return [
             Config::class,
             ConfigProvider::class,
-            BackupConfigurationProvider::class,
             ChannelAccessStore::class,
             ChannelAccessManager::class,
         ];
@@ -105,7 +102,6 @@ class DeferredServiceProvider extends BaseServiceProvider implements DeferrableP
     protected function bindContracts(): void
     {
         $this->app->bind(ConfigProvider::class, DatabaseConfigProvider::class);
-        $this->app->bind(BackupConfigurationProvider::class, BackupDatabaseConfigurationProvider::class);
     }
 
     /**
