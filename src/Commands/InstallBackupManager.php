@@ -157,6 +157,7 @@ class InstallBackupManager extends Command
             $baseSource.'/Responders/PerformBackupUiResponder.php' => $stackDestination.'/Responders/PerformBackupUiResponder.php',
             $baseSource.'/Responders/CleanupSchedulesUiResponder.php' => $stackDestination.'/Responders/CleanupSchedulesUiResponder.php',
             $baseSource.'/Responders/SchedulesUiResponder.php' => $stackDestination.'/Responders/SchedulesUiResponder.php',
+            $baseSource.'/Responders/BackupMonitorsUiResponder.php' => $stackDestination.'/Responders/BackupMonitorsUiResponder.php',
         ];
     }
 
@@ -178,6 +179,7 @@ class InstallBackupManager extends Command
             $baseSource.'/Responders/PerformBackupUiResponder.php' => $stackDestination.'/Responders/PerformBackupUiResponder.php',
             $baseSource.'/Responders/CleanupSchedulesUiResponder.php' => $stackDestination.'/Responders/CleanupSchedulesUiResponder.php',
             $baseSource.'/Responders/SchedulesUiResponder.php' => $stackDestination.'/Responders/SchedulesUiResponder.php',
+            $baseSource.'/Responders/BackupMonitorsUiResponder.php' => $stackDestination.'/Responders/BackupMonitorsUiResponder.php',
         ];
     }
 

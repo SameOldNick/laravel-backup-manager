@@ -29,6 +29,7 @@ class InstallBackupManagerTest extends TestCase
         'PerformBackupUiResponder.php',
         'CleanupSchedulesUiResponder.php',
         'SchedulesUiResponder.php',
+        'BackupMonitorsUiResponder.php',
     ];
 
     private Filesystem $realFilesystem;

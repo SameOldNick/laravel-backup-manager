@@ -17,5 +17,6 @@ class BackupManagerServiceProvider extends ServiceProvider
         $this->app->bind(UiResponderContracts\PerformBackupUiResponder::class, Responders\PerformBackupUiResponder::class);
         $this->app->bind(UiResponderContracts\CleanupSchedulesUiResponder::class, Responders\CleanupSchedulesUiResponder::class);
         $this->app->bind(UiResponderContracts\SchedulesUiResponder::class, Responders\SchedulesUiResponder::class);
+        $this->app->bind(UiResponderContracts\BackupMonitorsUiResponder::class, Responders\BackupMonitorsUiResponder::class);
     }
 }
