@@ -14,8 +14,9 @@ class BackupSchedulesService
     /**
      * Initializes BackupSchedulesService instance.
      */
-    public function __construct()
-    {
+    public function __construct(
+        protected readonly BackupDestinationsService $destinationsService
+    ) {
         //
     }
 
@@ -36,7 +37,7 @@ class BackupSchedulesService
      */
     public function getAvailableDestinations(): FilesystemConfigurationCollection
     {
-        return BackupSchedule::availableDestinations();
+        return $this->destinationsService->getBackupDestinations(active: true, orderBy: 'name ASC');
     }
 
     /**

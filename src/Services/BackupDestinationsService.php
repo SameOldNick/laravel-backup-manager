@@ -27,9 +27,10 @@ class BackupDestinationsService
      *
      * @param  bool|null  $active  Optional filter to retrieve only active or inactive backup destinations
      * @param  string|null  $query  Optional search query to filter backup destinations by name, type, or host
+     * @param  string|null  $orderBy  Optional order by clause to sort the results
      * @return FilesystemConfigurationCollection A collection of FilesystemConfiguration models matching the specified criteria
      */
-    public function getBackupDestinations(?bool $active = null, ?string $query = null): FilesystemConfigurationCollection
+    public function getBackupDestinations(?bool $active = null, ?string $query = null, ?string $orderBy = 'created_at DESC'): FilesystemConfigurationCollection
     {
         $fsConfigQuery = FilesystemConfiguration::query();
 
@@ -45,7 +46,11 @@ class BackupDestinationsService
             });
         }
 
-        return new FilesystemConfigurationCollection($fsConfigQuery->latest()->get());
+        if ($orderBy) {
+            $fsConfigQuery->orderByRaw($orderBy);
+        }
+
+        return $fsConfigQuery->get();
     }
 
     /**
