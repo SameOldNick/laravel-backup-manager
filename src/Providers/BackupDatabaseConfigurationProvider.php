@@ -2,9 +2,9 @@
 
 namespace SameOldNick\BackupManager\Providers;
 
+use Illuminate\Support\Facades\Log;
 use SameOldNick\BackupManager\Contracts\BackupConfigurationProvider;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
-use Illuminate\Support\Facades\Log;
 
 class BackupDatabaseConfigurationProvider implements BackupConfigurationProvider
 {
