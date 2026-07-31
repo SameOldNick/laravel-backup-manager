@@ -91,13 +91,22 @@ class BackupScheduler
      */
     public function scheduleCleanup()
     {
-        $expressions = CleanupSchedule::active()->pluck('cron_expression')->toArray();
+        try {
+            $expressions = CleanupSchedule::active()->pluck('cron_expression')->toArray();
 
-        foreach ($expressions as $expression) {
-            $expression = $this->transformCronExpression($expression);
+            foreach ($expressions as $expression) {
+                try {
+                    $expression = $this->transformCronExpression($expression);
 
-            $this->scheduleCommand('backup:clean', $expression);
+                    $this->scheduleCommand('backup:clean', $expression);
+                } catch (\Throwable $e) {
+                    Log::error("Error scheduling cleanup for cron expression '{$expression}': ".$e->getMessage());
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error retrieving cleanup schedules: '.$e->getMessage());
         }
+
     }
 
     /**
