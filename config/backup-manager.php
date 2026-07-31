@@ -51,6 +51,11 @@ return [
             'as' => 'destinations.',
         ],
 
+        'monitors' => [
+            'prefix' => '/monitors',
+            'as' => 'monitors.',
+        ],
+
         'schedules' => [
             'prefix' => '/schedules',
             'as' => 'schedules.',
@@ -92,5 +97,16 @@ return [
      */
     'db_dumper_extenders' => [
         'mysql' => MySqlPHP::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Config Fallbacks
+    |--------------------------------------------------------------------------
+    | Here you can specify the config values that will be used as fallbacks when the database
+    | configuration is not available.
+    */
+    'config_fallbacks' => [
+        'monitor_backups' => true,
     ],
 ];

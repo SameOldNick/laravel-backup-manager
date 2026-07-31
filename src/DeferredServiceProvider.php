@@ -84,17 +84,19 @@ class DeferredServiceProvider extends BaseServiceProvider implements DeferrableP
      */
     protected function rebindSpatieBackupConfig(): void
     {
-        if (! $this->app->bound(Config::class)) {
-            $this->app->scoped(Config::class, fn (): Config => Config::fromArray(config('backup')));
-        }
+        $this->app->singleton(Config::class, function (Container $app): Config {
+            $config = Config::fromArray(config('backup'));
 
-        $this->app->extend(Config::class, function (Config $config, Container $app): Config {
-            if ($this->isDatabaseSetup(['filesystem_configurations'])) {
+            if ($this->isDatabaseSetup(['filesystem_configurations', 'backup_monitors'])) {
                 return $app->make(DatabaseConfigProvider::class, ['original' => $config]);
             }
 
             return $config;
         });
+
+        if ($this->app->resolved(Config::class)) {
+            $this->app->forgetInstance(Config::class);
+        }
     }
 
     /**
