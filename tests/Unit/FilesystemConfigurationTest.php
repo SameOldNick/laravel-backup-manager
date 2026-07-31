@@ -28,7 +28,7 @@ class FilesystemConfigurationTest extends TestCase
 
         $this->expectException(\InvalidArgumentException::class);
 
-        /** @var Illuminate\Filesystem\FilesystemAdapter */
+        /** @var FilesystemAdapter */
         Storage::disk("dynamic-{$fsConfig->slug}");
     }
 
@@ -41,7 +41,7 @@ class FilesystemConfigurationTest extends TestCase
             'is_active' => true,
         ]);
 
-        /** @var Illuminate\Filesystem\FilesystemAdapter */
+        /** @var FilesystemAdapter */
         $disk = Storage::disk("dynamic-{$fsConfig->slug}");
 
         $this->assertInstanceOf(FilesystemAdapter::class, $disk);
@@ -100,7 +100,7 @@ class FilesystemConfigurationTest extends TestCase
             'configurable_id' => $sftpConfig->id,
         ]);
 
-        /** @var Illuminate\Filesystem\FilesystemAdapter */
+        /** @var FilesystemAdapter */
         $disk = Storage::disk('dynamic-test-sftp-config');
 
         $this->assertInstanceOf(FilesystemAdapter::class, $disk);
@@ -129,7 +129,7 @@ class FilesystemConfigurationTest extends TestCase
             'configurable_id' => $sftpConfig->id,
         ]);
 
-        /** @var Illuminate\Filesystem\FilesystemAdapter */
+        /** @var FilesystemAdapter */
         $disk = Storage::disk("dynamic-{$fsConfig->slug}");
 
         $this->assertInstanceOf(FilesystemAdapter::class, $disk);
@@ -192,7 +192,7 @@ class FilesystemConfigurationTest extends TestCase
             'configurable_id' => $sftpConfig->id,
         ]);
 
-        /** @var Illuminate\Filesystem\FilesystemAdapter */
+        /** @var FilesystemAdapter */
         $disk = Storage::disk('dynamic-test-ftp-config');
 
         $this->assertInstanceOf(FilesystemAdapter::class, $disk);
@@ -221,7 +221,7 @@ class FilesystemConfigurationTest extends TestCase
             'configurable_id' => $sftpConfig->id,
         ]);
 
-        /** @var Illuminate\Filesystem\FilesystemAdapter */
+        /** @var FilesystemAdapter */
         $disk = Storage::disk("dynamic-{$fsConfig->slug}");
 
         $this->assertInstanceOf(FilesystemAdapter::class, $disk);
