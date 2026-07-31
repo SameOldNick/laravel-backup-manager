@@ -142,7 +142,7 @@ class ScheduleTest extends TestCase
         $schedule1 = $this->createBackupSchedule('Valid Schedule', 'full', '0 0 * * *', true);
         $schedule2 = $this->createBackupSchedule('Invalid Schedule', 'full', '0 1 * * *', true);
 
-        $schedule2->forceFill(['type' => 'invalid_type'])->save();
+        $schedule2->setRawAttributes(array_merge($schedule2->getAttributes(), ['type' => 'invalid_type']))->save();
 
         $this->assertSchedulerJobs(function (array $jobs) {
             $this->assertCount(1, $jobs);
