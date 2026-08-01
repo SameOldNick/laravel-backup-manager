@@ -30,11 +30,27 @@ class DatabaseDestinationConfigProvider extends DestinationConfig
     public function getDisks(): array
     {
         try {
-            return FilesystemConfiguration::where('is_active', true)->get()->pluck('driver_name')->toArray();
+            $configs = FilesystemConfiguration::where('is_active', true)->get();
+
+            if ($configs->isEmpty()) {
+                return $this->getFallbackDisks();
+            }
+
+            return $configs->pluck('driver_name')->toArray();
         } catch (\Exception $e) {
             Log::error('Failed to fetch active filesystem configurations for backup disks: '.$e->getMessage());
 
-            return [];
+            return $this->getFallbackDisks();
         }
+    }
+
+    /**
+     * Get the fallback disks from the original configuration.
+     *
+     * @return array<string>
+     */
+    protected function getFallbackDisks(): array
+    {
+        return config('backup-manager.config_fallbacks.destination_disks') ? $this->original->disks : [];
     }
 }

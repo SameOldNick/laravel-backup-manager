@@ -107,6 +107,7 @@ return [
     | configuration is not available.
     */
     'config_fallbacks' => [
+        'destination_disks' => true,
         'monitor_backups' => true,
     ],
 ];
