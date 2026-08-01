@@ -52,7 +52,10 @@ Route::group(config('backup-manager.routes.all', [
             Route::put('/{destination}', [Controllers\BackupDestinationsController::class, 'update'])->name('update');
             Route::delete('/{destination}', [Controllers\BackupDestinationsController::class, 'destroy'])->name('destroy');
 
-            Route::prefix('/{destination}/test')->name('test.')->group(function () {
+            Route::group(config('backup-manager.routes.test-destinations', [
+                'prefix' => '/{destination}/test',
+                'as' => 'test.',
+            ]), function () {
                 Route::post('/initialize', [Controllers\BackupDestinationTestController::class, 'initialize'])->name('initialize');
                 Route::post('/start', [Controllers\BackupDestinationTestController::class, 'start'])
                     ->name('start')

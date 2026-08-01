@@ -51,6 +51,11 @@ return [
             'as' => 'destinations.',
         ],
 
+        'test-destinations' => [
+            'prefix' => '/{destination}/test',
+            'as' => 'test.',
+        ],
+
         'monitors' => [
             'prefix' => '/monitors',
             'as' => 'monitors.',
