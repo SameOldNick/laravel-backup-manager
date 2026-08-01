@@ -32,23 +32,14 @@ class BackupDestinationsService
      */
     public function getBackupDestinations(?bool $active = null, ?string $query = null, ?string $orderBy = 'created_at DESC'): FilesystemConfigurationCollection
     {
-        $fsConfigQuery = FilesystemConfiguration::query();
-
-        if ($active !== null) {
-            $fsConfigQuery->where('is_active', $active);
-        }
-
-        if ($query) {
-            $fsConfigQuery->where(function ($q) use ($query) {
+        $fsConfigQuery = FilesystemConfiguration::query()
+            ->when($active !== null, fn ($q) => $q->where('is_active', $active))
+            ->when($query, fn ($q) => $q->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
                     ->orWhere('type', 'like', "%{$query}%")
                     ->orWhere('host', 'like', "%{$query}%");
-            });
-        }
-
-        if ($orderBy) {
-            $fsConfigQuery->orderByRaw($orderBy);
-        }
+            }))
+            ->when($orderBy, fn ($q) => $q->orderByRaw($orderBy));
 
         return $fsConfigQuery->get();
     }
