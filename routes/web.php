@@ -4,15 +4,29 @@ use Illuminate\Support\Facades\Route;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Http\Controllers;
 
-Route::group(config('backup-manager.routes.all', []), function () {
-    Route::group(config('backup-manager.routes.management', []), function () {
-        Route::group(config('backup-manager.routes.backups', []), function () {
+Route::group(config('backup-manager.routes.all', [
+    'middleware' => [
+        'web',
+    ],
+    'prefix' => '/backup',
+    'as' => 'backup.',
+]), function () {
+    Route::group(config('backup-manager.routes.management', ['middleware' => [
+        'auth',
+    ]]), function () {
+        Route::group(config('backup-manager.routes.backups', [
+            'prefix' => '/backups',
+            'as' => 'backups.',
+        ]), function () {
             Route::get('/', [Controllers\BackupController::class, 'index'])->name('index');
             Route::get('/{backup}/download', [Controllers\BackupController::class, 'generateDownloadLink'])->name('download');
 
         });
 
-        Route::group(config('backup-manager.routes.perform', []), function () {
+        Route::group(config('backup-manager.routes.perform', [
+            'prefix' => '/perform',
+            'as' => 'perform.',
+        ]), function () {
             Route::post('/', [Controllers\PerformBackupController::class, 'initialize'])
                 ->name('initialize');
 
@@ -27,7 +41,10 @@ Route::group(config('backup-manager.routes.all', []), function () {
                 ->whereUuid('uuid');
         });
 
-        Route::group(config('backup-manager.routes.destinations', []), function () {
+        Route::group(config('backup-manager.routes.destinations', [
+            'prefix' => '/destinations',
+            'as' => 'destinations.',
+        ]), function () {
             Route::get('/', [Controllers\BackupDestinationsController::class, 'index'])->name('index');
             Route::get('/create', [Controllers\BackupDestinationsController::class, 'create'])->name('create');
             Route::post('/', [Controllers\BackupDestinationsController::class, 'store'])->name('store');
@@ -46,16 +63,22 @@ Route::group(config('backup-manager.routes.all', []), function () {
                     ->whereUuid('uuid');
             });
         });
-        Route::group(config('backup-manager.routes.monitors', []), function () {
-                Route::get('/', [Controllers\BackupMonitorController::class, 'index'])->name('index');
-                Route::get('/create', [Controllers\BackupMonitorController::class, 'create'])->name('create');
-                Route::post('/', [Controllers\BackupMonitorController::class, 'store'])->name('store');
-                Route::get('/{monitor}/edit', [Controllers\BackupMonitorController::class, 'edit'])->name('edit');
-                Route::put('/{monitor}', [Controllers\BackupMonitorController::class, 'update'])->name('update');
-                Route::delete('/{monitor}', [Controllers\BackupMonitorController::class, 'destroy'])->name('destroy');
-            });
+        Route::group(config('backup-manager.routes.monitors', [
+            'prefix' => '/monitors',
+            'as' => 'monitors.',
+        ]), function () {
+            Route::get('/', [Controllers\BackupMonitorController::class, 'index'])->name('index');
+            Route::get('/create', [Controllers\BackupMonitorController::class, 'create'])->name('create');
+            Route::post('/', [Controllers\BackupMonitorController::class, 'store'])->name('store');
+            Route::get('/{monitor}/edit', [Controllers\BackupMonitorController::class, 'edit'])->name('edit');
+            Route::put('/{monitor}', [Controllers\BackupMonitorController::class, 'update'])->name('update');
+            Route::delete('/{monitor}', [Controllers\BackupMonitorController::class, 'destroy'])->name('destroy');
+        });
 
-        Route::group(config('backup-manager.routes.schedules', []), function () {
+        Route::group(config('backup-manager.routes.schedules', [
+            'prefix' => '/schedules',
+            'as' => 'schedules.',
+        ]), function () {
             Route::get('/', [Controllers\ScheduleController::class, 'index'])->name('index');
 
             Route::resource('backup', Controllers\BackupScheduleController::class)->parameters([
@@ -68,8 +91,10 @@ Route::group(config('backup-manager.routes.all', []), function () {
         });
     });
 
-    Route::group(config('backup-manager.routes.download', []), function () {
-        Route::group(config('backup-manager.routes.files', []), function () {
+    Route::group(config('backup-manager.routes.download', ['middleware' => [
+        'signed',
+    ]]), function () {
+        Route::group(config('backup-manager.routes.files', ['prefix' => '/files']), function () {
             Route::get('/{file}', [Controllers\BackupFileController::class, 'retrieve'])->name('file');
         });
     });
