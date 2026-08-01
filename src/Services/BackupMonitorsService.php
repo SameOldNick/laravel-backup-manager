@@ -17,15 +17,11 @@ class BackupMonitorsService
 
     public function getBackupMonitors(?bool $active = null, ?string $query = null): BackupMonitorCollection
     {
-        $monitorQuery = BackupMonitor::query();
-
-        if ($active !== null) {
-            $monitorQuery->where('is_active', $active);
-        }
-
-        if ($query) {
-            $monitorQuery->where('name', 'like', "%{$query}%");
-        }
+        $monitorQuery = BackupMonitor::query()
+            ->when($active !== null, fn ($q) => $q->where('is_active', $active))
+            ->when($query, fn ($q) => $q->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%");
+            }));
 
         return new BackupMonitorCollection($monitorQuery->latest()->get());
     }

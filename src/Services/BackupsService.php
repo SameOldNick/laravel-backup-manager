@@ -2,6 +2,7 @@
 
 namespace SameOldNick\BackupManager\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\URL;
 use SameOldNick\BackupManager\Enums\BackupStatus;
 use SameOldNick\BackupManager\Models\Backup;
@@ -26,25 +27,25 @@ class BackupsService
      */
     public function getBackups(?BackupStatus $status = null, ?string $query = null): BackupCollection
     {
-        $backupsQuery = Backup::query()->withTrashed()->with('file', function ($query) {
-            $query->withTrashed();
-        });
-
-        if ($status !== null) {
-            $backupsQuery->afterQuery(function ($backups) use ($status) {
-                return $backups->filter(fn (Backup $backup) => $backup->status === $status);
-            });
-        }
-
-        if ($query) {
-            $backupsQuery->where(function ($q) use ($query) {
-                $q->where('uuid', 'like', "%{$query}%")
-                    ->orWhere('status', 'like', "%{$query}%")
-                    ->orWhereHas('file', function ($q) use ($query) {
-                        $q->where('path', 'like', "%{$query}%");
+        /** @var Builder $backupsQuery */
+        $backupsQuery =
+            Backup::query()->withTrashed()->with('file', function ($query) {
+                $query->withTrashed();
+            })
+                ->when($status !== null, function ($query) use ($status) {
+                    $query->afterQuery(function ($backups) use ($status) {
+                        return $backups->filter(fn (Backup $backup) => $backup->status === $status);
                     });
-            });
-        }
+                })
+                ->when($query, function ($queryBuilder) use ($query) {
+                    $queryBuilder->where(function ($q) use ($query) {
+                        $q->where('uuid', 'like', "%{$query}%")
+                            ->orWhere('status', 'like', "%{$query}%")
+                            ->orWhereHas('file', function ($q) use ($query) {
+                                $q->where('path', 'like', "%{$query}%");
+                            });
+                    });
+                });
 
         return new BackupCollection($backupsQuery->latest()->get());
     }
