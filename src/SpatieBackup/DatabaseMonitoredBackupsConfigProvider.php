@@ -2,6 +2,7 @@
 
 namespace SameOldNick\BackupManager\SpatieBackup;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use SameOldNick\BackupManager\Models\BackupMonitor;
 use Spatie\Backup\Config\MonitoredBackupConfig;
@@ -58,6 +59,14 @@ class DatabaseMonitoredBackupsConfigProvider extends MonitoredBackupsConfig
      */
     protected function getFallbackMonitorBackups(): array
     {
-        return config('backup-manager.config_fallbacks.monitor_backups') ? $this->original->monitorBackups : [];
+        $fallback = config('backup-manager.config_fallbacks.monitor_backups');
+
+        if (is_array($fallback)) {
+            return Arr::map($fallback, fn (array $monitoredBackup) => MonitoredBackupConfig::fromArray($monitoredBackup));
+        } elseif ($fallback) {
+            return $this->original->monitorBackups;
+        }
+
+        return [];
     }
 }

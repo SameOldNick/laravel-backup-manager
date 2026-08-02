@@ -112,7 +112,17 @@ return [
     | configuration is not available.
     */
     'config_fallbacks' => [
+        /**
+         * If true, the original 'backup.destinations.disks' config will be used for destination disks when the database is not available.
+         * If false, the disks from the original configuration will be used instead.
+         * If an array of disks is provided, those disks will be used.
+         */
         'destination_disks' => true,
+        /**
+         * If true, the original 'backup.monitor_backups' config will be used for monitored backups when the database is not available.
+         * If false, the monitored backups from the original configuration will be used instead.
+         * If an array of monitored backups is provided, those monitored backups will be used.
+         */
         'monitor_backups' => true,
     ],
 ];

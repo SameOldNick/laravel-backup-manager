@@ -51,6 +51,14 @@ class DatabaseDestinationConfigProvider extends DestinationConfig
      */
     protected function getFallbackDisks(): array
     {
-        return config('backup-manager.config_fallbacks.destination_disks') ? $this->original->disks : [];
+        $fallback = config('backup-manager.config_fallbacks.destination_disks');
+
+        if (is_array($fallback)) {
+            return $fallback;
+        } elseif ($fallback) {
+            return $this->original->disks;
+        }
+
+        return [];
     }
 }
