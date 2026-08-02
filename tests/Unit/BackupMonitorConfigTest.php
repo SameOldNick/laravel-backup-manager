@@ -8,6 +8,7 @@ use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Testing\Concerns;
 use SameOldNick\BackupManager\Tests\TestCase;
 use Spatie\Backup\Config\Config;
+use Spatie\Backup\Config\MonitoredBackupsConfig;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes;
 
@@ -21,14 +22,14 @@ class BackupMonitorConfigTest extends TestCase
             'backup-manager.config_fallbacks.monitor_backups' => true,
         ]);
 
+        $expected = MonitoredBackupsConfig::fromArray(config('backup.monitor_backups', []))->monitorBackups;
+
         $this->app->forgetInstance(Config::class);
         $this->app->register(DeferredServiceProvider::class);
 
-        $this->assertMonitoredBackups(function (array $monitors) {
-            $this->assertCount(1, $monitors);
-            $this->assertSame('Laravel', $monitors[0]['name']);
-            $this->assertCount(1, $monitors[0]['disks']);
-            $this->assertCount(2, $monitors[0]['healthChecks']);
+        $this->assertMonitoredBackups(function (array $monitors) use ($expected) {
+            $this->assertCount(count($expected), $monitors);
+            $this->assertSame($expected, $monitors);
         });
     }
 
