@@ -23,7 +23,7 @@ class BackupMonitorsService
                 $q->where('name', 'like', "%{$query}%");
             }));
 
-        return new BackupMonitorCollection($monitorQuery->latest()->get());
+        return $monitorQuery->latest()->get();
     }
 
     public function createBackupMonitor(CreateBackupMonitorData $data): BackupMonitor

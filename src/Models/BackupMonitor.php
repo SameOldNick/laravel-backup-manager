@@ -2,14 +2,17 @@
 
 namespace SameOldNick\BackupManager\Models;
 
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use SameOldNick\BackupManager\Models\Collections\BackupMonitorCollection;
 use SameOldNick\BackupManager\Models\Factories\BackupMonitorFactory;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes;
 
+#[CollectedBy(BackupMonitorCollection::class)]
 #[UseFactory(BackupMonitorFactory::class)]
 class BackupMonitor extends Model
 {
