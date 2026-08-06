@@ -24,7 +24,8 @@ composer require sameoldnick/laravel-backup-manager
 Publish the configuration and migrations:
 
 ```bash
-php artisan vendor:publish --provider="SameOldNick\BackupManager\ServiceProvider"
+php artisan vendor:publish --tag=backup-manager-config
+php artisan vendor:publish --tag=backup-manager-migrations
 php artisan migrate
 ```
 
@@ -46,11 +47,17 @@ Supported stacks: `inertia`, `custom`
 
 2. **Implement the frontend** — Follow the [Building React UI](https://github.com/SameOldNick/laravel-backup-manager/wiki/Building-React-UI) guide or explore the [demo repo](https://github.com/SameOldNick/laravel-backup-manager-demo) for a working example.
 
+The installer also scaffolds an app-level service provider so your application can bind its own responder implementations for the package UI layer.
+
 ## Features
 
 ### Database-Driven Schedules
 
 Backup and cleanup schedules live in the database — no hard-coded entries in `routes/console.php`. Each backup schedule links to one or more storage destinations.
+
+### Database-Backed Backup Monitors
+
+Backup monitor configuration, including monitored backup definitions and related filesystem mappings, is stored in the database and can be managed via the built-in service layer and UI responders.
 
 ### Dynamic Storage Destinations
 
@@ -81,6 +88,7 @@ The Inertia responders return page-level props for:
 - Listing and downloading backups
 - Creating, editing, testing, and deleting storage destinations
 - Managing backup and cleanup schedules
+- Managing backup monitor configuration
 - Triggering and monitoring backup runs
 
 The UI layer is contract-based — swap in your own responders for a custom stack (REST API, Blade, Livewire, etc.).
