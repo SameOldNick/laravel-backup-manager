@@ -19,6 +19,28 @@ All notable changes will be documented in this file.
 - Re-publish the package config if you previously published it, because the config file includes new options and fallback settings
 - Add the UI responder and register it in `BackupManagerServiceProvider`
 
+### Upgrade Prompt
+
+Use this prompt to upgrade an existing Laravel app from Laravel Backup Manager 1.x to 2.0:
+
+```text
+Upgrade this Laravel application from Laravel Backup Manager (sameoldnick/laravel-backup-manager) 1.x to 2.0.
+
+Follow this process:
+1. Inspect composer.json, composer.lock, config/backup-manager.php, config/backup.php, bootstrap/providers.php, app/Providers/BackupManagerServiceProvider.php, and database/migrations for existing Laravel Backup Manager integration.
+2. Update the package to v2.0 if it is not already installed.
+3. Publish the latest package migrations with `php artisan vendor:publish --tag=backup-manager-migrations --force`.
+4. Detect and remove duplicated legacy published migrations for this package from the host application's database/migrations directory so the new package migrations are the single source of truth.
+5. Run `php artisan migrate`.
+6. Re-publish or manually update the published package config so it matches the v2.0 defaults, including any new fallback options.
+7. Replace any usage of removed 1.x APIs, especially `BackupConfigurationProvider`, `UsesBackupConfigurationProvider`, and `BackupDatabaseConfigurationProvider`.
+8. Ensure the application's UI responder classes exist and that `App\Providers\BackupManagerServiceProvider` binds and registers them correctly.
+9. Verify the package now relies on the Spatie config provider integration and database-backed monitored backup configuration expected by v2.0.
+10. Run focused validation for the upgrade, including relevant tests and a quick route or UI smoke check if the app exposes backup manager screens.
+
+When you make changes, explain what you changed, call out any manual follow-up still required, and highlight anything that could not be upgraded automatically.
+```
+
 ### Added
 
 - Database-backed backup monitor configuration
