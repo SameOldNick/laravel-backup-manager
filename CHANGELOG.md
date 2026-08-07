@@ -2,6 +2,17 @@
 
 All notable changes will be documented in this file.
 
+## v2.0.1 - 2026-08-07
+
+### Fixed
+
+- Backup monitor age and storage limits can now be disabled correctly
+
+### Documentation
+
+- Updated README with revised publish commands and database-backed backup monitor details
+- Clarified v1.x to v2.0 upgrade guidance, including migration handling and responder binding details
+
 ## v2.0.0 - 2026-08-01
 
 ### Breaking
