@@ -30,7 +30,7 @@ Follow this process:
 1. Inspect composer.json, composer.lock, config/backup-manager.php, config/backup.php, bootstrap/providers.php, app/Providers/BackupManagerServiceProvider.php, and database/migrations for existing Laravel Backup Manager integration.
 2. Update the package to v2.0 if it is not already installed.
 3. Publish the latest package migrations with `php artisan vendor:publish --tag=backup-manager-migrations --force`.
-4. Detect and remove duplicated legacy published migrations for this package from the host application's database/migrations directory so the new package migrations are the single source of truth.
+4. Detect duplicate package migrations carefully. Do not delete or rename existing migration files for tables that already exist. Keep original migration filenames/timestamps (for example, keep `database/migrations/2026_07_07_021221_create_backup_destination_test_runs.php` and do not replace it with a newly timestamped copy like `database/migrations/2026_08_06_021221_create_backup_destination_test_runs.php`).
 5. Run `php artisan migrate`.
 6. Re-publish or manually update the published package config so it matches the v2.0 defaults, including any new fallback options.
 7. Replace any usage of removed 1.x APIs, especially `BackupConfigurationProvider`, `UsesBackupConfigurationProvider`, and `BackupDatabaseConfigurationProvider`.
