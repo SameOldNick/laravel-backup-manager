@@ -34,7 +34,7 @@ Follow this process:
 5. Run `php artisan migrate`.
 6. Re-publish or manually update the published package config so it matches the v2.0 defaults, including any new fallback options.
 7. Replace any usage of removed 1.x APIs, especially `BackupConfigurationProvider`, `UsesBackupConfigurationProvider`, and `BackupDatabaseConfigurationProvider`.
-8. Ensure the application's UI responder classes exist and that `App\Providers\BackupManagerServiceProvider` binds and registers them correctly.
+8. Ensure the application's UI responder classes exist and that `App\Providers\BackupManagerServiceProvider` binds and registers them correctly. In particular, bind `SameOldNick\BackupManager\Contracts\Responders\BackupMonitorsUiResponder` to a concrete `BackupMonitorsUiResponder` class (for example `VendorName\BackupManager\Responders\BackupMonitorsUiResponder`) using `$this->app->bind(...)` in the `register` method.
 9. Verify the package now relies on the Spatie config provider integration and database-backed monitored backup configuration expected by v2.0.
 10. Run focused validation for the upgrade, including relevant tests and a quick route or UI smoke check if the app exposes backup manager screens.
 
