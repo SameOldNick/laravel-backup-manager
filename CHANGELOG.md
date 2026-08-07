@@ -39,7 +39,7 @@ Upgrade this Laravel application from Laravel Backup Manager (sameoldnick/larave
 
 Follow this process:
 1. Inspect composer.json, composer.lock, config/backup-manager.php, config/backup.php, bootstrap/providers.php, app/Providers/BackupManagerServiceProvider.php, and database/migrations for existing Laravel Backup Manager integration.
-2. Update the package to v2.0 if it is not already installed.
+2. Update composer.json to require the package with a `^2.0` constraint if it is not already installed.
 3. Publish the latest package migrations with `php artisan vendor:publish --tag=backup-manager-migrations --force`.
 4. Detect duplicate package migrations carefully. Do not delete or rename existing migration files for tables that already exist. Keep original migration filenames/timestamps (for example, keep `database/migrations/2026_07_07_021221_create_backup_destination_test_runs.php` and do not replace it with a newly timestamped copy like `database/migrations/2026_08_06_021221_create_backup_destination_test_runs.php`).
 5. Run `php artisan migrate`.
