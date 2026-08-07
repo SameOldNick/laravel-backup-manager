@@ -124,7 +124,7 @@ class BackupMonitorConfigTest extends TestCase
         });
     }
 
-    public function test_monitored_backups_no_health_checks(): void
+    public function test_monitored_backups_no_health_checks_when_null_values(): void
     {
         $fsConfig = FilesystemConfiguration::factory()->local()->create([
             'name' => 'test-disk',
@@ -137,6 +137,34 @@ class BackupMonitorConfigTest extends TestCase
         $monitor = BackupMonitor::factory()->create([
             'maximum_age_in_days' => null,
             'maximum_storage_in_megabytes' => null,
+            'is_active' => true,
+        ]);
+
+        $monitor->filesystemConfigurations()->attach($fsConfig);
+
+        $this->app->forgetInstance(Config::class);
+        $this->app->register(DeferredServiceProvider::class);
+
+        $this->assertMonitoredBackups(function (array $monitors) use ($monitor) {
+            $this->assertCount(1, $monitors);
+            $this->assertSame($monitor->name, $monitors[0]['name']);
+            $this->assertEmpty($monitors[0]['healthChecks']);
+        });
+    }
+
+    public function test_monitored_backups_no_health_checks_when_zero_values(): void
+    {
+        $fsConfig = FilesystemConfiguration::factory()->local()->create([
+            'name' => 'test-disk',
+            'slug' => 'test-disk',
+            'is_active' => true,
+        ]);
+
+        $fsConfig->refresh();
+
+        $monitor = BackupMonitor::factory()->create([
+            'maximum_age_in_days' => 0,
+            'maximum_storage_in_megabytes' => 0,
             'is_active' => true,
         ]);
 

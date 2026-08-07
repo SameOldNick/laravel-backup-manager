@@ -271,6 +271,96 @@ class BackupMonitorControllerTest extends TestCase
         $this->assertFalse($monitor->is_active);
     }
 
+    public function test_updates_monitor_disables_maximum_age(): void
+    {
+        $admin = $this->createAdmin();
+
+        $destinationOne = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+        $destinationTwo = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+
+        $monitor = BackupMonitor::query()->create([
+            'name' => 'Monitor Name',
+            'destination_ids' => [
+                $destinationOne->id,
+                $destinationTwo->id,
+            ],
+            'maximum_age_in_days' => 7,
+            'maximum_storage_in_megabytes' => 512,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('backup.monitors.update', $monitor), [
+            'name' => 'Monitor Name',
+            'destination_ids' => [
+                $destinationOne->id,
+                $destinationTwo->id,
+            ],
+            'maximum_age_in_days' => 0,
+            'maximum_storage_in_megabytes' => 4096,
+            'enabled' => true,
+        ]);
+
+        $response->assertOk();
+
+        $this->assertResponderUsed($response, 'backup-monitors');
+        $this->assertResponseId($response, 'update');
+
+        $monitor->refresh();
+        $fsConfigs = $monitor->filesystemConfigurations()->get()->pluck('id')->toArray();
+
+        $this->assertSame('Monitor Name', $monitor->name);
+        $this->assertContains($destinationOne->id, $fsConfigs);
+        $this->assertContains($destinationTwo->id, $fsConfigs);
+        $this->assertSame(0, $monitor->maximum_age_in_days);
+        $this->assertSame(4096, $monitor->maximum_storage_in_megabytes);
+        $this->assertTrue($monitor->is_active);
+    }
+
+    public function test_updates_monitor_disables_maximum_storage(): void
+    {
+        $admin = $this->createAdmin();
+
+        $destinationOne = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+        $destinationTwo = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+
+        $monitor = BackupMonitor::query()->create([
+            'name' => 'Monitor Name',
+            'destination_ids' => [
+                $destinationOne->id,
+                $destinationTwo->id,
+            ],
+            'maximum_age_in_days' => 7,
+            'maximum_storage_in_megabytes' => 512,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('backup.monitors.update', $monitor), [
+            'name' => 'Monitor Name',
+            'destination_ids' => [
+                $destinationOne->id,
+                $destinationTwo->id,
+            ],
+            'maximum_age_in_days' => 5,
+            'maximum_storage_in_megabytes' => 0,
+            'enabled' => true,
+        ]);
+
+        $response->assertOk();
+
+        $this->assertResponderUsed($response, 'backup-monitors');
+        $this->assertResponseId($response, 'update');
+
+        $monitor->refresh();
+        $fsConfigs = $monitor->filesystemConfigurations()->get()->pluck('id')->toArray();
+
+        $this->assertSame('Monitor Name', $monitor->name);
+        $this->assertContains($destinationOne->id, $fsConfigs);
+        $this->assertContains($destinationTwo->id, $fsConfigs);
+        $this->assertSame(5, $monitor->maximum_age_in_days);
+        $this->assertSame(0, $monitor->maximum_storage_in_megabytes);
+        $this->assertTrue($monitor->is_active);
+    }
+
     public function test_updates_monitor_without_enabled_field_keeps_existing_enabled_state(): void
     {
         $admin = $this->createAdmin();

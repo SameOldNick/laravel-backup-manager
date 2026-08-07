@@ -25,8 +25,8 @@ class UpdateBackupMonitorRequest extends FormRequest
                     true,
                 ),
             ],
-            'maximum_age_in_days' => ['nullable', 'integer', 'min:1'],
-            'maximum_storage_in_megabytes' => ['nullable', 'integer', 'min:1'],
+            'maximum_age_in_days' => ['nullable', 'integer', 'min:0'],
+            'maximum_storage_in_megabytes' => ['nullable', 'integer', 'min:0'],
             'enabled' => ['sometimes', 'boolean'],
         ];
     }
