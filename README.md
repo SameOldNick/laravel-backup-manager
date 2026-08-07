@@ -1,5 +1,6 @@
 # Laravel Backup Manager
 
+[![Packagist](https://img.shields.io/packagist/v/sameoldnick/laravel-backup-manager)](https://packagist.org/packages/sameoldnick/laravel-backup-manager)
 [![codecov](https://codecov.io/gh/SameOldNick/laravel-backup-manager/graph/badge.svg?token=SgfZngm6IB)](https://codecov.io/gh/SameOldNick/laravel-backup-manager)
 [![Demo](https://img.shields.io/badge/demo-repo-blue)](https://github.com/SameOldNick/backup-manager-demo)
 
