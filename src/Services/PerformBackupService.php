@@ -3,7 +3,6 @@
 namespace SameOldNick\BackupManager\Services;
 
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
-use SameOldNick\BackupManager\Concerns;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Exceptions\BackupChannelLeaseNotFoundException;
 use SameOldNick\BackupManager\Exceptions\BackupChannelLeaseUnauthorizedException;
@@ -11,19 +10,8 @@ use SameOldNick\BackupManager\Exceptions\BackupRunAlreadyExistsException;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 use SameOldNick\BackupManager\Models\BackupRun;
 
-class PerformBackupService
+class PerformBackupService extends AbstractChannelLeaseService
 {
-    use Concerns\AcquiresChannelLease;
-    use Concerns\GeneratesChannelId;
-
-    /**
-     * Initializes PerformBackupService instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
     /**
      * Starts a backup process by dispatching a BackupJob and creating a channel lease for real-time updates.
      *
@@ -35,11 +23,7 @@ class PerformBackupService
      */
     public function openBackupChannel(string $uuid, object $user): ChannelLease
     {
-        $channel = $this->createChannelId($uuid);
-
-        $lease = $this->openChannelLease($channel, $user);
-
-        return $lease;
+        return $this->openChannelLeaseForUuid($uuid, $user);
     }
 
     /**
@@ -50,7 +34,7 @@ class PerformBackupService
      */
     public function getBackupChannelLease(string $uuid): ?ChannelLease
     {
-        return $this->getChannelLease($this->createChannelId($uuid));
+        return $this->getChannelLeaseForUuid($uuid);
     }
 
     /**
@@ -75,15 +59,7 @@ class PerformBackupService
      */
     public function dispatchBackupJobOnce(BackupTypes $type, object $user, string $uuid): BackupRun
     {
-        $lease = $this->getBackupChannelLease($uuid);
-
-        if (! $lease) {
-            throw new BackupChannelLeaseNotFoundException($uuid);
-        }
-
-        if ($lease->notifiableClass !== $user::class || $lease->notifiableKey !== (string) $user->getAuthIdentifier()) {
-            throw new BackupChannelLeaseUnauthorizedException($uuid);
-        }
+        $lease = $this->requireChannelLeaseForUuid($uuid, $user);
 
         /**
          * A insertOrIgnore is used to ensure that only one BackupRun is created for a given UUID, even if this method is called multiple times concurrently.
@@ -125,5 +101,21 @@ class PerformBackupService
     protected function getChannelLeaseExpirationMinutes(): int
     {
         return config('backup-manager.channel_leases.perform_backup.ttl', 180);
+    }
+
+    /**
+     * Gets the channel lease not found exception for backup runs.
+     */
+    protected function makeChannelLeaseNotFoundException(string $uuid): \Throwable
+    {
+        return new BackupChannelLeaseNotFoundException($uuid);
+    }
+
+    /**
+     * Gets the channel lease unauthorized exception for backup runs.
+     */
+    protected function makeChannelLeaseUnauthorizedException(string $uuid): \Throwable
+    {
+        return new BackupChannelLeaseUnauthorizedException($uuid);
     }
 }

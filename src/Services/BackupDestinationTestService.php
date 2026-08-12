@@ -3,25 +3,13 @@
 namespace SameOldNick\BackupManager\Services;
 
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
-use SameOldNick\BackupManager\Concerns;
 use SameOldNick\BackupManager\Enums\RunStatus;
 use SameOldNick\BackupManager\Jobs\Notifiable\FilesystemConfigurationTestJob;
 use SameOldNick\BackupManager\Models\BackupDestinationTestRun;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 
-class BackupDestinationTestService
+class BackupDestinationTestService extends AbstractChannelLeaseService
 {
-    use Concerns\AcquiresChannelLease;
-    use Concerns\GeneratesChannelId;
-
-    /**
-     * Initializes BackupDestinationTestService instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
     /**
      * Opens a channel lease for a backup destination test.
      *
@@ -31,11 +19,7 @@ class BackupDestinationTestService
      */
     public function openBackupDestinationTestChannel(string $uuid, object $user): ChannelLease
     {
-        $channel = $this->createChannelId($uuid);
-
-        $lease = $this->openChannelLease($channel, $user);
-
-        return $lease;
+        return $this->openChannelLeaseForUuid($uuid, $user);
     }
 
     /**
@@ -58,15 +42,7 @@ class BackupDestinationTestService
      */
     public function dispatchTestJobOnce(FilesystemConfiguration $destination, object $user, string $uuid): BackupDestinationTestRun
     {
-        $lease = $this->getBackupDestinationTestChannelLease($uuid);
-
-        if ($lease === null) {
-            throw new \RuntimeException('Backup destination test channel lease not found for UUID: '.$uuid);
-        }
-
-        if ($lease->notifiableClass !== $user::class || $lease->notifiableKey !== (string) $user->getAuthIdentifier()) {
-            throw new \RuntimeException('Unauthorized access to backup destination test channel lease for UUID: '.$uuid);
-        }
+        $lease = $this->requireChannelLeaseForUuid($uuid, $user);
 
         /** @var int $inserted */
         $inserted = BackupDestinationTestRun::query()->insertOrIgnore([
@@ -98,7 +74,7 @@ class BackupDestinationTestService
      */
     public function getBackupDestinationTestChannelLease(string $uuid): ?ChannelLease
     {
-        return $this->getChannelLease($this->createChannelId($uuid));
+        return $this->getChannelLeaseForUuid($uuid);
     }
 
     /**
@@ -114,7 +90,22 @@ class BackupDestinationTestService
      */
     protected function getChannelLeaseExpirationMinutes(): int
     {
-
         return config('backup-manager.channel_leases.test_backup_destination.ttl', 180);
+    }
+
+    /**
+     * Gets the channel lease not found exception for destination tests.
+     */
+    protected function makeChannelLeaseNotFoundException(string $uuid): \Throwable
+    {
+        return new \RuntimeException('Backup destination test channel lease not found for UUID: '.$uuid);
+    }
+
+    /**
+     * Gets the channel lease unauthorized exception for destination tests.
+     */
+    protected function makeChannelLeaseUnauthorizedException(string $uuid): \Throwable
+    {
+        return new \RuntimeException('Unauthorized access to backup destination test channel lease for UUID: '.$uuid);
     }
 }
