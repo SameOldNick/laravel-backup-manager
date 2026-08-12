@@ -125,7 +125,7 @@ class BackupDestinationTestControllerTest extends TestCase
             'uuid' => $uuid,
         ]);
 
-        $secondStartResponse->assertServerError();
+        $secondStartResponse->assertConflict();
 
         Queue::assertPushedTimes(FilesystemConfigurationTestJob::class, 1);
 
