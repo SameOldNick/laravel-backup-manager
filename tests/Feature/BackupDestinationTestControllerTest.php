@@ -2,6 +2,7 @@
 
 namespace SameOldNick\BackupManager\Tests\Feature;
 
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,7 @@ use SameOldNick\BackupManager\Tests\TestCase;
 class BackupDestinationTestControllerTest extends TestCase
 {
     use Concerns\UiResponderAssertions;
+    use WithFaker;
 
     /**
      * Prepare faked storage for backup-related tests.
@@ -128,6 +130,37 @@ class BackupDestinationTestControllerTest extends TestCase
         $secondStartResponse->assertConflict();
 
         Queue::assertPushedTimes(FilesystemConfigurationTestJob::class, 1);
+
+    }
+
+    /**
+     * It fails when starting with an invalid UUID
+     */
+    public function test_fails_when_starting_invalid_uuid(): void
+    {
+        Queue::fake();
+
+        $fsConfig = FilesystemConfiguration::factory()->local()->create([
+            'is_active' => true,
+        ]);
+
+        $admin = $this->createAdmin();
+
+        $initializeResponse = $this->actingAs($admin)->post(route('backup.destinations.test.initialize', [
+            'destination' => $fsConfig->id,
+        ]));
+
+        $initializeResponse->assertOk();
+
+        $startUrl = $initializeResponse->json('data.startUrl');
+
+        $startResponse = $this->actingAs($admin)->post($startUrl, [
+            'uuid' => $this->faker->uuid(),
+        ]);
+
+        $startResponse->assertNotFound();
+
+        Queue::assertNotPushed(FilesystemConfigurationTestJob::class);
 
     }
 
