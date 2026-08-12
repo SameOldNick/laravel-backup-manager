@@ -10,9 +10,9 @@ use SameOldNick\BackupManager\DataTransferObjects\Responders\PerformBackup\Initi
 use SameOldNick\BackupManager\DataTransferObjects\Responders\PerformBackup\PerformBackupViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\PerformBackup\StartBackupViewData;
 use SameOldNick\BackupManager\Enums\BackupTypes;
-use SameOldNick\BackupManager\Exceptions\BackupChannelLeaseNotFoundException;
-use SameOldNick\BackupManager\Exceptions\BackupChannelLeaseUnauthorizedException;
 use SameOldNick\BackupManager\Exceptions\BackupRunAlreadyExistsException;
+use SameOldNick\BackupManager\Exceptions\ChannelLeaseNotFoundException;
+use SameOldNick\BackupManager\Exceptions\ChannelLeaseUnauthorizedException;
 use SameOldNick\BackupManager\Services\PerformBackupService;
 
 class PerformBackupController
@@ -94,9 +94,9 @@ class PerformBackupController
             ));
         } catch (BackupRunAlreadyExistsException $e) {
             abort(409, $e->getMessage());
-        } catch (BackupChannelLeaseUnauthorizedException $e) {
+        } catch (ChannelLeaseUnauthorizedException $e) {
             abort(403, $e->getMessage());
-        } catch (BackupChannelLeaseNotFoundException $e) {
+        } catch (ChannelLeaseNotFoundException $e) {
             abort(404, $e->getMessage());
         } catch (\Throwable $e) {
             abort(500, 'Failed to start backup job: '.$e->getMessage());

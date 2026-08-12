@@ -4,8 +4,6 @@ namespace SameOldNick\BackupManager\Services;
 
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Enums\BackupTypes;
-use SameOldNick\BackupManager\Exceptions\BackupChannelLeaseNotFoundException;
-use SameOldNick\BackupManager\Exceptions\BackupChannelLeaseUnauthorizedException;
 use SameOldNick\BackupManager\Exceptions\BackupRunAlreadyExistsException;
 use SameOldNick\BackupManager\Jobs\Notifiable\BackupJob;
 use SameOldNick\BackupManager\Models\BackupRun;
@@ -101,21 +99,5 @@ class PerformBackupService extends AbstractChannelLeaseService
     protected function getChannelLeaseExpirationMinutes(): int
     {
         return config('backup-manager.channel_leases.perform_backup.ttl', 180);
-    }
-
-    /**
-     * Gets the channel lease not found exception for backup runs.
-     */
-    protected function makeChannelLeaseNotFoundException(string $uuid): \Throwable
-    {
-        return new BackupChannelLeaseNotFoundException($uuid);
-    }
-
-    /**
-     * Gets the channel lease unauthorized exception for backup runs.
-     */
-    protected function makeChannelLeaseUnauthorizedException(string $uuid): \Throwable
-    {
-        return new BackupChannelLeaseUnauthorizedException($uuid);
     }
 }
