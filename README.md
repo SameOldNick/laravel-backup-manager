@@ -2,7 +2,7 @@
 
 [![Packagist](https://img.shields.io/packagist/v/sameoldnick/laravel-backup-manager)](https://packagist.org/packages/sameoldnick/laravel-backup-manager)
 [![codecov](https://codecov.io/gh/SameOldNick/laravel-backup-manager/graph/badge.svg?token=SgfZngm6IB)](https://codecov.io/gh/SameOldNick/laravel-backup-manager)
-[![Demo](https://img.shields.io/badge/demo-repo-blue)](https://github.com/SameOldNick/backup-manager-demo)
+[![Demo](https://img.shields.io/badge/demo-repo-blue)](https://github.com/SameOldNick/laravel-backup-manager-demo)
 
 A database-driven backup management package for Laravel that centralizes backup and cleanup schedules, supports dynamic storage destinations, and extends [Spatie Backup](https://github.com/spatie/laravel-backup) for production workflows. Provides backend responders for your front-end stack — example React components are available in the [wiki](https://github.com/SameOldNick/laravel-backup-manager/wiki).
 
