@@ -2,6 +2,30 @@
 
 All notable changes will be documented in this file.
 
+## v2.0.2 - 2026-08-12
+
+### Breaking
+
+- Renamed backup channel lease exceptions to `ChannelLeaseNotFoundException` and `ChannelLeaseUnauthorizedException`, and updated the backup controller error handling to match
+
+### Added
+
+- Introduced `AbstractChannelLeaseService` to share the lease lifecycle logic between backup and destination test services
+- Added `BackupDestinationTestRunAlreadyExistsException` for duplicate backup destination test runs
+
+### Fixed
+
+- Backup start now maps missing, unauthorized, and duplicate lease states to the correct HTTP responses
+
+### Refactored
+
+- Consolidated the backup and destination test services onto a shared abstract lease workflow
+
+### Documentation
+
+- Clarified the composer constraint guidance in the upgrade notes
+- Added README badges for package visibility
+
 ## v2.0.1 - 2026-08-07
 
 ### Fixed
