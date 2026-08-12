@@ -4,6 +4,9 @@ namespace SameOldNick\BackupManager\Services;
 
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Enums\RunStatus;
+use SameOldNick\BackupManager\Exceptions\BackupDestinationTestRunAlreadyExistsException;
+use SameOldNick\BackupManager\Exceptions\ChannelLeaseNotFoundException;
+use SameOldNick\BackupManager\Exceptions\ChannelLeaseUnauthorizedException;
 use SameOldNick\BackupManager\Jobs\Notifiable\FilesystemConfigurationTestJob;
 use SameOldNick\BackupManager\Models\BackupDestinationTestRun;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
@@ -38,7 +41,9 @@ class BackupDestinationTestService extends AbstractChannelLeaseService
      * @param  string  $uuid  The UUID for the backup destination test (used for channel ID generation and test run tracking)
      * @return BackupDestinationTestRun The created BackupDestinationTestRun record representing the test process
      *
-     * @throws \RuntimeException If a test run already exists for the given UUID or if the channel lease is not found or unauthorized
+     * @throws BackupDestinationTestRunAlreadyExistsException If a test run already exists for the given UUID
+     * @throws ChannelLeaseNotFoundException If the channel lease is not found
+     * @throws ChannelLeaseUnauthorizedException If the channel lease is unauthorized
      */
     public function dispatchTestJobOnce(FilesystemConfiguration $destination, object $user, string $uuid): BackupDestinationTestRun
     {
@@ -55,7 +60,7 @@ class BackupDestinationTestService extends AbstractChannelLeaseService
 
         if ($inserted === 0) {
             // No rows were inserted, which means a BackupDestinationTestRun with this UUID already exists
-            throw new \RuntimeException('Test run already exists for UUID: '.$uuid);
+            throw new BackupDestinationTestRunAlreadyExistsException('Test run already exists for UUID: '.$uuid);
         }
 
         /** @var BackupDestinationTestRun $testRun */
