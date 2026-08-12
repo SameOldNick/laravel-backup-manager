@@ -4,6 +4,8 @@ namespace SameOldNick\BackupManager\Services;
 
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Concerns;
+use SameOldNick\BackupManager\Exceptions\ChannelLeaseNotFoundException;
+use SameOldNick\BackupManager\Exceptions\ChannelLeaseUnauthorizedException;
 
 abstract class AbstractChannelLeaseService
 {
@@ -54,14 +56,20 @@ abstract class AbstractChannelLeaseService
     }
 
     /**
-     * Gets the channel lease not found exception for the current workflow.
+     * Gets the channel lease not found exception for the workflow.
      */
-    abstract protected function makeChannelLeaseNotFoundException(string $uuid): \Throwable;
+    protected function makeChannelLeaseNotFoundException(string $uuid): \Throwable
+    {
+        return new ChannelLeaseNotFoundException($uuid);
+    }
 
     /**
-     * Gets the channel lease unauthorized exception for the current workflow.
+     * Gets the channel lease unauthorized exception for the workflow.
      */
-    abstract protected function makeChannelLeaseUnauthorizedException(string $uuid): \Throwable;
+    protected function makeChannelLeaseUnauthorizedException(string $uuid): \Throwable
+    {
+        return new ChannelLeaseUnauthorizedException($uuid);
+    }
 
     /**
      * Gets the channel ID prefix from configuration.

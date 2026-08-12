@@ -8,6 +8,8 @@ use SameOldNick\BackupManager\Contracts\Responders\BackupDestinationTestUiRespon
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinationTest\InitializeBackupDestinationTestViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinationTest\ShowBackupDestinationTestViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\BackupDestinationTest\StartBackupDestinationTestViewData;
+use SameOldNick\BackupManager\Exceptions\ChannelLeaseNotFoundException;
+use SameOldNick\BackupManager\Exceptions\ChannelLeaseUnauthorizedException;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Services\BackupDestinationTestService;
 use Spatie\Backup\Config\Config;
@@ -71,6 +73,10 @@ class BackupDestinationTestController
                 uuid: $uuid,
                 lease: $this->service->getBackupDestinationTestChannelLease($uuid),
             ));
+        } catch (ChannelLeaseUnauthorizedException $e) {
+            abort(403, $e->getMessage());
+        } catch (ChannelLeaseNotFoundException $e) {
+            abort(404, $e->getMessage());
         } catch (\Exception $e) {
             abort(500, 'Failed to start backup destination test: '.$e->getMessage());
         }

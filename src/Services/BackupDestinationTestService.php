@@ -92,20 +92,4 @@ class BackupDestinationTestService extends AbstractChannelLeaseService
     {
         return config('backup-manager.channel_leases.test_backup_destination.ttl', 180);
     }
-
-    /**
-     * Gets the channel lease not found exception for destination tests.
-     */
-    protected function makeChannelLeaseNotFoundException(string $uuid): \Throwable
-    {
-        return new \RuntimeException('Backup destination test channel lease not found for UUID: '.$uuid);
-    }
-
-    /**
-     * Gets the channel lease unauthorized exception for destination tests.
-     */
-    protected function makeChannelLeaseUnauthorizedException(string $uuid): \Throwable
-    {
-        return new \RuntimeException('Unauthorized access to backup destination test channel lease for UUID: '.$uuid);
-    }
 }
