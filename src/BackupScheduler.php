@@ -2,6 +2,7 @@
 
 namespace SameOldNick\BackupManager;
 
+use Illuminate\Bus\Queueable;
 use Illuminate\Console\Scheduling\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
@@ -71,7 +72,12 @@ class BackupScheduler
                         ->all();
 
                     // Keep legacy schedules working by falling back to default disk resolution.
-                    $this->scheduleJob(new BackupJob($backupType, count($disks) > 0 ? $disks : null), $expression);
+                    $job = $this->configureJob(
+                        new BackupJob($backupType, count($disks) > 0 ? $disks : null),
+                        config('backup-manager.jobs.backup', [])
+                    );
+
+                    $this->scheduleJob($job, $expression);
                 } catch (\Throwable $e) {
                     $name = $schedule->getRawOriginal('name') ?? 'Unknown Schedule';
                     Log::error("Error scheduling backup for schedule '{$name}': ".$e->getMessage());
@@ -127,5 +133,41 @@ class BackupScheduler
     protected function scheduleCommand(string $command, string $expression)
     {
         return Schedule::command($command)->cron($expression)->runInBackground();
+    }
+
+    /**
+     * Configures a job with the provided queue options.
+     */
+    protected function configureJob(object $job, array $queueOptions): object
+    {
+        if (! ($job instanceof Queueable) || empty($queueOptions)) {
+            return $job;
+        }
+
+        if ($queueOptions['connection']) {
+            $job->onConnection($queueOptions['connection']);
+        }
+
+        if ($queueOptions['name']) {
+            $job->onQueue($queueOptions['name']);
+        }
+
+        if ($queueOptions['group']) {
+            $job->onGroup($queueOptions['group']);
+        }
+
+        if ($queueOptions['delay']) {
+            $job->delay($queueOptions['delay']);
+        }
+
+        if ($queueOptions['middleware']) {
+            $job->through($queueOptions['middleware']);
+        }
+
+        if ($queueOptions['after_commit']) {
+            $job->afterCommit();
+        }
+
+        return $job;
     }
 }

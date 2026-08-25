@@ -106,6 +106,58 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Jobs
+    |--------------------------------------------------------------------------
+    | Here you can specify the default configuration for each job type.
+     */
+    'jobs' => [
+        'backup' => [
+            /**
+             * The name of the connection the job should be sent to.
+             *
+             * @var string|BackedEnum|null
+             */
+            'connection' => env('BACKUP_QUEUE_CONNECTION', null),
+
+            /**
+             * The name of the queue the job should be sent to.
+             *
+             * @var string|BackedEnum|null
+             */
+            'queue' => env('BACKUP_QUEUE_NAME', null),
+
+            /**
+             * The job "group" the job should be sent to.
+             *
+             * @var string|BackedEnum|null
+             */
+            'group' => env('BACKUP_QUEUE_GROUP', null),
+
+            /**
+             * The delay (in seconds) before the job should be run.
+             *
+             * @var int|null
+             */
+            'delay' => env('BACKUP_QUEUE_DELAY', null),
+
+            /**
+             * The middleware the job should be dispatched through.
+             *
+             * @var array|null
+             */
+            'middleware' => env('BACKUP_QUEUE_MIDDLEWARE', null),
+
+            /**
+             * Indicates whether the job should be dispatched after all database transactions have committed.
+             *
+             * @var bool|null
+             */
+            'after_commit' => env('BACKUP_QUEUE_AFTER_COMMIT', null),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Config Fallbacks
     |--------------------------------------------------------------------------
     | Here you can specify the config values that will be used as fallbacks when the database
