@@ -2,6 +2,9 @@
 
 namespace SameOldNick\BackupManager\Runners;
 
+use Illuminate\Support\Collection;
+use Spatie\Backup\BackupDestination\BackupDestination;
+
 abstract class Runner
 {
     /**
@@ -42,6 +45,18 @@ abstract class Runner
         $this->onSuccessCallback = $onSuccessCallback;
         $this->onFailedCallback = $onFailedCallback;
         $this->onCompletedCallback = $onCompletedCallback;
+    }
+
+    /**
+     * Create backup destinations for the given disks.
+     *
+     * @param  array<int, string>  $disks
+     * @return Collection<int, BackupDestination>
+     */
+    protected function createBackupDestinations(array $disks, string $backupName): Collection
+    {
+        return collect($disks)
+            ->map(fn (string $filesystemName) => BackupDestination::create($filesystemName, $backupName));
     }
 
     /**

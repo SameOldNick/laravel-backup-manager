@@ -2,11 +2,9 @@
 
 namespace SameOldNick\BackupManager\Runners;
 
-use Illuminate\Support\Collection;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Enums\RunStatus;
 use SameOldNick\BackupManager\Models\BackupRun;
-use Spatie\Backup\BackupDestination\BackupDestination;
 use Spatie\Backup\Config\Config;
 use Spatie\Backup\Tasks\Backup\BackupJob as SpatieBackupJob;
 use Spatie\Backup\Tasks\Backup\BackupJobFactory;
@@ -48,16 +46,6 @@ class BackupRunner extends Runner
         }
 
         return $backupJob;
-    }
-
-    /**
-     * @param  array<int, string>  $disks
-     * @return Collection<int, BackupDestination>
-     */
-    protected function createBackupDestinations(array $disks, string $backupName): Collection
-    {
-        return collect($disks)
-            ->map(fn (string $filesystemName) => BackupDestination::create($filesystemName, $backupName));
     }
 
     /**
