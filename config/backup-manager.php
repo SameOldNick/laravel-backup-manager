@@ -154,6 +154,50 @@ return [
              */
             'after_commit' => env('BACKUP_QUEUE_AFTER_COMMIT', null),
         ],
+
+        'cleanup' => [
+            /**
+             * The name of the connection the job should be sent to.
+             *
+             * @var string|BackedEnum|null
+             */
+            'connection' => env('CLEANUP_QUEUE_CONNECTION', null),
+
+            /**
+             * The name of the queue the job should be sent to.
+             *
+             * @var string|BackedEnum|null
+             */
+            'queue' => env('CLEANUP_QUEUE_NAME', null),
+
+            /**
+             * The job "group" the job should be sent to.
+             *
+             * @var string|BackedEnum|null
+             */
+            'group' => env('CLEANUP_QUEUE_GROUP', null),
+
+            /**
+             * The delay (in seconds) before the job should be run.
+             *
+             * @var int|null
+             */
+            'delay' => env('CLEANUP_QUEUE_DELAY', null),
+
+            /**
+             * The middleware the job should be dispatched through.
+             *
+             * @var array|null
+             */
+            'middleware' => env('CLEANUP_QUEUE_MIDDLEWARE', null),
+
+            /**
+             * Indicates whether the job should be dispatched after all database transactions have committed.
+             *
+             * @var bool|null
+             */
+            'after_commit' => env('CLEANUP_QUEUE_AFTER_COMMIT', null),
+        ],
     ],
 
     /*

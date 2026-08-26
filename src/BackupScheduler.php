@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
 use SameOldNick\BackupManager\Concerns\TransformsCronExpression;
 use SameOldNick\BackupManager\Jobs\BackupJob;
+use SameOldNick\BackupManager\Jobs\CleanupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
@@ -104,7 +105,13 @@ class BackupScheduler
                 try {
                     $expression = $this->transformCronExpression($expression);
 
-                    $this->scheduleCommand('backup:clean', $expression);
+                    $job = $this->configureJob(
+                        // Cleans up all disks if no specific disks are provided
+                        new CleanupJob(disks: null),
+                        config('backup-manager.jobs.cleanup', [])
+                    );
+
+                    $this->scheduleJob($job, $expression);
                 } catch (\Throwable $e) {
                     Log::error("Error scheduling cleanup for cron expression '{$expression}': ".$e->getMessage());
                 }
