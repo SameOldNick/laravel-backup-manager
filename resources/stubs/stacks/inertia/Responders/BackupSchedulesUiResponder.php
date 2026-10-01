@@ -39,9 +39,9 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
      */
     public function renderEditBackupSchedule(EditBackupScheduleViewData $data)
     {
-        $selectedDestinationIds = $data->schedule
-            ->filesystemConfigurations()
-            ->pluck('filesystem_configurations.id')
+        $selectedDestinationIds = $data->configurations
+            ->filter(fn ($destination) => $destination->is_active)
+            ->pluck('id')
             ->all();
 
         return Inertia::render('dashboard/settings/backups/page', [

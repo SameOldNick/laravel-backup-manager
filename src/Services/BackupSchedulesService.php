@@ -7,7 +7,6 @@ use SameOldNick\BackupManager\DataTransferObjects\Services\CreateBackupScheduleD
 use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateBackupScheduleData;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\Collections\BackupScheduleCollection;
-use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 
 class BackupSchedulesService
 {
@@ -28,16 +27,6 @@ class BackupSchedulesService
     public function getBackupSchedules(): BackupScheduleCollection
     {
         return BackupSchedule::all();
-    }
-
-    /**
-     * Retrieves a collection of available backup destinations that can be associated with backup schedules.
-     *
-     * @return FilesystemConfigurationCollection A collection of FilesystemConfiguration models representing the available backup destinations
-     */
-    public function getAvailableDestinations(): FilesystemConfigurationCollection
-    {
-        return $this->destinationsService->getBackupDestinations(active: true, orderBy: 'name ASC');
     }
 
     /**
