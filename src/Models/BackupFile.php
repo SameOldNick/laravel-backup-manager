@@ -135,13 +135,24 @@ final class BackupFile extends Model
      */
     protected function fileExists(): Attribute
     {
-        return Attribute::get(function ($value, $attributes = []) {
-            try {
-                return $this->getStorageDisk()->exists($attributes['path']);
-            } catch (\InvalidArgumentException) {
-                return false;
-            }
-        });
+        return Attribute::get(
+            fn ($value, $attributes = []) => $this->storageFileExists($attributes['path'] ?? null)
+        )->shouldCache();
+    }
+
+    /**
+     * Checks if the file exists in storage.
+     *
+     * @param  string|null  $path  The path to the file
+     * @return bool True if the file exists, false otherwise
+     */
+    private function storageFileExists(?string $path): bool
+    {
+        try {
+            return $this->getStorageDisk()->exists($path);
+        } catch (\InvalidArgumentException) {
+            return false;
+        }
     }
 
     /**
@@ -163,7 +174,7 @@ final class BackupFile extends Model
         $defaults = [];
 
         return Attribute::get(function ($value, $attributes = []) use ($defaults) {
-            if (! $this->file_exists) {
+            if (! $this->storageFileExists($attributes['path'] ?? null)) {
                 return $defaults;
             }
 
