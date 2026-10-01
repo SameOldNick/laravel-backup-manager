@@ -4,7 +4,9 @@ namespace SameOldNick\BackupManager\Models;
 
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use SameOldNick\BackupManager\Models\Collections\CleanupScheduleCollection;
+use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 
 /**
  * @property string $id
@@ -15,6 +17,7 @@ use SameOldNick\BackupManager\Models\Collections\CleanupScheduleCollection;
  * @property ?\DateTimeInterface $updated_at
  * @property ?\DateTimeInterface $deleted_at
  * @property-read ?\DateTimeInterface $next_run
+ * @property-read FilesystemConfigurationCollection $filesystemConfigurations
  */
 #[CollectedBy(CleanupScheduleCollection::class)]
 class CleanupSchedule extends AbstractSchedule
@@ -47,4 +50,14 @@ class CleanupSchedule extends AbstractSchedule
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    /**
+     * The filesystems configurations that belong to the schedule.
+     *
+     * @return BelongsToMany<FilesystemConfiguration>
+     */
+    public function filesystemConfigurations(): BelongsToMany
+    {
+        return $this->belongsToMany(FilesystemConfiguration::class);
+    }
 }

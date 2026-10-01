@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Models\Collections\BackupScheduleCollection;
+use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 
 /**
  * @property string $id
@@ -17,6 +18,7 @@ use SameOldNick\BackupManager\Models\Collections\BackupScheduleCollection;
  * @property ?\DateTimeInterface $updated_at
  * @property ?\DateTimeInterface $deleted_at
  * @property-read ?\DateTimeInterface $next_run
+ * @property-read FilesystemConfigurationCollection $filesystemConfigurations
  */
 #[CollectedBy(BackupScheduleCollection::class)]
 class BackupSchedule extends AbstractSchedule

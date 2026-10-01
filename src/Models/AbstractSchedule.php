@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string $cron_expression
  * @property bool $is_active
+ * @property-read ?Carbon $next_run
  *
  * @method static Builder active(bool $isActive = true)
  */

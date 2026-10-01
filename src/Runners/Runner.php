@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Runners;
 
 use Illuminate\Support\Collection;
+use SameOldNick\BackupManager\Exceptions\NoValidDisksException;
 use Spatie\Backup\BackupDestination\BackupDestination;
 
 abstract class Runner
@@ -57,6 +58,21 @@ abstract class Runner
     {
         return collect($disks)
             ->map(fn (string $filesystemName) => BackupDestination::create($filesystemName, $backupName));
+    }
+
+    /**
+     * Check if the provided disks array is empty and throw an exception if it is.
+     *
+     * @param  ?array<int, string>  $disks
+     *
+     * @throws \InvalidArgumentException if the disks array is empty
+     */
+    protected function checkForEmptyDisks(?array $disks): void
+    {
+        if ($disks !== null && count($disks) === 0) {
+            // If disks are explicitly provided but the array is empty, throw an exception to prevent running a backup with no destinations.
+            throw NoValidDisksException::forRun();
+        }
     }
 
     /**

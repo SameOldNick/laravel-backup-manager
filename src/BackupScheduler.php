@@ -4,6 +4,7 @@ namespace SameOldNick\BackupManager;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Console\Scheduling\Event;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
 use SameOldNick\BackupManager\Concerns\TransformsCronExpression;
@@ -11,7 +12,7 @@ use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Jobs\CleanupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
-use SameOldNick\BackupManager\Models\FilesystemConfiguration;
+use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 
 class BackupScheduler
 {
@@ -44,6 +45,7 @@ class BackupScheduler
     public function scheduleBackup()
     {
         try {
+            /** @var Builder<BackupSchedule> $scheduleQuery */
             $scheduleQuery = BackupSchedule::active()->with('filesystemConfigurations');
 
             $schedules = $scheduleQuery->get();
@@ -66,15 +68,17 @@ class BackupScheduler
                         continue;
                     }
 
-                    $disks = $schedule->filesystemConfigurations
-                        ->filter(fn (FilesystemConfiguration $config) => $config->is_active && $config->is_valid)
-                        ->map(fn (FilesystemConfiguration $config) => $config->driver_name)
-                        ->values()
-                        ->all();
+                    $disks = $this->getDisksForJob($schedule->filesystemConfigurations);
+
+                    if ($disks === []) {
+                        Log::error("No valid disks found for backup schedule '{$schedule->name}' with specified disks.");
+
+                        continue;
+                    }
 
                     // Keep legacy schedules working by falling back to default disk resolution.
                     $job = $this->configureJob(
-                        new BackupJob($backupType, count($disks) > 0 ? $disks : null),
+                        new BackupJob($backupType, $disks),
                         config('backup-manager.jobs.backup', [])
                     );
 
@@ -99,27 +103,68 @@ class BackupScheduler
     public function scheduleCleanup()
     {
         try {
-            $expressions = CleanupSchedule::active()->pluck('cron_expression')->toArray();
+            /** @var Builder<CleanupSchedule> $scheduleQuery */
+            $scheduleQuery = CleanupSchedule::active()->with('filesystemConfigurations');
 
-            foreach ($expressions as $expression) {
+            $schedules = $scheduleQuery->get();
+
+            foreach ($schedules as $schedule) {
                 try {
-                    $expression = $this->transformCronExpression($expression);
+                    $expression = $this->transformCronExpression($schedule->cron_expression);
 
+                    // Skip schedules with invalid cron expressions
+                    if (! $expression) {
+                        Log::error("Invalid cron expression for cleanup schedule '{$schedule->name}': '{$schedule->cron_expression}'");
+
+                        continue;
+                    }
+
+                    $disks = $this->getDisksForJob($schedule->filesystemConfigurations);
+
+                    if ($disks === []) {
+                        Log::error("No valid disks found for cleanup schedule '{$schedule->name}' with specified disks.");
+
+                        continue;
+                    }
+
+                    // Keep legacy schedules working by falling back to default disk resolution.
                     $job = $this->configureJob(
-                        // Cleans up all disks if no specific disks are provided
-                        new CleanupJob(disks: null),
+                        new CleanupJob($disks),
                         config('backup-manager.jobs.cleanup', [])
                     );
 
                     $this->scheduleJob($job, $expression);
                 } catch (\Throwable $e) {
-                    Log::error("Error scheduling cleanup for cron expression '{$expression}': ".$e->getMessage());
+                    $name = $schedule->getRawOriginal('name') ?? 'Unknown Schedule';
+                    Log::error("Error scheduling cleanup for schedule '{$name}': ".$e->getMessage());
                 }
             }
         } catch (\Throwable $e) {
             Log::error('Error retrieving cleanup schedules: '.$e->getMessage());
         }
 
+    }
+
+    /**
+     * Gets disks for job based on the provided FilesystemConfigurationCollection.
+     *
+     * @param  FilesystemConfigurationCollection  $configs  The collection of filesystem configurations associated with the schedule.
+     * @return ?array<int, string> Returns an array of disk names or null if no specific disks are configured.
+     */
+    protected function getDisksForJob(FilesystemConfigurationCollection $configs): ?array
+    {
+        if ($configs->isEmpty()) {
+            return null; // No specific disks configured, use default behavior
+        }
+
+        $disks = $configs->getActiveAndValid()->toDiskNames();
+
+        // If there are supposed to be disks for this schedule, but none were found, return an empty array.
+        if (count($disks) === 0) {
+            return [];
+        }
+
+        return $disks;
     }
 
     /**

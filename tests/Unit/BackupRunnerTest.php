@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Enums\RunStatus;
+use SameOldNick\BackupManager\Exceptions\NoValidDisksException;
 use SameOldNick\BackupManager\Models\BackupRun;
 use SameOldNick\BackupManager\Runners\BackupRunner;
 use SameOldNick\BackupManager\Tests\TestCase;
@@ -252,6 +254,79 @@ class BackupRunnerTest extends TestCase
     }
 
     #[Test]
+    public function it_passes_null_disks_to_the_backup_job_when_no_disks_are_given(): void
+    {
+        $mockBackupJob = Mockery::mock(SpatieBackupJob::class);
+        $mockBackupJob->shouldReceive('run')->once();
+
+        // The runner helper asserts the disks passed to createBackupJob(), so the default
+        // expectation of null covers the "use every configured disk" path.
+        $runner = $this->createPartialMockedRunner(mockBackupJob: $mockBackupJob);
+
+        $runner(Mockery::mock(Config::class));
+
+        $this->addToAssertionCount(1);
+    }
+
+    #[Test]
+    public function it_passes_the_given_disks_to_the_backup_job(): void
+    {
+        $disks = ['dynamic-local', 'dynamic-sftp'];
+        $successCalled = false;
+
+        $mockBackupJob = Mockery::mock(SpatieBackupJob::class);
+        $mockBackupJob->shouldReceive('run')->once();
+
+        $runner = $this->createPartialMockedRunner(
+            mockBackupJob: $mockBackupJob,
+            onSuccessCallback: function () use (&$successCalled) {
+                $successCalled = true;
+            },
+            disks: $disks,
+        );
+
+        $runner(Mockery::mock(Config::class), BackupTypes::Full, $disks);
+
+        $this->assertTrue($successCalled, 'The backup should run against the given disks.');
+    }
+
+    #[Test]
+    public function it_fails_without_running_the_backup_job_when_disks_are_empty(): void
+    {
+        $callOrder = [];
+
+        /** @var MockInterface&BackupRunner $runner */
+        $runner = Mockery::mock(BackupRunner::class, [
+            function () use (&$callOrder) {
+                $callOrder[] = 'started';
+            },
+            function () use (&$callOrder) {
+                $callOrder[] = 'success';
+            },
+            function (Exception $e) use (&$callOrder) {
+                $callOrder[] = 'failed';
+            },
+            function () use (&$callOrder) {
+                $callOrder[] = 'completed';
+            },
+        ])->makePartial();
+
+        // No backup job may be built for an explicitly empty disk list.
+        $runner->shouldReceive('createBackupJob')->never();
+
+        $caught = null;
+
+        try {
+            $runner(Mockery::mock(Config::class), BackupTypes::Full, []);
+        } catch (Exception $e) {
+            $caught = $e;
+        }
+
+        $this->assertInstanceOf(NoValidDisksException::class, $caught, 'An empty disk list should fail with NoValidDisksException.');
+        $this->assertSame(['started', 'failed', 'completed'], $callOrder, 'The run should start, fail, and complete without ever succeeding.');
+    }
+
+    #[Test]
     public function create_factory_sets_started_callback_that_updates_backup_run(): void
     {
         $backupRun = BackupRun::factory()->create([
@@ -346,7 +421,10 @@ class BackupRunnerTest extends TestCase
      * Create a partially mocked BackupRunner with a mocked createBackupJob method
      * that returns the given mock SpatieBackupJob.
      *
-     * @param  array<string, callable|null>  $callbacks
+     * The createBackupJob expectation also asserts the disks the runner passes through,
+     * so the null default covers the "use every configured disk" path.
+     *
+     * @param  ?array<int, string>  $disks  The disks createBackupJob is expected to receive
      */
     private function createPartialMockedRunner(
         SpatieBackupJob $mockBackupJob,
@@ -354,6 +432,7 @@ class BackupRunnerTest extends TestCase
         ?callable $onSuccessCallback = null,
         ?callable $onFailedCallback = null,
         ?callable $onCompletedCallback = null,
+        ?array $disks = null,
     ): BackupRunner {
         /** @var MockInterface&BackupRunner $runner */
         $runner = Mockery::mock(BackupRunner::class, [
@@ -364,6 +443,7 @@ class BackupRunnerTest extends TestCase
         ])->makePartial();
 
         $runner->shouldReceive('createBackupJob')
+            ->with(Mockery::type(Config::class), BackupTypes::Full, $disks)
             ->andReturn($mockBackupJob);
 
         return $runner;

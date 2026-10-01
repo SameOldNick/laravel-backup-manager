@@ -19,6 +19,8 @@ class BackupRunner extends Runner
     public function __invoke(Config $config, BackupTypes $backupType = BackupTypes::Full, ?array $disks = null): void
     {
         $this->executeWithCallbacks(function () use ($config, $backupType, $disks) {
+            $this->checkForEmptyDisks($disks);
+
             $backupJob = $this->createBackupJob($config, $backupType, $disks);
 
             $backupJob->run();
@@ -41,7 +43,7 @@ class BackupRunner extends Runner
             default => $backupJob,
         };
 
-        if ($disks !== null && count($disks) > 0) {
+        if ($disks !== null) {
             $backupJob->setBackupDestinations($this->createBackupDestinations($disks, $config->backup->name));
         }
 

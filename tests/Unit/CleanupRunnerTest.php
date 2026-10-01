@@ -6,6 +6,7 @@ use Exception;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use SameOldNick\BackupManager\Exceptions\NoValidDisksException;
 use SameOldNick\BackupManager\Runners\CleanupRunner;
 use SameOldNick\BackupManager\Tests\TestCase;
 use Spatie\Backup\Config\Config;
@@ -249,6 +250,87 @@ class CleanupRunnerTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    #[Test]
+    public function it_uses_the_configured_destinations_when_no_disks_are_given(): void
+    {
+        $mockCleanupJob = Mockery::mock(SpatieCleanupJob::class);
+        $mockCleanupJob->shouldReceive('run')->once();
+
+        $runner = $this->createPartialMockedRunner(mockCleanupJob: $mockCleanupJob);
+
+        // No explicit disks: the destinations must come from the configuration, not a disk list.
+        $runner->shouldReceive('createBackupDestinations')->never();
+
+        $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
+
+        $this->addToAssertionCount(1);
+    }
+
+    #[Test]
+    public function it_uses_the_given_disks_for_the_cleanup_job(): void
+    {
+        $disks = ['dynamic-local', 'dynamic-sftp'];
+        $strategy = Mockery::mock(CleanupStrategy::class);
+        $destinations = collect();
+
+        $mockCleanupJob = Mockery::mock(SpatieCleanupJob::class);
+        $mockCleanupJob->shouldReceive('run')->once();
+
+        /** @var MockInterface&CleanupRunner $runner */
+        $runner = Mockery::mock(CleanupRunner::class, [null, null, null, null])->shouldAllowMockingProtectedMethods()->makePartial();
+
+        $runner->shouldReceive('createBackupDestinations')
+            ->once()
+            ->with($disks, Mockery::type('string'))
+            ->andReturn($destinations);
+
+        $runner->shouldReceive('createCleanupJob')
+            ->once()
+            ->with($strategy, $destinations)
+            ->andReturn($mockCleanupJob);
+
+        $runner(app(Config::class), $strategy, $disks);
+
+        $this->addToAssertionCount(1);
+    }
+
+    #[Test]
+    public function it_fails_without_running_the_cleanup_when_disks_are_empty(): void
+    {
+        $callOrder = [];
+
+        /** @var MockInterface&CleanupRunner $runner */
+        $runner = Mockery::mock(CleanupRunner::class, [
+            function () use (&$callOrder) {
+                $callOrder[] = 'started';
+            },
+            function () use (&$callOrder) {
+                $callOrder[] = 'success';
+            },
+            function (Exception $e) use (&$callOrder) {
+                $callOrder[] = 'failed';
+            },
+            function () use (&$callOrder) {
+                $callOrder[] = 'completed';
+            },
+        ])->shouldAllowMockingProtectedMethods()->makePartial();
+
+        // Neither destinations nor a cleanup job may be built for an explicitly empty disk list.
+        $runner->shouldReceive('createBackupDestinations')->never();
+        $runner->shouldReceive('createCleanupJob')->never();
+
+        $caught = null;
+
+        try {
+            $runner(app(Config::class), Mockery::mock(CleanupStrategy::class), []);
+        } catch (Exception $e) {
+            $caught = $e;
+        }
+
+        $this->assertInstanceOf(NoValidDisksException::class, $caught, 'An empty disk list should fail with NoValidDisksException.');
+        $this->assertSame(['started', 'failed', 'completed'], $callOrder, 'The run should start, fail, and complete without ever succeeding.');
+    }
+
     /**
      * Create a partially mocked CleanupRunner with a mocked createCleanupJob method
      * that returns the given mock SpatieCleanupJob.
@@ -272,7 +354,7 @@ class CleanupRunnerTest extends TestCase
             $onSuccessCallback,
             $onFailedCallback,
             $onCompletedCallback,
-        ])->makePartial();
+        ])->shouldAllowMockingProtectedMethods()->makePartial();
 
         $runner->shouldReceive('createCleanupJob')
             ->andReturn($mockCleanupJob);

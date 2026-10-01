@@ -19,7 +19,9 @@ class CleanupRunner extends Runner
     public function __invoke(Config $config, CleanupStrategy $strategy, ?array $disks = null): void
     {
         $this->executeWithCallbacks(function () use ($config, $disks, $strategy) {
-            $destinations = ! empty($disks) ?
+            $this->checkForEmptyDisks($disks);
+
+            $destinations = $disks !== null ?
                 $this->createBackupDestinations($disks, $config->backup->name) :
                 BackupDestinationFactory::createFromArray($config);
 

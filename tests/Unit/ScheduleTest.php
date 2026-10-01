@@ -161,31 +161,114 @@ class ScheduleTest extends TestCase
         });
     }
 
-    public function test_schedule_backup_skips_configurations_with_invalid_morph_class(): void
+    public function test_cleanup_schedule_without_filesystem_configurations_is_scheduled_with_all_disks(): void
     {
-        $schedule = $this->createBackupSchedule('Schedule', 'full', '0 0 * * *', true);
-
-        // Create a FilesystemConfiguration with a non-existent morph class
-        $config = new FilesystemConfiguration([
-            'name' => 'Broken Destination',
-            'slug' => 'broken-destination',
-            'disk_type' => 'local',
-            'is_active' => true,
-        ]);
-
-        // Directly set the morph fields to a class that does not exist
-        $config->forceFill([
-            'configurable_type' => 'App\\Models\\NonExistentConfig',
-            'configurable_id' => 999,
-        ])->save();
-
-        // Attach to the schedule via the pivot table
-        $schedule->filesystemConfigurations()->attach($config);
+        $this->createCleanupSchedule('Cleanup Run', '0 7 * * *', true);
 
         $this->assertSchedulerJobs(function (array $jobs) {
             $this->assertCount(1, $jobs);
-            // The broken config should be skipped, falling back to default disk resolution
+            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
+            // No configurations attached: keep the legacy behaviour of cleaning every disk.
             $this->assertNull($jobs[0]['job']->disks);
+        });
+    }
+
+    public function test_cleanup_schedule_with_active_and_valid_filesystem_configurations_is_scheduled_with_those_disks(): void
+    {
+        $schedule = $this->createCleanupSchedule('Cleanup Run', '0 7 * * *', true);
+        $destination = $this->createDestination('Active Destination');
+
+        $schedule->filesystemConfigurations()->attach($destination);
+
+        $this->assertSchedulerJobs(function (array $jobs) use ($destination) {
+            $this->assertCount(1, $jobs);
+            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
+            $this->assertSame([$destination->driver_name], $jobs[0]['job']->disks);
+        });
+    }
+
+    public function test_cleanup_schedule_ignores_inactive_filesystem_configurations(): void
+    {
+        $schedule = $this->createCleanupSchedule('Cleanup Run', '0 7 * * *', true);
+        $active = $this->createDestination('Active Destination');
+        $inactive = $this->createDestination('Inactive Destination', isActive: false);
+
+        $schedule->filesystemConfigurations()->attach([$active->id, $inactive->id]);
+
+        $this->assertSchedulerJobs(function (array $jobs) use ($active, $inactive) {
+            $this->assertCount(1, $jobs);
+            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
+            $this->assertSame([$active->driver_name], $jobs[0]['job']->disks);
+            $this->assertNotContains($inactive->driver_name, $jobs[0]['job']->disks);
+        });
+    }
+
+    public function test_cleanup_schedule_ignores_invalid_filesystem_configurations(): void
+    {
+        $schedule = $this->createCleanupSchedule('Cleanup Run', '0 7 * * *', true);
+        $valid = $this->createDestination('Valid Destination');
+        $invalid = $this->createDestination('Invalid Destination', isValid: false);
+
+        $schedule->filesystemConfigurations()->attach([$valid->id, $invalid->id]);
+
+        $this->assertSchedulerJobs(function (array $jobs) use ($valid, $invalid) {
+            $this->assertCount(1, $jobs);
+            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
+            $this->assertSame([$valid->driver_name], $jobs[0]['job']->disks);
+            $this->assertNotContains($invalid->driver_name, $jobs[0]['job']->disks);
+        });
+    }
+
+    public function test_cleanup_schedule_with_only_inactive_filesystem_configurations_is_not_scheduled(): void
+    {
+        // A schedule whose attached destinations are all inactive must not be scheduled...
+        $skipped = $this->createCleanupSchedule('Skipped Cleanup', '0 7 * * *', true);
+        $skipped->filesystemConfigurations()->attach(
+            $this->createDestination('Inactive Destination', isActive: false)
+        );
+
+        // ...but it must not stop the other schedules from being scheduled.
+        $kept = $this->createCleanupSchedule('Kept Cleanup', '0 8 * * *', true);
+        $active = $this->createDestination('Active Destination');
+        $kept->filesystemConfigurations()->attach($active);
+
+        $this->assertSchedulerJobs(function (array $jobs) use ($active) {
+            $this->assertCount(1, $jobs);
+            $this->assertSame('0 8 * * *', $jobs[0]['expression']);
+            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
+            $this->assertSame([$active->driver_name], $jobs[0]['job']->disks);
+        });
+    }
+
+    public function test_backup_schedule_without_filesystem_configurations_uses_all_disks(): void
+    {
+        $this->createBackupSchedule('Backup Run', 'full', '0 0 * * *', true);
+
+        $this->assertSchedulerJobs(function (array $jobs) {
+            $this->assertCount(1, $jobs);
+            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
+            $this->assertNull($jobs[0]['job']->disks);
+        });
+    }
+
+    public function test_schedule_backup_skips_configurations_with_invalid_morph_class(): void
+    {
+        // A schedule whose only destination has a non-existent morph class must not be scheduled...
+        $skipped = $this->createBackupSchedule('Broken Schedule', 'full', '0 1 * * *', true);
+        $skipped->filesystemConfigurations()->attach(
+            $this->createDestination('Broken Destination', isValid: false)
+        );
+
+        // ...but it must not stop the other schedules from being scheduled.
+        $kept = $this->createBackupSchedule('Valid Schedule', 'full', '0 0 * * *', true);
+        $valid = $this->createDestination('Valid Destination');
+        $kept->filesystemConfigurations()->attach($valid);
+
+        $this->assertSchedulerJobs(function (array $jobs) use ($valid) {
+            $this->assertCount(1, $jobs);
+            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
+            $this->assertSame([$valid->driver_name], $jobs[0]['job']->disks);
         });
     }
 
@@ -215,6 +298,26 @@ class ScheduleTest extends TestCase
             $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
             $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
         });
+    }
+
+    /**
+     * Create a filesystem configuration (destination) for scheduling tests.
+     */
+    private function createDestination(string $name, bool $isActive = true, bool $isValid = true): FilesystemConfiguration
+    {
+        $destination = FilesystemConfiguration::factory()->local()->create([
+            'name' => $name,
+            'is_active' => $isActive,
+        ]);
+
+        if (! $isValid) {
+            // Point the configuration at a configurable class that does not exist.
+            $destination->forceFill([
+                'configurable_type' => 'App\\Models\\NonExistentConfig',
+            ])->save();
+        }
+
+        return $destination;
     }
 
     private function createBackupSchedule(string $name, string $type, string $cronExpression, bool $isActive): BackupSchedule

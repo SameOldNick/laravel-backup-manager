@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\SpatieBackup;
 
 use Illuminate\Support\Facades\Log;
+use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use Spatie\Backup\Config\DestinationConfig;
 
@@ -30,7 +31,9 @@ class DatabaseDestinationConfigProvider extends DestinationConfig
     public function getDisks(): array
     {
         try {
-            $configs = FilesystemConfiguration::where('is_active', true)->get();
+            /** @var FilesystemConfigurationCollection $configs */
+            $configs = FilesystemConfiguration::all()
+                ->getActiveAndValid();
 
             if ($configs->isEmpty()) {
                 return $this->getFallbackDisks();
