@@ -2,6 +2,7 @@
 
 namespace SameOldNick\BackupManager\Tests\Unit;
 
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Jobs\CleanupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
@@ -73,6 +74,56 @@ class ScheduleTest extends TestCase
             $this->assertSame('0 4 * * *', $jobs[0]['expression']);
             $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
             $this->assertSame(BackupJob::BACKUP_ONLY_FILES, $jobs[0]['job']->backupType);
+        });
+    }
+
+    public function test_scheduled_backup_jobs_receive_queue_configuration(): void
+    {
+        config()->set('backup-manager.jobs.backup', [
+            'connection' => 'redis',
+            'queue' => 'backups',
+            'group' => 'nightly',
+            'delay' => 30,
+            'middleware' => [WithoutOverlapping::class],
+            'after_commit' => true,
+        ]);
+
+        $this->createBackupSchedule('Queued Schedule', 'full', '0 0 * * *', true);
+
+        $this->assertSchedulerJobs(function (array $jobs) {
+            $this->assertCount(1, $jobs);
+
+            $job = $jobs[0]['job'];
+
+            $this->assertInstanceOf(BackupJob::class, $job);
+            $this->assertSame('redis', $job->connection);
+            $this->assertSame('backups', $job->queue);
+            $this->assertSame('nightly', $job->messageGroup);
+            $this->assertSame(30, $job->delay);
+            $this->assertSame([WithoutOverlapping::class], $job->middleware);
+            $this->assertTrue($job->afterCommit);
+        });
+    }
+
+    public function test_scheduled_cleanup_jobs_receive_queue_configuration(): void
+    {
+        config()->set('backup-manager.jobs.cleanup', [
+            'connection' => 'redis',
+            'queue' => 'cleanups',
+            'after_commit' => true,
+        ]);
+
+        $this->createCleanupSchedule('Queued Cleanup', '0 5 * * *', true);
+
+        $this->assertSchedulerJobs(function (array $jobs) {
+            $this->assertCount(1, $jobs);
+
+            $job = $jobs[0]['job'];
+
+            $this->assertInstanceOf(CleanupJob::class, $job);
+            $this->assertSame('redis', $job->connection);
+            $this->assertSame('cleanups', $job->queue);
+            $this->assertTrue($job->afterCommit);
         });
     }
 

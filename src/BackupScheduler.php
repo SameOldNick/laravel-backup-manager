@@ -155,27 +155,27 @@ class BackupScheduler
             return $job;
         }
 
-        if ($queueOptions['connection']) {
+        if ($queueOptions['connection'] ?? null) {
             $job->onConnection($queueOptions['connection']);
         }
 
-        if ($queueOptions['name']) {
-            $job->onQueue($queueOptions['name']);
+        if ($queueOptions['queue'] ?? null) {
+            $job->onQueue($queueOptions['queue']);
         }
 
-        if ($queueOptions['group']) {
+        if ($queueOptions['group'] ?? null) {
             $job->onGroup($queueOptions['group']);
         }
 
-        if ($queueOptions['delay']) {
+        if ($queueOptions['delay'] ?? null) {
             $job->delay($queueOptions['delay']);
         }
 
-        if ($queueOptions['middleware']) {
+        if ($queueOptions['middleware'] ?? null) {
             $job->through($queueOptions['middleware']);
         }
 
-        if ($queueOptions['after_commit']) {
+        if ($queueOptions['after_commit'] ?? null) {
             $job->afterCommit();
         }
 
