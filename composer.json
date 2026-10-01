@@ -62,7 +62,7 @@
       "@composer run prepare"
     ],
     "prepare": "@php vendor/bin/testbench package:discover --ansi",
-    "analyse": "vendor/bin/phpstan analyse",
+    "analyse": "vendor/bin/phpstan analyse --memory-limit=1G",
     "test": "vendor/bin/pest",
     "test-coverage": "vendor/bin/pest --coverage",
     "format": "vendor/bin/pint",
@@ -76,7 +76,7 @@
     ],
     "lint": [
       "@php vendor/bin/pint --ansi",
-      "@php vendor/bin/phpstan analyse --verbose --ansi"
+      "@php vendor/bin/phpstan analyse --verbose --ansi --memory-limit=1G"
     ]
   },
   "config": {
