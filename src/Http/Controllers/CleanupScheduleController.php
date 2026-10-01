@@ -13,6 +13,7 @@ use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateCleanupSchedule
 use SameOldNick\BackupManager\Http\Requests\StoreCleanupScheduleRequest;
 use SameOldNick\BackupManager\Http\Requests\UpdateCleanupScheduleRequest;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
+use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Services\BackupDestinationsService;
 use SameOldNick\BackupManager\Services\CleanupSchedulesService;
 
@@ -65,9 +66,11 @@ class CleanupScheduleController
             ->pluck('filesystem_configurations.id')
             ->all();
 
-        $destinations = $destinationsService->getAvailableDestinations()->filter(function ($destination) use ($selectedDestinationIds) {
-            return $destination->is_active || in_array($destination->id, $selectedDestinationIds);
-        });
+        // Start from every destination, not just the active ones, otherwise the filter below can
+        // never re-add an attached destination that has since been deactivated.
+        $destinations = $destinationsService
+            ->getBackupDestinations(orderBy: 'name ASC')
+            ->filter(fn (FilesystemConfiguration $destination) => $destination->is_active || in_array($destination->id, $selectedDestinationIds));
 
         return $this->ui->renderEditCleanupSchedule(new EditCleanupScheduleViewData(
             schedule: $schedule,
