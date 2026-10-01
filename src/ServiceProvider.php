@@ -85,7 +85,11 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerRoutes()
     {
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
-        $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
+
+        // Channel authenticators are runtime registrations — they are not part of the route cache,
+        // and loadRoutesFrom() skips its file while that cache exists, so registering them that way
+        // silently drops both channels and every /broadcasting/auth answers 403 after `optimize`.
+        $this->app->booted(fn () => require __DIR__.'/../routes/channels.php');
     }
 
     /**
