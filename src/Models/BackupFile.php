@@ -30,6 +30,8 @@ use SameOldNick\BackupManager\Models\Factories\BackupFileFactory;
  * @property-read ?object $user
  * @property-read ?Model $fileable
  * @property-read array $path_info
+ * @property-read bool $file_exists
+ * @property-read array{size: int, last_modified: Carbon, mime_type: ?string} $meta
  */
 #[UseFactory(BackupFileFactory::class)]
 final class BackupFile extends Model
