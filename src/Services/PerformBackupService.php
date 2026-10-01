@@ -42,20 +42,25 @@ class PerformBackupService extends AbstractChannelLeaseService
      * @param  ChannelLease  $lease  The channel lease for real-time updates during the backup process
      * @param  BackupTypes  $type  The type of backup to perform (e.g. full, incremental)
      * @param  object  $user  The user initiating the backup (used for job dispatching)
+     * @param  ?array<int, string>  $disks  The disks to include in the backup
      *
      * @throws \InvalidArgumentException If an invalid backup type is provided
      */
-    public function dispatchBackupJob(BackupRun $backupRun, ChannelLease $lease, BackupTypes $type, object $user): void
+    public function dispatchBackupJob(BackupRun $backupRun, ChannelLease $lease, BackupTypes $type, object $user, ?array $disks = null): void
     {
-        dispatch(new BackupJob($backupRun->getKey(), $lease->channelId, $user, $type));
+        dispatch(new BackupJob($backupRun->getKey(), $lease->channelId, $user, $type, $disks));
     }
 
     /**
      * Dispatches a backup job only once for a given UUID.
      *
-     * Returns null when the run was already created for this UUID.
+     * @param  BackupTypes  $type  The type of backup to perform (e.g. full, incremental)
+     * @param  object  $user  The user initiating the backup (used for job dispatching)
+     * @param  string  $uuid  The UUID for the backup process (used for channel ID generation)
+     * @param  ?array<int, string>  $disks  The disks to include in the backup
+     * @return BackupRun The created BackupRun record representing the backup process
      */
-    public function dispatchBackupJobOnce(BackupTypes $type, object $user, string $uuid): BackupRun
+    public function dispatchBackupJobOnce(BackupTypes $type, object $user, string $uuid, ?array $disks = null): BackupRun
     {
         $lease = $this->requireChannelLeaseForUuid($uuid, $user);
 
@@ -80,7 +85,7 @@ class PerformBackupService extends AbstractChannelLeaseService
         /** @var BackupRun $backupRun */
         $backupRun = BackupRun::query()->findOrFail($uuid);
 
-        $this->dispatchBackupJob($backupRun, $lease, $type, $user);
+        $this->dispatchBackupJob($backupRun, $lease, $type, $user, $disks);
 
         return $backupRun;
     }
