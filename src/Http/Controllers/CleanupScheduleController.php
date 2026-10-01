@@ -75,6 +75,7 @@ class CleanupScheduleController
         return $this->ui->renderEditCleanupSchedule(new EditCleanupScheduleViewData(
             schedule: $schedule,
             configurations: $destinations,
+            selectedDestinationIds: $selectedDestinationIds,
         ));
     }
 

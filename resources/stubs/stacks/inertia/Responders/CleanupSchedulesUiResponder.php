@@ -39,16 +39,12 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
      */
     public function renderEditCleanupSchedule(EditCleanupScheduleViewData $data)
     {
-        $selectedDestinationIds = $data->configurations
-            ->filter(fn ($destination) => $destination->is_active)
-            ->pluck('id')
-            ->all();
-
         return Inertia::render('dashboard/settings/backups/page', [
             'tab' => 'schedule',
             'action' => 'edit:cleanup',
             'schedule' => $data->schedule,
-            'destination_ids' => $selectedDestinationIds,
+            'destinations' => $data->configurations,
+            'destination_ids' => $data->selectedDestinationIds,
         ]);
     }
 

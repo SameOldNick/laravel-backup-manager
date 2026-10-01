@@ -42,6 +42,7 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
         return $this->createTestResponse('edit', [
             'schedule' => $data->schedule,
             'destinations' => $data->configurations,
+            'destination_ids' => $data->selectedDestinationIds,
         ]);
     }
 
