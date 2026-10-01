@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Tests\Unit;
 
 use SameOldNick\BackupManager\Jobs\BackupJob;
+use SameOldNick\BackupManager\Jobs\CleanupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
@@ -80,10 +81,10 @@ class ScheduleTest extends TestCase
         $this->createCleanupSchedule('Active Cleanup', '0 5 * * *', true);
         $this->createCleanupSchedule('Inactive Cleanup', '0 6 * * *', false);
 
-        $this->assertSchedulerCommands(function (array $commands) {
-            $this->assertCount(1, $commands);
-            $this->assertSame('0 5 * * *', $commands[0]['expression']);
-            $this->assertSame('backup:clean', $commands[0]['command']);
+        $this->assertSchedulerJobs(function (array $jobs) {
+            $this->assertCount(1, $jobs);
+            $this->assertSame('0 5 * * *', $jobs[0]['expression']);
+            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
         });
     }
 
@@ -91,10 +92,10 @@ class ScheduleTest extends TestCase
     {
         $this->createCleanupSchedule('Shortcut Cleanup', '@daily', true);
 
-        $this->assertSchedulerCommands(function (array $commands) {
-            $this->assertCount(1, $commands);
-            $this->assertSame('0 0 * * *', $commands[0]['expression']);
-            $this->assertSame('backup:clean', $commands[0]['command']);
+        $this->assertSchedulerJobs(function (array $jobs) {
+            $this->assertCount(1, $jobs);
+            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
+            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
         });
     }
 
@@ -102,10 +103,10 @@ class ScheduleTest extends TestCase
     {
         $this->createCleanupSchedule('Cleanup Run', '0 7 * * *', true);
 
-        $this->assertSchedulerCommands(function (array $commands) {
-            $this->assertCount(1, $commands);
-            $this->assertSame('0 7 * * *', $commands[0]['expression']);
-            $this->assertSame('backup:clean', $commands[0]['command']);
+        $this->assertSchedulerJobs(function (array $jobs) {
+            $this->assertCount(1, $jobs);
+            $this->assertSame('0 7 * * *', $jobs[0]['expression']);
+            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
         });
     }
 
