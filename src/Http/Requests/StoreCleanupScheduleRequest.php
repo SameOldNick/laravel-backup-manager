@@ -5,9 +5,8 @@ namespace SameOldNick\BackupManager\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Rules\CronExpression as CronExpressionRule;
+use SameOldNick\BackupManager\Rules\SelectableDestinationId;
 
 class StoreCleanupScheduleRequest extends FormRequest
 {
@@ -30,13 +29,10 @@ class StoreCleanupScheduleRequest extends FormRequest
             'name' => 'required|string|max:255',
             'cron_expression' => ['required', 'string', new CronExpressionRule],
             'is_active' => 'sometimes|boolean',
-            'destination_ids' => 'sometimes|array|min:1',
+            'destination_ids' => 'sometimes|array|max:255',
             'destination_ids.*' => [
                 'integer',
-                Rule::exists(FilesystemConfiguration::class, 'id')->where(
-                    'is_active',
-                    true,
-                ),
+                new SelectableDestinationId,
             ],
         ];
     }

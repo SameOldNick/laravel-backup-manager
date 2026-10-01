@@ -155,23 +155,27 @@ class CleanupScheduleControllerTest extends TestCase
         $this->assertDatabaseMissing('cleanup_schedules', ['name' => 'Cleanup With Inactive Destination']);
     }
 
-    public function test_rejects_empty_destination_ids_on_create(): void
+    public function test_creates_cleanup_schedule_without_destinations(): void
     {
         $admin = $this->createAdmin();
 
-        $response = $this->actingAs($admin)
-            ->from(route('backup.schedules.cleanup.create'))
-            ->post(route('backup.schedules.cleanup.store'), [
-                'name' => 'Cleanup Without Destinations',
-                'cron_expression' => '0 0 * * *',
-                'is_active' => true,
-                'destination_ids' => [],
-            ]);
+        $response = $this->actingAs($admin)->post(route('backup.schedules.cleanup.store'), [
+            'name' => 'Cleanup Without Destinations',
+            'cron_expression' => '0 0 * * *',
+            'is_active' => true,
+            'destination_ids' => [],
+        ]);
 
-        $response->assertRedirect(route('backup.schedules.cleanup.create'));
-        $response->assertSessionHasErrors(['destination_ids']);
+        $response->assertOk();
 
-        $this->assertDatabaseMissing('cleanup_schedules', ['name' => 'Cleanup Without Destinations']);
+        $this->assertResponderUsed($response, 'cleanup-schedules');
+        $this->assertResponseId($response, 'store');
+
+        // An empty selection is allowed and means "use the destinations configured for the app",
+        // exactly like a schedule created before destination selection existed.
+        $schedule = CleanupSchedule::query()->where('name', 'Cleanup Without Destinations')->firstOrFail();
+
+        $this->assertCount(0, $schedule->filesystemConfigurations()->get());
     }
 
     public function test_updates_cleanup_schedule_destinations(): void
@@ -224,6 +228,31 @@ class CleanupScheduleControllerTest extends TestCase
         $this->assertEquals([$destination->id], $schedule->filesystemConfigurations()->pluck('filesystem_configurations.id')->all());
     }
 
+    public function test_clearing_destination_ids_on_update_detaches_every_destination(): void
+    {
+        $admin = $this->createAdmin();
+
+        $attached = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+
+        $schedule = CleanupSchedule::create([
+            'name' => 'Cleanup Clears Destinations',
+            'cron_expression' => '0 0 * * *',
+            'is_active' => true,
+        ]);
+
+        $schedule->filesystemConfigurations()->attach($attached);
+
+        // Sending an empty array clears the selection; omitting the key leaves it untouched, as
+        // test_updating_cleanup_schedule_without_destinations_keeps_existing_ones covers.
+        $response = $this->actingAs($admin)->put(route('backup.schedules.cleanup.update', $schedule), [
+            'destination_ids' => [],
+        ]);
+
+        $response->assertOk();
+
+        $this->assertCount(0, $schedule->filesystemConfigurations()->get());
+    }
+
     public function test_rejects_unknown_destination_on_update(): void
     {
         $admin = $this->createAdmin();
@@ -244,6 +273,63 @@ class CleanupScheduleControllerTest extends TestCase
         $response->assertSessionHasErrors(['destination_ids.0']);
 
         $this->assertCount(0, $schedule->filesystemConfigurations()->get());
+    }
+
+    public function test_updates_cleanup_schedule_keeping_an_attached_but_inactive_destination(): void
+    {
+        $admin = $this->createAdmin();
+
+        $deactivated = FilesystemConfiguration::factory()->local()->create(['is_active' => false]);
+
+        $schedule = CleanupSchedule::create([
+            'name' => 'Cleanup Keeps Deactivated Destination',
+            'cron_expression' => '0 0 * * *',
+            'is_active' => true,
+        ]);
+
+        $schedule->filesystemConfigurations()->attach($deactivated);
+
+        // Re-submitting the edit screen's pre-filled selection has to stay valid, otherwise no
+        // other change to the schedule could be saved without first detaching the destination.
+        $response = $this->actingAs($admin)->put(route('backup.schedules.cleanup.update', $schedule), [
+            'cron_expression' => '30 2 * * *',
+            'destination_ids' => [$deactivated->id],
+        ]);
+
+        $response->assertOk();
+
+        $schedule->refresh();
+
+        $this->assertSame('30 2 * * *', $schedule->cron_expression);
+        $this->assertEquals([$deactivated->id], $schedule->filesystemConfigurations()->pluck('filesystem_configurations.id')->all());
+    }
+
+    public function test_rejects_an_inactive_destination_that_was_never_attached_on_update(): void
+    {
+        $admin = $this->createAdmin();
+
+        $attached = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+        $deactivated = FilesystemConfiguration::factory()->ftp()->create(['is_active' => false]);
+
+        $schedule = CleanupSchedule::create([
+            'name' => 'Cleanup Inactive Not Attached',
+            'cron_expression' => '0 0 * * *',
+            'is_active' => true,
+        ]);
+
+        $schedule->filesystemConfigurations()->attach($attached);
+
+        $response = $this->actingAs($admin)
+            ->from(route('backup.schedules.cleanup.edit', $schedule))
+            ->put(route('backup.schedules.cleanup.update', $schedule), [
+                'destination_ids' => [$deactivated->id],
+            ]);
+
+        $response->assertRedirect(route('backup.schedules.cleanup.edit', $schedule));
+        $response->assertSessionHasErrors(['destination_ids.0']);
+
+        // The deactivated destination was never attached, so it must not be attachable now.
+        $this->assertEquals([$attached->id], $schedule->filesystemConfigurations()->pluck('filesystem_configurations.id')->all());
     }
 
     public function test_create_page_lists_active_destinations_ordered_by_name(): void
@@ -292,6 +378,10 @@ class CleanupScheduleControllerTest extends TestCase
             [$attached->id, $available->id],
             collect($response->json('data.destinations'))->pluck('id')->all(),
         );
+
+        // Only the attached destination is selected; an active destination that is not
+        // attached is offered but must not be pre-selected.
+        $this->assertEquals([$attached->id], $response->json('data.destination_ids'));
     }
 
     public function test_edit_page_lists_an_attached_destination_that_is_inactive(): void
@@ -318,6 +408,8 @@ class CleanupScheduleControllerTest extends TestCase
             [$deactivated->id],
             collect($response->json('data.destinations'))->pluck('id')->all(),
         );
+
+        $this->assertEquals([$deactivated->id], $response->json('data.destination_ids'));
     }
 
     public function test_edit_page_omits_inactive_destinations_that_are_not_attached(): void

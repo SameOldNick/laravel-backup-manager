@@ -216,6 +216,52 @@ class BackupScheduleControllerTest extends TestCase
         $this->assertEquals([$destinationTwo->id], $schedule->filesystemConfigurations()->pluck('filesystem_configurations.id')->all());
     }
 
+    public function test_creates_backup_schedule_without_destinations(): void
+    {
+        $admin = $this->createAdmin();
+
+        $response = $this->actingAs($admin)->post(route('backup.schedules.backup.store'), [
+            'name' => 'Backup Without Destinations',
+            'type' => 'full',
+            'cron_expression' => '0 0 * * *',
+            'is_active' => true,
+            'destination_ids' => [],
+        ]);
+
+        $response->assertOk();
+
+        $this->assertResponderUsed($response, 'backup-schedules');
+        $this->assertResponseId($response, 'store');
+
+        $schedule = BackupSchedule::query()->where('name', 'Backup Without Destinations')->firstOrFail();
+
+        $this->assertCount(0, $schedule->filesystemConfigurations()->get());
+    }
+
+    public function test_clearing_destination_ids_on_update_detaches_every_destination(): void
+    {
+        $admin = $this->createAdmin();
+
+        $attached = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+
+        $schedule = BackupSchedule::create([
+            'name' => 'Backup Clears Destinations',
+            'type' => 'full',
+            'cron_expression' => '0 0 * * *',
+            'is_active' => true,
+        ]);
+
+        $schedule->filesystemConfigurations()->attach($attached);
+
+        $response = $this->actingAs($admin)->put(route('backup.schedules.backup.update', $schedule), [
+            'destination_ids' => [],
+        ]);
+
+        $response->assertOk();
+
+        $this->assertCount(0, $schedule->filesystemConfigurations()->get());
+    }
+
     public function test_changes_backup_schedule_cron_expression(): void
     {
         $admin = $this->createAdmin();
@@ -257,5 +303,98 @@ class BackupScheduleControllerTest extends TestCase
         $this->assertResponseId($response, 'destroy');
 
         $this->assertFalse(BackupSchedule::query()->whereKey($schedule->id)->exists());
+    }
+
+    public function test_edit_page_lists_destinations_and_reports_the_attached_ids(): void
+    {
+        $admin = $this->createAdmin();
+
+        $attached = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+        $available = FilesystemConfiguration::factory()->ftp()->create(['is_active' => true]);
+        $deactivated = FilesystemConfiguration::factory()->sftp()->create(['is_active' => false]);
+
+        $schedule = BackupSchedule::create([
+            'name' => 'Edit Destinations Schedule',
+            'type' => 'full',
+            'cron_expression' => '0 11 * * *',
+            'is_active' => true,
+        ]);
+
+        $schedule->filesystemConfigurations()->attach([$attached->id, $deactivated->id]);
+
+        $response = $this->actingAs($admin)->get(route('backup.schedules.backup.edit', $schedule));
+
+        $response->assertOk();
+
+        $this->assertResponderUsed($response, 'backup-schedules');
+        $this->assertResponseId($response, 'edit');
+
+        // An attached destination stays selectable after being deactivated, while every other
+        // active destination is offered as an option without being pre-selected.
+        $this->assertEqualsCanonicalizing(
+            [$attached->id, $available->id, $deactivated->id],
+            collect($response->json('data.destinations'))->pluck('id')->all(),
+        );
+
+        $this->assertEqualsCanonicalizing(
+            [$attached->id, $deactivated->id],
+            $response->json('data.destination_ids'),
+        );
+    }
+
+    public function test_updates_backup_schedule_keeping_an_attached_but_inactive_destination(): void
+    {
+        $admin = $this->createAdmin();
+
+        $deactivated = FilesystemConfiguration::factory()->local()->create(['is_active' => false]);
+
+        $schedule = BackupSchedule::create([
+            'name' => 'Backup Keeps Deactivated Destination',
+            'type' => 'full',
+            'cron_expression' => '0 12 * * *',
+            'is_active' => true,
+        ]);
+
+        $schedule->filesystemConfigurations()->attach($deactivated);
+
+        $response = $this->actingAs($admin)->put(route('backup.schedules.backup.update', $schedule), [
+            'cron_expression' => '15 3 * * *',
+            'destination_ids' => [$deactivated->id],
+        ]);
+
+        $response->assertOk();
+
+        $schedule->refresh();
+
+        $this->assertSame('15 3 * * *', $schedule->cron_expression);
+        $this->assertEquals([$deactivated->id], $schedule->filesystemConfigurations()->pluck('filesystem_configurations.id')->all());
+    }
+
+    public function test_rejects_an_inactive_destination_that_was_never_attached_on_update(): void
+    {
+        $admin = $this->createAdmin();
+
+        $attached = FilesystemConfiguration::factory()->local()->create(['is_active' => true]);
+        $deactivated = FilesystemConfiguration::factory()->ftp()->create(['is_active' => false]);
+
+        $schedule = BackupSchedule::create([
+            'name' => 'Backup Inactive Not Attached',
+            'type' => 'full',
+            'cron_expression' => '0 13 * * *',
+            'is_active' => true,
+        ]);
+
+        $schedule->filesystemConfigurations()->attach($attached);
+
+        $response = $this->actingAs($admin)
+            ->from(route('backup.schedules.backup.edit', $schedule))
+            ->put(route('backup.schedules.backup.update', $schedule), [
+                'destination_ids' => [$deactivated->id],
+            ]);
+
+        $response->assertRedirect(route('backup.schedules.backup.edit', $schedule));
+        $response->assertSessionHasErrors(['destination_ids.0']);
+
+        $this->assertEquals([$attached->id], $schedule->filesystemConfigurations()->pluck('filesystem_configurations.id')->all());
     }
 }

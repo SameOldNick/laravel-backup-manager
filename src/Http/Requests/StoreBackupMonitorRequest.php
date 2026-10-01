@@ -17,7 +17,7 @@ class StoreBackupMonitorRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'destination_ids' => 'sometimes|array|min:1',
+            'destination_ids' => 'sometimes|array|max:255',
             'destination_ids.*' => [
                 'integer',
                 Rule::exists(FilesystemConfiguration::class, 'id')->where(
