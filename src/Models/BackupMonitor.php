@@ -4,14 +4,26 @@ namespace SameOldNick\BackupManager\Models;
 
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Carbon;
 use SameOldNick\BackupManager\Models\Collections\BackupMonitorCollection;
 use SameOldNick\BackupManager\Models\Factories\BackupMonitorFactory;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes;
 
+/**
+ * @property string $id
+ * @property string $name
+ * @property int $maximum_age_in_days
+ * @property int $maximum_storage_in_megabytes
+ * @property bool $is_active
+ * @property ?Carbon $created_at
+ * @property ?Carbon $updated_at
+ * @property-read Collection<int, FilesystemConfiguration> $filesystemConfigurations
+ */
 #[CollectedBy(BackupMonitorCollection::class)]
 #[UseFactory(BackupMonitorFactory::class)]
 class BackupMonitor extends Model

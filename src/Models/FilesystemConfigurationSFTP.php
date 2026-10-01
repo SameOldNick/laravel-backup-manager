@@ -17,6 +17,7 @@ use Spatie\Backup\Config\Config;
  * @property string|null $password
  * @property string|null $private_key
  * @property string|null $passphrase
+ * @property string|null $root
  * @property array|null $extra
  * @property-read ?FilesystemConfiguration $filesystemConfiguration
  */

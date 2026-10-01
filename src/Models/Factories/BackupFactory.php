@@ -36,7 +36,6 @@ class BackupFactory extends Factory
      * Indicate that the backup was successful.
      *
      * @param  UploadedFile|File|string|null  $file
-     * @return BackupFactory
      */
     public function successful($file = null): static
     {
@@ -51,13 +50,12 @@ class BackupFactory extends Factory
     /**
      * Indicate that the backup failed with an error message.
      *
-     * @param  string|null  $errorMessage
-     * @return BackupFactory
+     * @param  string|\Closure|null  $errorMessage  The error message or a closure that returns the error message
      */
     public function failed($errorMessage = null): static
     {
         return $this->state(fn () => [
-            'error_message' => value($errorMessage) ?? $this->faker->sentence(),
+            'error_message' => value($errorMessage, $this) ?? $this->faker->sentence(),
         ]);
     }
 
@@ -65,7 +63,6 @@ class BackupFactory extends Factory
      * Indicate that the backup file is missing to simulate a file not found scenario.
      *
      * @param  string|null  $path
-     * @return BackupFactory
      */
     public function fileNotFound($path = null): static
     {
@@ -77,8 +74,6 @@ class BackupFactory extends Factory
 
     /**
      * Indicate that the backup was deleted.
-     *
-     * @return BackupFactory
      */
     public function deleted(): static
     {

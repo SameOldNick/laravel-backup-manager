@@ -78,14 +78,14 @@ class BackupFileFactory extends Factory
     /**
      * Store the given uploaded file and associate it with the backup file.
      *
-     * @param  UploadedFile|File|string|null  $uploadedFile
+     * @param  UploadedFile|File|string|\Closure|null  $uploadedFile
      * @param  string|null  $disk
      * @return BackupFileFactory
      */
     public function uploadedFile($uploadedFile, string $path = '', $disk = 'local')
     {
         return $this->state(fn () => [
-            'path' => value($uploadedFile)->store($path, $disk ? ['disk' => $disk] : []),
+            'path' => value($uploadedFile, $this)->store($path, $disk ? ['disk' => $disk] : []),
         ]);
     }
 
