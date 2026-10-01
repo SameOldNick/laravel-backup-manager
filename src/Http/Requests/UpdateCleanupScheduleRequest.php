@@ -5,6 +5,8 @@ namespace SameOldNick\BackupManager\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 use SameOldNick\BackupManager\Rules\CronExpression as CronExpressionRule;
 
 class UpdateCleanupScheduleRequest extends FormRequest
@@ -28,6 +30,14 @@ class UpdateCleanupScheduleRequest extends FormRequest
             'name' => 'sometimes|string|max:255',
             'cron_expression' => ['sometimes', 'string', new CronExpressionRule],
             'is_active' => 'sometimes|boolean',
+            'destination_ids' => 'sometimes|array|min:1',
+            'destination_ids.*' => [
+                'integer',
+                Rule::exists(FilesystemConfiguration::class, 'id')->where(
+                    'is_active',
+                    true,
+                ),
+            ],
         ];
     }
 }
