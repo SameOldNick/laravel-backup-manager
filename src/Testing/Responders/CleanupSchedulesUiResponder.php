@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Testing\Responders;
 
 use SameOldNick\BackupManager\Contracts\Responders\CleanupSchedulesUiResponder as CleanupSchedulesUiResponderContract;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\CreateCleanupScheduleViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\DestroyCleanupScheduleViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\EditCleanupScheduleViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\StoreCleanupScheduleViewData;
@@ -16,9 +17,11 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
     /**
      * {@inheritDoc}
      */
-    public function renderCreateCleanupSchedule()
+    public function renderCreateCleanupSchedule(CreateCleanupScheduleViewData $data)
     {
-        return $this->createTestResponse('create');
+        return $this->createTestResponse('create', [
+            'destinations' => $data->configurations,
+        ]);
     }
 
     /**
@@ -38,6 +41,7 @@ class CleanupSchedulesUiResponder implements CleanupSchedulesUiResponderContract
     {
         return $this->createTestResponse('edit', [
             'schedule' => $data->schedule,
+            'destinations' => $data->configurations,
         ]);
     }
 

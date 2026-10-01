@@ -45,6 +45,16 @@ class BackupDestinationsService
     }
 
     /**
+     * Retrieves a collection of available backup destinations
+     *
+     * @return FilesystemConfigurationCollection A collection of FilesystemConfiguration models representing the available backup destinations
+     */
+    public function getAvailableDestinations(): FilesystemConfigurationCollection
+    {
+        return $this->getBackupDestinations(active: true, orderBy: 'name ASC');
+    }
+
+    /**
      * Creates a new backup destination based on the provided data.
      *
      * @param  CreateBackupDestinationData  $data  The data for creating the backup destination

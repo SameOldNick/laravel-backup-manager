@@ -2,13 +2,11 @@
 
 namespace SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules;
 
-use SameOldNick\BackupManager\Models\CleanupSchedule;
 use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
 
-class EditCleanupScheduleViewData
+class CreateCleanupScheduleViewData
 {
     public function __construct(
-        public readonly CleanupSchedule $schedule,
         public readonly FilesystemConfigurationCollection $configurations,
     ) {
         //

@@ -8,6 +8,7 @@ class UpdateCleanupScheduleData
         public readonly ?string $name,
         public readonly ?string $cronExpression,
         public readonly ?bool $isActive,
+        public readonly ?array $destinationIds
     ) {
         //
     }
@@ -23,6 +24,7 @@ class UpdateCleanupScheduleData
             name: $data['name'] ?? null,
             cronExpression: $data['cron_expression'] ?? null,
             isActive: $data['is_active'] ?? null,
+            destinationIds: $data['destination_ids'] ?? null,
         );
     }
 }

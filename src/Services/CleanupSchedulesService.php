@@ -35,11 +35,16 @@ class CleanupSchedulesService
      */
     public function createCleanupSchedule(CreateCleanupScheduleData $data): CleanupSchedule
     {
+        /** @var CleanupSchedule $schedule */
         $schedule = CleanupSchedule::create([
             'name' => $data->name,
             'cron_expression' => $data->cronExpression,
             'is_active' => $data->isActive,
         ]);
+
+        if ($data->destinationIds !== null) {
+            $schedule->filesystemConfigurations()->sync($data->destinationIds);
+        }
 
         return $schedule;
     }
@@ -67,6 +72,10 @@ class CleanupSchedulesService
 
         if ($schedule->isDirty()) {
             $schedule->save();
+        }
+
+        if ($data->destinationIds !== null) {
+            $schedule->filesystemConfigurations()->sync($data->destinationIds);
         }
 
         return $schedule;

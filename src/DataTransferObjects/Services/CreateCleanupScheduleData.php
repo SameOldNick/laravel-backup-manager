@@ -8,6 +8,7 @@ class CreateCleanupScheduleData
         public readonly string $name,
         public readonly string $cronExpression,
         public readonly bool $isActive,
+        public readonly ?array $destinationIds
     ) {
         //
     }
@@ -23,6 +24,7 @@ class CreateCleanupScheduleData
             name: $data['name'],
             cronExpression: $data['cron_expression'],
             isActive: $data['is_active'] ?? false,
+            destinationIds: $data['destination_ids'] ?? null,
         );
     }
 }

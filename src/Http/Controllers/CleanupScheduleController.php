@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Http\Controllers;
 
 use SameOldNick\BackupManager\Contracts\Responders\CleanupSchedulesUiResponder;
+use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\CreateCleanupScheduleViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\DestroyCleanupScheduleViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\EditCleanupScheduleViewData;
 use SameOldNick\BackupManager\DataTransferObjects\Responders\Schedules\CleanupSchedules\StoreCleanupScheduleViewData;
@@ -12,6 +13,7 @@ use SameOldNick\BackupManager\DataTransferObjects\Services\UpdateCleanupSchedule
 use SameOldNick\BackupManager\Http\Requests\StoreCleanupScheduleRequest;
 use SameOldNick\BackupManager\Http\Requests\UpdateCleanupScheduleRequest;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
+use SameOldNick\BackupManager\Services\BackupDestinationsService;
 use SameOldNick\BackupManager\Services\CleanupSchedulesService;
 
 class CleanupScheduleController
@@ -32,9 +34,11 @@ class CleanupScheduleController
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(BackupDestinationsService $destinationsService)
     {
-        return $this->ui->renderCreateCleanupSchedule();
+        return $this->ui->renderCreateCleanupSchedule(new CreateCleanupScheduleViewData(
+            configurations: $destinationsService->getAvailableDestinations(),
+        ));
     }
 
     /**
@@ -54,10 +58,20 @@ class CleanupScheduleController
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(CleanupSchedule $schedule)
+    public function edit(CleanupSchedule $schedule, BackupDestinationsService $destinationsService)
     {
+        $selectedDestinationIds = $schedule
+            ->filesystemConfigurations()
+            ->pluck('filesystem_configurations.id')
+            ->all();
+
+        $destinations = $destinationsService->getAvailableDestinations()->filter(function ($destination) use ($selectedDestinationIds) {
+            return $destination->is_active || in_array($destination->id, $selectedDestinationIds);
+        });
+
         return $this->ui->renderEditCleanupSchedule(new EditCleanupScheduleViewData(
             schedule: $schedule,
+            configurations: $destinations,
         ));
     }
 
