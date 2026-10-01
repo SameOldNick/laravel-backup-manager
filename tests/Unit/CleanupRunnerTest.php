@@ -29,7 +29,7 @@ class CleanupRunnerTest extends TestCase
             },
         );
 
-        $runner(app(Config::class), app(CleanupStrategy::class));
+        $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
 
         $this->assertTrue($successCalled, 'onSuccessCallback should be called on success.');
     }
@@ -51,7 +51,7 @@ class CleanupRunnerTest extends TestCase
         );
 
         try {
-            $runner(app(Config::class), app(CleanupStrategy::class));
+            $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
         } catch (Exception) {
             // Exception is expected to propagate
         }
@@ -76,7 +76,7 @@ class CleanupRunnerTest extends TestCase
         );
 
         try {
-            $runner(app(Config::class), app(CleanupStrategy::class));
+            $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
         } catch (Exception) {
             // Expected to propagate
         }
@@ -99,7 +99,7 @@ class CleanupRunnerTest extends TestCase
             },
         );
 
-        $runner(app(Config::class), app(CleanupStrategy::class));
+        $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
 
         $this->assertTrue($completedCalled, 'onCompletedCallback should be called after a successful cleanup.');
     }
@@ -120,7 +120,7 @@ class CleanupRunnerTest extends TestCase
         );
 
         try {
-            $runner(app(Config::class), app(CleanupStrategy::class));
+            $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
         } catch (Exception) {
             // Expected to propagate
         }
@@ -136,7 +136,7 @@ class CleanupRunnerTest extends TestCase
 
         $runner = $this->createPartialMockedRunner(mockCleanupJob: $mockCleanupJob);
 
-        $runner(app(Config::class), app(CleanupStrategy::class));
+        $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
 
         // Mockery will automatically verify the 'run' expectation via its destructor.
         // If 'run' is not called, the test will fail.
@@ -164,7 +164,7 @@ class CleanupRunnerTest extends TestCase
 
         $caught = false;
         try {
-            $runner(app(Config::class), app(CleanupStrategy::class));
+            $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
         } catch (Exception $e) {
             $caught = true;
             $this->assertSame($expectedException, $e);
@@ -190,7 +190,7 @@ class CleanupRunnerTest extends TestCase
         );
 
         try {
-            $runner(app(Config::class), app(CleanupStrategy::class));
+            $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
         } catch (Exception) {
             // Expected to propagate
         }
@@ -213,7 +213,7 @@ class CleanupRunnerTest extends TestCase
             },
         );
 
-        $runner(app(Config::class), app(CleanupStrategy::class));
+        $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
 
         $this->assertFalse($failedCalled, 'onFailedCallback should not be called on success.');
     }
@@ -227,7 +227,7 @@ class CleanupRunnerTest extends TestCase
         $runner = $this->createPartialMockedRunner(mockCleanupJob: $mockCleanupJob);
 
         // Should not throw any errors when callbacks are null
-        $runner(app(Config::class), app(CleanupStrategy::class));
+        $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
 
         $this->addToAssertionCount(1);
     }
@@ -241,7 +241,7 @@ class CleanupRunnerTest extends TestCase
         $runner = $this->createPartialMockedRunner(mockCleanupJob: $mockCleanupJob);
 
         try {
-            $runner(app(Config::class), app(CleanupStrategy::class));
+            $runner(app(Config::class), Mockery::mock(CleanupStrategy::class));
         } catch (Exception) {
             // Expected to propagate
         }
