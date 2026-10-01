@@ -145,9 +145,9 @@ class BackupScheduler
     /**
      * Configures a job with the provided queue options.
      */
-    protected function configureJob(object $job, array $queueOptions): object
+    protected function configureJob(Queueable $job, array $queueOptions): object
     {
-        if (! ($job instanceof Queueable) || empty($queueOptions)) {
+        if (empty($queueOptions)) {
             return $job;
         }
 
