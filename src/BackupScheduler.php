@@ -4,9 +4,10 @@ namespace SameOldNick\BackupManager;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Console\Scheduling\Event;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Container\Attributes\Config;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schedule;
 use SameOldNick\BackupManager\Concerns\TransformsCronExpression;
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Jobs\CleanupJob;
@@ -20,9 +21,16 @@ class BackupScheduler
 
     /**
      * Initializes backup scheduler
+     *
+     * @param  Schedule  $schedule  The schedule instance to use for scheduling jobs and commands
+     * @param  array  $config  The configuration array for backup and cleanup jobs
+     * @return void
      */
-    public function __construct()
-    {
+    public function __construct(
+        protected readonly Schedule $schedule,
+        #[Config('backup-manager.jobs', [])]
+        protected readonly array $config = []
+    ) {
         //
     }
 
@@ -79,7 +87,7 @@ class BackupScheduler
                     // Keep legacy schedules working by falling back to default disk resolution.
                     $job = $this->configureJob(
                         new BackupJob($backupType, $disks),
-                        config('backup-manager.jobs.backup', [])
+                        $this->config['backup'] ?? []
                     );
 
                     $this->scheduleJob($job, $expression);
@@ -130,7 +138,7 @@ class BackupScheduler
                     // Keep legacy schedules working by falling back to default disk resolution.
                     $job = $this->configureJob(
                         new CleanupJob($disks),
-                        config('backup-manager.jobs.cleanup', [])
+                        $this->config['cleanup'] ?? []
                     );
 
                     $this->scheduleJob($job, $expression);
@@ -174,7 +182,7 @@ class BackupScheduler
      */
     protected function scheduleJob(object $job, string $expression)
     {
-        return Schedule::job($job)->cron($expression);
+        return $this->schedule->job($job)->cron($expression);
     }
 
     /**
@@ -184,7 +192,7 @@ class BackupScheduler
      */
     protected function scheduleCommand(string $command, string $expression)
     {
-        return Schedule::command($command)->cron($expression)->runInBackground();
+        return $this->schedule->command($command)->cron($expression)->runInBackground();
     }
 
     /**
