@@ -25,8 +25,12 @@ abstract class AbstractChannel
 
     /**
      * Authenticate the user's access to the channel.
+     *
+     * @param  object|null  $user  The user to authenticate (null if not authenticated)
+     * @param  string  $uuid  The unique identifier for the channel
+     * @return array|bool An array of channel data if access is granted, or false if access is denied
      */
-    public function join($user, string $uuid): array|bool
+    public function join(?object $user, string $uuid): array|bool
     {
         return $this->hasAccess($user, static::getChannelName(), $uuid);
     }
@@ -34,12 +38,12 @@ abstract class AbstractChannel
     /**
      * Determines if the given user has access to the channel with the specified ID.
      *
-     * @param  mixed  $user  The user to check access for (null if not authenticated)
+     * @param  object|null  $user  The user to check access for (null if not authenticated)
      * @param  string  $channel  The channel name (e.g. "jobs")
      * @param  string  $id  The channel ID (e.g. "{uuid}")
      * @return bool True if the user has access, false otherwise
      */
-    protected function hasAccess($user, string $channel, string $id): bool
+    protected function hasAccess(?object $user, string $channel, string $id): bool
     {
         if (is_null($user)) {
             return false;
