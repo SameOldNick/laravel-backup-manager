@@ -2,10 +2,9 @@
 
 namespace SameOldNick\BackupManager\Broadcasting;
 
+use Illuminate\Support\Facades\Artisan as ArtisanFacade;
 use SameOldNick\BackupManager\Broadcasting\Console\OutputRedirector;
 use SameOldNick\BackupManager\Broadcasting\Notifiers\ProcessNotifier;
-use Illuminate\Support\Facades\Artisan as ArtisanFacade;
-use Symfony\Component\Process\Process;
 
 /**
  * Pipes Artisan command to websocket.
@@ -17,8 +16,6 @@ class Artisan
 
     /**
      * Intitializes Artisan instance
-     *
-     * @param  ProcessNotifier  $notifier  Used to send process related notifications
      */
     public function __construct(
         public readonly string $channel,
