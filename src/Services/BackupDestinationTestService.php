@@ -2,6 +2,7 @@
 
 namespace SameOldNick\BackupManager\Services;
 
+use Illuminate\Container\Attributes\Config;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Enums\RunStatus;
 use SameOldNick\BackupManager\Exceptions\BackupDestinationTestRunAlreadyExistsException;
@@ -13,6 +14,21 @@ use SameOldNick\BackupManager\Models\FilesystemConfiguration;
 
 class BackupDestinationTestService extends AbstractChannelLeaseService
 {
+    /**
+     * Initializes BackupDestinationTestService instance.
+     *
+     * @param  string  $channelIdPrefix  The prefix for channel IDs used in backup destination tests
+     * @param  int  $channelLeaseExpirationMinutes  The expiration time in minutes for channel leases
+     */
+    public function __construct(
+        #[Config('backup-manager.channel_leases.test_backup_destination.prefix', 'test-destination')]
+        protected readonly string $channelIdPrefix,
+        #[Config('backup-manager.channel_leases.test_backup_destination.ttl', 180)]
+        protected readonly int $channelLeaseExpirationMinutes
+    ) {
+        //
+    }
+
     /**
      * Opens a channel lease for a backup destination test.
      *
@@ -87,7 +103,7 @@ class BackupDestinationTestService extends AbstractChannelLeaseService
      */
     protected function getChannelIdPrefix(): string
     {
-        return config('backup-manager.channel_leases.test_backup_destination.prefix', 'test-destination');
+        return $this->channelIdPrefix;
     }
 
     /**
@@ -95,6 +111,6 @@ class BackupDestinationTestService extends AbstractChannelLeaseService
      */
     protected function getChannelLeaseExpirationMinutes(): int
     {
-        return config('backup-manager.channel_leases.test_backup_destination.ttl', 180);
+        return $this->channelLeaseExpirationMinutes;
     }
 }

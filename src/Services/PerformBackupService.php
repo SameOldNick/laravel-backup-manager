@@ -2,6 +2,7 @@
 
 namespace SameOldNick\BackupManager\Services;
 
+use Illuminate\Container\Attributes\Config;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelLease;
 use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Exceptions\BackupRunAlreadyExistsException;
@@ -10,6 +11,21 @@ use SameOldNick\BackupManager\Models\BackupRun;
 
 class PerformBackupService extends AbstractChannelLeaseService
 {
+    /**
+     * Initializes PerformBackupService instance.
+     *
+     * @param  string  $channelIdPrefix  The prefix for channel IDs used in backup processes
+     * @param  int  $channelLeaseExpirationMinutes  The expiration time in minutes for channel leases
+     */
+    public function __construct(
+        #[Config('backup-manager.channel_leases.perform_backup.prefix', 'backups')]
+        protected readonly string $channelIdPrefix,
+        #[Config('backup-manager.channel_leases.perform_backup.ttl', 180)]
+        protected readonly int $channelLeaseExpirationMinutes
+    ) {
+        //
+    }
+
     /**
      * Starts a backup process by dispatching a BackupJob and creating a channel lease for real-time updates.
      *
@@ -95,7 +111,7 @@ class PerformBackupService extends AbstractChannelLeaseService
      */
     protected function getChannelIdPrefix(): string
     {
-        return config('backup-manager.channel_leases.perform_backup.prefix', 'backups');
+        return $this->channelIdPrefix;
     }
 
     /**
@@ -103,6 +119,6 @@ class PerformBackupService extends AbstractChannelLeaseService
      */
     protected function getChannelLeaseExpirationMinutes(): int
     {
-        return config('backup-manager.channel_leases.perform_backup.ttl', 180);
+        return $this->channelLeaseExpirationMinutes;
     }
 }
