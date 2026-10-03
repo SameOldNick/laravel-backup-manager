@@ -2,11 +2,9 @@
 
 namespace SameOldNick\BackupManager;
 
-use Exception;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Filesystem\Factory as FactoryContract;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use SameOldNick\BackupManager\Commands\InstallBackupManager;
 use SameOldNick\BackupManager\DbDumper\MySqlPHP;
@@ -15,6 +13,8 @@ use Spatie\Backup\Tasks\Backup\DbDumperFactory;
 
 class ServiceProvider extends BaseServiceProvider
 {
+    use Concerns\ChecksDatabaseSetup;
+
     /**
      * Register any application services.
      *
@@ -100,24 +100,6 @@ class ServiceProvider extends BaseServiceProvider
     protected function subscribeToEvents()
     {
         Event::subscribe(Listeners\BackupProjectionSubscriber::class);
-    }
-
-    /**
-     * Checks if database has been setup by checking if the specified tables exist.
-     */
-    protected function isDatabaseSetup(array $tables): bool
-    {
-        try {
-            foreach ($tables as $table) {
-                if (! Schema::hasTable($table)) {
-                    return false;
-                }
-            }
-
-            return true;
-        } catch (Exception $ex) {
-            return false;
-        }
     }
 
     /**

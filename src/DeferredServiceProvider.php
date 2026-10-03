@@ -2,11 +2,9 @@
 
 namespace SameOldNick\BackupManager;
 
-use Exception;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Support\DeferrableProvider;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use SameOldNick\BackupManager\Broadcasting\Access\ChannelAccessManager;
 use SameOldNick\BackupManager\Broadcasting\Access\Stores\CacheStore;
@@ -24,6 +22,8 @@ use Spatie\Backup\Config\Config;
  */
 class DeferredServiceProvider extends BaseServiceProvider implements DeferrableProvider
 {
+    use Concerns\ChecksDatabaseSetup;
+
     /**
      * Register container bindings.
      *
@@ -49,24 +49,6 @@ class DeferredServiceProvider extends BaseServiceProvider implements DeferrableP
             ChannelAccessStore::class,
             ChannelAccessManager::class,
         ];
-    }
-
-    /**
-     * Checks if database has been setup by checking if the specified tables exist.
-     */
-    protected function isDatabaseSetup(array $tables): bool
-    {
-        try {
-            foreach ($tables as $table) {
-                if (! Schema::hasTable($table)) {
-                    return false;
-                }
-            }
-
-            return true;
-        } catch (Exception $ex) {
-            return false;
-        }
     }
 
     /**
