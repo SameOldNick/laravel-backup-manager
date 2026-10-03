@@ -25,6 +25,8 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__.'/../config/backup-manager.php', 'backup-manager');
+
         $this->extendFilesystemManager();
     }
 
@@ -54,8 +56,6 @@ class ServiceProvider extends BaseServiceProvider
                 InstallBackupManager::class,
             ]);
         }
-
-        $this->mergeConfigFrom(__DIR__.'/../config/backup-manager.php', 'backup-manager');
 
         if (config('backup-manager.routes.enabled', true)) {
             $this->registerRoutes();
