@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('cleanup_schedule_filesystem_configuration', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cleanup_schedule_id')->constrained(indexName: 'cleanup_schedule_id_index')->cascadeOnDelete();
-            $table->foreignId('filesystem_configuration_id')->constrained(indexName: 'filesystem_config_id_index')->cascadeOnDelete();
+            $table->foreignId('cleanup_schedule_id')->constrained(indexName: 'cleanup_sched_fs_cfg_schedule_fk')->cascadeOnDelete();
+            $table->foreignId('filesystem_configuration_id')->constrained(indexName: 'cleanup_sched_fs_cfg_filesystem_fk')->cascadeOnDelete();
             $table->timestamps();
         });
     }

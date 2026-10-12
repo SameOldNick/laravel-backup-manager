@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('backup_monitor_filesystem_configuration', function (Blueprint $table) {
             $table->id();
             $table->foreignId('backup_monitor_id')->constrained(indexName: 'backup_monitor_id_index')->cascadeOnDelete();
-            $table->foreignId('filesystem_configuration_id')->constrained(indexName: 'filesystem_config_id_index')->cascadeOnDelete();
+            $table->foreignId('filesystem_configuration_id')->constrained(indexName: 'backup_monitor_fs_cfg_filesystem_fk')->cascadeOnDelete();
             $table->timestamps();
         });
     }
