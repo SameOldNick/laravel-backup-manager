@@ -2,6 +2,25 @@
 
 All notable changes will be documented in this file.
 
+## v3.0.1 - 2026-10-11
+
+### Fixed
+
+- Fixed duplicate foreign key index names in the `backup_monitor_filesystem_configuration` and `cleanup_schedule_filesystem_configuration` migrations, which used the same index name and could collide when both tables were created
+- `ServiceProvider` now merges `config/backup-manager.php` in `register()`, so the package's default configuration is available without requiring a published config file
+
+### Refactored
+
+- `BackupScheduler` now accepts the scheduler `Schedule` and the backup-manager `jobs` config via constructor injection instead of the `Schedule` facade and `config()` helper
+- `BackupDestinationTestService` and `PerformBackupService` now accept their channel lease prefix and expiration as constructor-injected config values instead of reading `config()` in each method
+- Extracted the database setup check into a shared `ChecksDatabaseSetup` trait used by both `ServiceProvider` and `DeferredServiceProvider`
+- `AbstractChannel::join()` and `hasAccess()` now declare the user parameter as `?object` for clarity and type safety
+- Removed an unused import and stale docblock from `Artisan`
+
+### Upgrade Notes
+
+- The `0001_01_01_000019_create_backup_monitor_filesystem_configuration_table` and `0001_01_01_000020_create_cleanup_schedule_filesystem_configuration_table` migrations were updated to use distinct foreign key index names instead of the shared `filesystem_config_id_index` (which can collide when both tables are created in the same schema). If you have already published these migrations into your app's `database/migrations` directory, update the `indexName` arguments in your published copies to match the new names so fresh installs use the corrected indexes — do not re-publish, as that would create duplicate migration files. Databases that have already run these migrations are unaffected.
+
 ## v3.0.0 - 2026-10-01
 
 ### Breaking
