@@ -30,7 +30,11 @@ class BackupScheduler
         #[Config('backup-manager.jobs', [])]
         protected readonly array $config = [],
         #[Config('backup-manager.scheduler.error_ttl', 900)]
-        protected readonly int $errorTtl = 900
+        protected readonly int $errorTtl = 900,
+        #[Config('backup-manager.scheduler.backup', [])]
+        protected readonly array $backupScheduleConfig = [],
+        #[Config('backup-manager.scheduler.cleanup', [])]
+        protected readonly array $cleanupScheduleConfig = []
     ) {
         //
     }
@@ -69,13 +73,16 @@ class BackupScheduler
                         $this->config['backup'] ?? []
                     );
 
-                    $this->scheduleJob($job, $eligible->expression);
+                    $event = $this->scheduleJob($job, $eligible->expression)
+                        ->description("Backup Schedule: {$schedule->name}");
+
+                    $this->configureScheduleEvent($event, $this->backupScheduleConfig ?? []);
                 } catch (\Throwable $e) {
                     $this->handleScheduleException(
                         $e,
                         'backup',
                         $schedule->getKey(),
-                        $schedule->getRawOriginal('name') ?? 'Unknown Schedule',
+                        $schedule->name,
                     );
                 }
             }
@@ -111,13 +118,16 @@ class BackupScheduler
                         $this->config['cleanup'] ?? []
                     );
 
-                    $this->scheduleJob($job, $eligible->expression);
+                    $event = $this->scheduleJob($job, $eligible->expression)
+                        ->description("Cleanup Schedule: {$schedule->name}");
+
+                    $this->configureScheduleEvent($event, $this->cleanupScheduleConfig ?? []);
                 } catch (\Throwable $e) {
                     $this->handleScheduleException(
                         $e,
                         'cleanup',
                         $schedule->getKey(),
-                        $schedule->getRawOriginal('name') ?? 'Unknown Schedule',
+                        $schedule->name,
                     );
                 }
             }
@@ -163,6 +173,61 @@ class BackupScheduler
     protected function scheduleJob(object $job, string $expression)
     {
         return $this->schedule->job($job)->cron($expression);
+    }
+
+    /**
+     * Configures a scheduled event with the provided queue options.
+     *
+     * @param  Event  $event  The scheduled event to configure
+     * @param  array  $queueOptions  The queue options to apply
+     * @return Event The configured scheduled event
+     */
+    protected function configureScheduleEvent(Event $event, array $queueOptions): Event
+    {
+        if (empty($queueOptions)) {
+            return $event;
+        }
+
+        if ($queueOptions['on_one_server'] ?? false) {
+            $event->onOneServer();
+        }
+
+        $withoutOverlapping = $queueOptions['without_overlapping'] ?? ['enabled' => false];
+
+        if ($withoutOverlapping['enabled'] ?? false) {
+            $event->withoutOverlapping(
+                $withoutOverlapping['expires_at'] ?? 1440,
+                $withoutOverlapping['release_on_termination_signals'] ?? true
+            );
+        }
+
+        if ($user = $queueOptions['user'] ?? null) {
+            $event->user($user);
+        }
+
+        if ($environments = $queueOptions['environments'] ?? null) {
+            $event->environments($environments);
+        }
+
+        if ($queueOptions['even_in_maintenance_mode'] ?? false) {
+            $event->evenInMaintenanceMode();
+        }
+
+        if ($queueOptions['even_when_paused'] ?? false) {
+            $event->evenWhenPaused();
+        }
+
+        if ($timezone = $queueOptions['timezone'] ?? null) {
+            $event->timezone($timezone);
+        }
+
+        if ($when = $queueOptions['when'] ?? null) {
+            $event->when(function (...$args) use ($when) {
+                return app()->call($when, $args);
+            });
+        }
+
+        return $event;
     }
 
     /**
