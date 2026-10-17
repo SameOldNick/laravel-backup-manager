@@ -215,7 +215,7 @@ return [
          *
          * @var int
          */
-        'error_ttl' => env('BACKUP_SCHEDULER_LOG_TTL', 900),
+        'error_ttl' => env('BACKUP_SCHEDULER_ERROR_TTL', 900),
     ],
 
     /*
