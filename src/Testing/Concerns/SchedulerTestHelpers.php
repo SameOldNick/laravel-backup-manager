@@ -5,6 +5,7 @@ namespace SameOldNick\BackupManager\Testing\Concerns;
 use Illuminate\Console\Scheduling\Schedule;
 use SameOldNick\BackupManager\BackupScheduler;
 use SameOldNick\BackupManager\Services\ScheduleEligibilityService;
+use SameOldNick\BackupManager\Testing\BackupSchedulerRecorder;
 
 trait SchedulerTestHelpers
 {
@@ -13,24 +14,15 @@ trait SchedulerTestHelpers
      *
      * @param  Schedule|null  $schedule  The schedule instance to use
      * @param  array|null  $config  The configuration array to use
-     * @return object An instance of the anonymous class that extends BackupScheduler and records scheduled jobs and commands
+     * @return BackupSchedulerRecorder A spy instance of the BackupScheduler class
      */
-    protected function makeSchedulerSpy(?Schedule $schedule = null, ?ScheduleEligibilityService $eligibilityService = null, ?array $config = null): object
+    protected function makeSchedulerSpy(?Schedule $schedule = null, ?ScheduleEligibilityService $eligibilityService = null, ?array $config = null): BackupSchedulerRecorder
     {
-        return new class($schedule ?? new Schedule, $eligibilityService ?? new ScheduleEligibilityService, $config ?? config('backup-manager.jobs', [])) extends BackupScheduler
-        {
-            public array $jobs = [];
-
-            protected function scheduleJob(object $job, string $expression)
-            {
-                $this->jobs[] = [
-                    'job' => $job,
-                    'expression' => $expression,
-                ];
-
-                return null;
-            }
-        };
+        return new BackupSchedulerRecorder(
+            $schedule ?? new Schedule,
+            $eligibilityService ?? new ScheduleEligibilityService,
+            $config ?? config('backup-manager.jobs', [])
+        );
     }
 
     /**
