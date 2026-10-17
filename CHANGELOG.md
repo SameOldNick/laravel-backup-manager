@@ -2,6 +2,68 @@
 
 All notable changes will be documented in this file.
 
+## v3.1.0 - 2026-10-17
+
+### Added
+
+- Configurable scheduling attributes for backup and cleanup events through `config/backup-manager.php` → `scheduler.attributes`: `on_one_server`, `without_overlapping.enabled`, `without_overlapping.expires_at`, `without_overlapping.release_on_termination_signals`, `user`, `environments`, `even_in_maintenance_mode`, `even_when_paused`, `timezone` and `when`. Each attribute has a `backup` and a `cleanup` value, so both schedule types can be configured independently
+- Added `scheduler.error_ttl` (default `900` seconds, `BACKUP_SCHEDULER_ERROR_TTL`) to throttle repeated schedule registration errors and events for the same schedule and exception type; set it to `0` to disable throttling
+- Added the `ScheduleRegistrationFailed` event, dispatched with the schedule type, id, name and the exception whenever a backup or cleanup schedule fails registration
+- Added `ScheduleEligibilityService` and the `EligibleSchedule` DTO, which resolve a schedule's cron expression and eligible disks and validate the backup type before the job is created
+- Added `InvalidBackupTypeException` and `InvalidCronExpressionException`
+- Scheduled backup and cleanup events now receive descriptions (`Backup Schedule: {name}` and `Cleanup Schedule: {name}`)
+- Added `SameOldNick\BackupManager\Testing\BackupSchedulerRecorder`, a scheduler test double that records scheduled jobs and events while still registering them with the Laravel `Schedule`
+- Added `assertSchedulerEvents()` to the `SchedulerTestHelpers` trait, with optional `scheduler.attributes` overrides
+
+### Fixed
+
+- Schedule registration failures for invalid cron expressions, invalid backup types and schedules whose attached destinations are all inactive or invalid now dispatch `ScheduleRegistrationFailed` in addition to being logged
+- Repeated registration failures for the same schedule and exception type are no longer logged on every scheduler rebuild; they are reported at most once per `scheduler.error_ttl`
+
+### Refactored
+
+- `BackupScheduler` now receives `ScheduleEligibilityService`, `scheduler.error_ttl` and `scheduler.attributes` through constructor injection
+- Moved the cron expression, backup type and destination eligibility checks out of `BackupScheduler` and into `ScheduleEligibilityService`
+- Removed the unused `BackupScheduler::scheduleCommand()` method
+- `SchedulerTestHelpers::makeSchedulerSpy()` now returns a `BackupSchedulerRecorder`, accepts a `ScheduleEligibilityService` and optional `scheduler.attributes`, and records scheduled events alongside jobs
+- Removed the unused `SchedulerTestHelpers::assertSchedulerCommands()` method
+- Added scheduler tests covering event attributes, disabled overlap protection, rejected `when` conditions, empty attribute values, backup/cleanup configuration isolation, eligibility failures and error throttling
+
+### Upgrade Notes
+
+- Re-publish the package config to pick up the new `scheduler` section: `php artisan vendor:publish --tag=backup-manager-config --force`
+- `on_one_server` is enabled for both schedule types by default, so only one server dispatches each scheduled backup or cleanup. Set `BACKUP_SCHEDULER_BACKUP_ON_ONE_SERVER=false` or `BACKUP_SCHEDULER_CLEANUP_ON_ONE_SERVER=false` to keep the previous behaviour
+- `without_overlapping` is disabled by default. Enable it with `BACKUP_SCHEDULER_BACKUP_WITHOUT_OVERLAPPING=true` or `BACKUP_SCHEDULER_CLEANUP_WITHOUT_OVERLAPPING=true`
+
+  The `scheduler.attributes` section combines both settings:
+
+  ```php
+  'scheduler' => [
+      'attributes' => [
+          'on_one_server' => [
+              'backup' => env('BACKUP_SCHEDULER_BACKUP_ON_ONE_SERVER', true),
+              'cleanup' => env('BACKUP_SCHEDULER_CLEANUP_ON_ONE_SERVER', true),
+          ],
+          'without_overlapping' => [
+              'backup' => [
+                  'enabled' => env('BACKUP_SCHEDULER_BACKUP_WITHOUT_OVERLAPPING', false),
+                  'expires_at' => env('BACKUP_SCHEDULER_BACKUP_EXPIRES_AT', 1440),
+                  'release_on_termination_signals' => env('BACKUP_SCHEDULER_BACKUP_RELEASE_ON_TERMINATION_SIGNALS', true),
+              ],
+              'cleanup' => [
+                  'enabled' => env('BACKUP_SCHEDULER_CLEANUP_WITHOUT_OVERLAPPING', false),
+                  'expires_at' => env('BACKUP_SCHEDULER_CLEANUP_EXPIRES_AT', 1440),
+                  'release_on_termination_signals' => env('BACKUP_SCHEDULER_CLEANUP_RELEASE_ON_TERMINATION_SIGNALS', true),
+              ],
+          ],
+      ],
+  ],
+  ```
+
+  Both features use cache locks, so configure a cache store shared by all servers when running more than one
+- Registration failures, including schedules whose attached destinations are all inactive or invalid, are now dispatched as `ScheduleRegistrationFailed` and logged at most once per schedule and exception type per `scheduler.error_ttl` (default 15 minutes). Set `BACKUP_SCHEDULER_ERROR_TTL=0` to log every failure
+- If you use the package's `SchedulerTestHelpers` trait, `assertSchedulerCommands()` has been removed and has no direct replacement. Use `assertSchedulerEvents()` to inspect the registered Laravel events, or `assertSchedulerJobs()` to inspect the dispatched jobs. Calls to `makeSchedulerSpy()` that passed the jobs config as the second argument must use named arguments (`makeSchedulerSpy(config: [...])`) or pass `null` for the new `ScheduleEligibilityService` argument. Scheduler attributes are overridden with the `attributes` argument, which uses the same `scheduler.attributes` shape as the config file
+
 ## v3.0.1 - 2026-10-11
 
 ### Fixed
