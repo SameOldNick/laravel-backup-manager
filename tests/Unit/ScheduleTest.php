@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Tests\Unit;
 
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Support\Facades\Log;
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Jobs\CleanupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
@@ -270,6 +271,24 @@ class ScheduleTest extends TestCase
             $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
             $this->assertSame([$valid->driver_name], $jobs[0]['job']->disks);
         });
+    }
+
+    public function test_invalid_backup_disks_are_logged_once_during_the_cooldown(): void
+    {
+        $schedule = $this->createBackupSchedule('Broken Schedule', 'full', '0 1 * * *', true);
+        $schedule->filesystemConfigurations()->attach(
+            $this->createDestination('Broken Destination', isValid: false)
+        );
+
+        Log::spy();
+        $scheduler = $this->makeSchedulerSpy();
+
+        $scheduler->scheduleBackup();
+        $scheduler->scheduleBackup();
+
+        Log::shouldHaveReceived('error')
+            ->once()
+            ->with("No valid disks found for backup schedule 'Broken Schedule' with specified disks.");
     }
 
     public function test_schedule_backup_skips_with_invalid_type(): void

@@ -4,6 +4,7 @@ namespace SameOldNick\BackupManager\Testing\Concerns;
 
 use Illuminate\Console\Scheduling\Schedule;
 use SameOldNick\BackupManager\BackupScheduler;
+use SameOldNick\BackupManager\Services\ScheduleEligibilityService;
 
 trait SchedulerTestHelpers
 {
@@ -14,9 +15,9 @@ trait SchedulerTestHelpers
      * @param  array|null  $config  The configuration array to use
      * @return object An instance of the anonymous class that extends BackupScheduler and records scheduled jobs and commands
      */
-    protected function makeSchedulerSpy(?Schedule $schedule = null, ?array $config = null): object
+    protected function makeSchedulerSpy(?Schedule $schedule = null, ?ScheduleEligibilityService $eligibilityService = null, ?array $config = null): object
     {
-        return new class($schedule ?? new Schedule, $config ?? config('backup-manager.jobs', [])) extends BackupScheduler
+        return new class($schedule ?? new Schedule, $eligibilityService ?? new ScheduleEligibilityService, $config ?? config('backup-manager.jobs', [])) extends BackupScheduler
         {
             public array $jobs = [];
 

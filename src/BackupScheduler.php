@@ -9,18 +9,14 @@ use Illuminate\Container\Attributes\Config;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Psr\Log\LoggerInterface;
-use SameOldNick\BackupManager\Concerns\TransformsCronExpression;
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Jobs\CleanupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
-use SameOldNick\BackupManager\Models\Collections\FilesystemConfigurationCollection;
+use SameOldNick\BackupManager\Services\ScheduleEligibilityService;
 
 class BackupScheduler
 {
-    use TransformsCronExpression;
-
     /**
      * Initializes backup scheduler
      *
@@ -30,6 +26,7 @@ class BackupScheduler
      */
     public function __construct(
         protected readonly Schedule $schedule,
+        protected readonly ScheduleEligibilityService $eligibilityService,
         #[Config('backup-manager.jobs', [])]
         protected readonly array $config = [],
         #[Config('backup-manager.scheduler.log_ttl', 900)]
@@ -64,47 +61,28 @@ class BackupScheduler
 
             foreach ($schedules as $schedule) {
                 try {
-                    $expression = $this->transformCronExpression($schedule->cron_expression);
-
-                    // Skip schedules with invalid cron expressions
-                    if (! $expression) {
-                        Log::error("Invalid cron expression for backup schedule '{$schedule->name}': '{$schedule->cron_expression}'");
-
-                        continue;
-                    }
-
-                    // Skip schedules with invalid backup types
-                    if (! $backupType = $schedule->type) {
-                        Log::error("Invalid backup type for schedule '{$schedule->name}': '{$schedule->getRawOriginal('type')}'");
-
-                        continue;
-                    }
-
-                    $disks = $this->getDisksForJob($schedule->filesystemConfigurations);
-
-                    if ($disks === []) {
-                        $this->logOnceWithinTtl('backup', $schedule->getKey(), function ($logger) use ($schedule) {
-                            $logger->error("No valid disks found for backup schedule '{$schedule->name}' with specified disks.");
-                        });
-
-                        continue;
-                    }
+                    $eligible = $this->eligibilityService->forBackup($schedule);
 
                     // Keep legacy schedules working by falling back to default disk resolution.
                     $job = $this->configureJob(
-                        new BackupJob($backupType, $disks),
+                        new BackupJob($schedule->type, $eligible->disks),
                         $this->config['backup'] ?? []
                     );
 
-                    $this->scheduleJob($job, $expression);
+                    $this->scheduleJob($job, $eligible->expression);
                 } catch (\Throwable $e) {
-                    $name = $schedule->getRawOriginal('name') ?? 'Unknown Schedule';
-                    Log::error("Error scheduling backup for schedule '{$name}': ".$e->getMessage());
+                    $this->handleScheduleException(
+                        $e,
+                        'backup',
+                        $schedule->getKey(),
+                    );
                 }
             }
 
         } catch (\Throwable $e) {
-            Log::error('Error retrieving backup schedules: '.$e->getMessage());
+            $this->logOnceWithinTtl('backup', null, function () use ($e) {
+                Log::error('Error retrieving backup schedules: '.$e->getMessage());
+            });
         }
 
     }
@@ -124,63 +102,46 @@ class BackupScheduler
 
             foreach ($schedules as $schedule) {
                 try {
-                    $expression = $this->transformCronExpression($schedule->cron_expression);
-
-                    // Skip schedules with invalid cron expressions
-                    if (! $expression) {
-                        Log::error("Invalid cron expression for cleanup schedule '{$schedule->name}': '{$schedule->cron_expression}'");
-
-                        continue;
-                    }
-
-                    $disks = $this->getDisksForJob($schedule->filesystemConfigurations);
-
-                    if ($disks === []) {
-                        $this->logOnceWithinTtl('cleanup', $schedule->getKey(), function ($logger) use ($schedule) {
-                            $logger->error("No valid disks found for cleanup schedule '{$schedule->name}' with specified disks.");
-                        });
-
-                        continue;
-                    }
+                    $eligible = $this->eligibilityService->forCleanup($schedule);
 
                     // Keep legacy schedules working by falling back to default disk resolution.
                     $job = $this->configureJob(
-                        new CleanupJob($disks),
+                        new CleanupJob($eligible->disks),
                         $this->config['cleanup'] ?? []
                     );
 
-                    $this->scheduleJob($job, $expression);
+                    $this->scheduleJob($job, $eligible->expression);
                 } catch (\Throwable $e) {
-                    $name = $schedule->getRawOriginal('name') ?? 'Unknown Schedule';
-                    Log::error("Error scheduling cleanup for schedule '{$name}': ".$e->getMessage());
+                    $this->handleScheduleException(
+                        $e,
+                        'cleanup',
+                        $schedule->getKey(),
+                    );
                 }
             }
         } catch (\Throwable $e) {
-            Log::error('Error retrieving cleanup schedules: '.$e->getMessage());
+            $this->logOnceWithinTtl('cleanup', null, function () use ($e) {
+                Log::error('Error retrieving cleanup schedules: '.$e->getMessage());
+            });
         }
 
     }
 
     /**
-     * Gets disks for job based on the provided FilesystemConfigurationCollection.
+     * Handles exceptions that occur during the scheduling of backup or cleanup jobs, logging the error message and ensuring that the log is only written once within a specified time-to-live (TTL) period.
      *
-     * @param  FilesystemConfigurationCollection  $configs  The collection of filesystem configurations associated with the schedule.
-     * @return ?array<int, string> Returns an array of disk names or null if no specific disks are configured.
+     * @param  \Throwable  $e  The exception that occurred
+     * @param  string  $scheduleType  The type of schedule (backup or cleanup)
+     * @param  int|string|null  $scheduleId  The ID of the schedule
      */
-    protected function getDisksForJob(FilesystemConfigurationCollection $configs): ?array
-    {
-        if ($configs->isEmpty()) {
-            return null; // No specific disks configured, use default behavior
-        }
-
-        $disks = $configs->getActiveAndValid()->toDiskNames();
-
-        // If there are supposed to be disks for this schedule, but none were found, return an empty array.
-        if (count($disks) === 0) {
-            return [];
-        }
-
-        return $disks;
+    protected function handleScheduleException(
+        \Throwable $e,
+        string $scheduleType,
+        int|string|null $scheduleId = null,
+    ): void {
+        $this->logOnceWithinTtl($scheduleType, $scheduleId, function () use ($e) {
+            Log::error($e->getMessage());
+        });
     }
 
     /**
@@ -206,18 +167,21 @@ class BackupScheduler
     /**
      * Logs a message, ensuring that the log is only written once within a specified time-to-live (TTL) period.
      *
-     * @param  string|int  $scheduleId  The schedule identifier.
-     * @param  callable(LoggerInterface $logger)  $callback  The callback to execute for logging.
+     * @param  string|int|null  $scheduleId  The schedule identifier.
+     * @param  callable()  $callback  The callback to execute for logging.
      */
-    protected function logOnceWithinTtl(string $scheduleType, string|int $scheduleId, callable $callback): void
+    protected function logOnceWithinTtl(string $scheduleType, string|int|null $scheduleId, callable $callback): void
     {
-        $key = "backup-manager:log:{$scheduleType}:{$scheduleId}";
+        $key =
+            $scheduleId !== null ?
+            "backup-manager:log:{$scheduleType}:{$scheduleId}" :
+            "backup-manager:log:{$scheduleType}";
 
         if ($this->logTtl > 0 && ! Cache::add($key, true, $this->logTtl)) {
             return;
         }
 
-        $callback(Log::getLogger());
+        $callback();
     }
 
     /**
