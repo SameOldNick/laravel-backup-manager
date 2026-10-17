@@ -21,22 +21,10 @@ trait SchedulerTestHelpers
         {
             public array $jobs = [];
 
-            public array $commands = [];
-
             protected function scheduleJob(object $job, string $expression)
             {
                 $this->jobs[] = [
                     'job' => $job,
-                    'expression' => $expression,
-                ];
-
-                return null;
-            }
-
-            protected function scheduleCommand(string $command, string $expression)
-            {
-                $this->commands[] = [
-                    'command' => $command,
                     'expression' => $expression,
                 ];
 

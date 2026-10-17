@@ -231,16 +231,6 @@ class BackupScheduler
     }
 
     /**
-     * Schedules command
-     *
-     * @return Event
-     */
-    protected function scheduleCommand(string $command, string $expression)
-    {
-        return $this->schedule->command($command)->cron($expression)->runInBackground();
-    }
-
-    /**
      * Creates a cache key for tracking the execution of a job.
      *
      * @param  string  $scheduleType  The type of schedule (backup or cleanup)
