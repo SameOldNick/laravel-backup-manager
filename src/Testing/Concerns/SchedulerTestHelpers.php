@@ -16,12 +16,20 @@ trait SchedulerTestHelpers
      * @param  array|null  $config  The configuration array to use
      * @return BackupSchedulerRecorder A spy instance of the BackupScheduler class
      */
-    protected function makeSchedulerSpy(?Schedule $schedule = null, ?ScheduleEligibilityService $eligibilityService = null, ?array $config = null): BackupSchedulerRecorder
-    {
+    protected function makeSchedulerSpy(
+        ?Schedule $schedule = null,
+        ?ScheduleEligibilityService $eligibilityService = null,
+        ?array $config = null,
+        ?array $backupScheduleConfig = null,
+        ?array $cleanupScheduleConfig = null,
+    ): BackupSchedulerRecorder {
         return new BackupSchedulerRecorder(
             $schedule ?? new Schedule,
             $eligibilityService ?? new ScheduleEligibilityService,
-            $config ?? config('backup-manager.jobs', [])
+            $config ?? config('backup-manager.jobs', []),
+            900,
+            $backupScheduleConfig ?? [],
+            $cleanupScheduleConfig ?? [],
         );
     }
 
@@ -38,5 +46,27 @@ trait SchedulerTestHelpers
         $scheduler->scheduleCleanup();
 
         $callback($scheduler->jobs);
+    }
+
+    /**
+     * Asserts that the expected events were scheduled by the BackupScheduler.
+     *
+     * @param  callable  $callback  A callback function that receives the array of scheduled events for making assertions
+     */
+    protected function assertSchedulerEvents(
+        callable $callback,
+        ?array $backupScheduleConfig = null,
+        ?array $cleanupScheduleConfig = null,
+    ): void
+    {
+        $scheduler = $this->makeSchedulerSpy(
+            backupScheduleConfig: $backupScheduleConfig,
+            cleanupScheduleConfig: $cleanupScheduleConfig,
+        );
+
+        $scheduler->scheduleBackup();
+        $scheduler->scheduleCleanup();
+
+        $callback($scheduler->events);
     }
 }
