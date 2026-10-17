@@ -7,7 +7,9 @@ use Illuminate\Console\Scheduling\Event;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Container\Attributes\Config;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Psr\Log\LoggerInterface;
 use SameOldNick\BackupManager\Concerns\TransformsCronExpression;
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Jobs\CleanupJob;
@@ -29,7 +31,9 @@ class BackupScheduler
     public function __construct(
         protected readonly Schedule $schedule,
         #[Config('backup-manager.jobs', [])]
-        protected readonly array $config = []
+        protected readonly array $config = [],
+        #[Config('backup-manager.scheduler.log_ttl', 900)]
+        protected readonly int $logTtl = 900
     ) {
         //
     }
@@ -79,7 +83,9 @@ class BackupScheduler
                     $disks = $this->getDisksForJob($schedule->filesystemConfigurations);
 
                     if ($disks === []) {
-                        Log::error("No valid disks found for backup schedule '{$schedule->name}' with specified disks.");
+                        $this->logOnceWithinTtl('backup', $schedule->getKey(), function ($logger) use ($schedule) {
+                            $logger->error("No valid disks found for backup schedule '{$schedule->name}' with specified disks.");
+                        });
 
                         continue;
                     }
@@ -130,7 +136,9 @@ class BackupScheduler
                     $disks = $this->getDisksForJob($schedule->filesystemConfigurations);
 
                     if ($disks === []) {
-                        Log::error("No valid disks found for cleanup schedule '{$schedule->name}' with specified disks.");
+                        $this->logOnceWithinTtl('cleanup', $schedule->getKey(), function ($logger) use ($schedule) {
+                            $logger->error("No valid disks found for cleanup schedule '{$schedule->name}' with specified disks.");
+                        });
 
                         continue;
                     }
@@ -193,6 +201,23 @@ class BackupScheduler
     protected function scheduleCommand(string $command, string $expression)
     {
         return $this->schedule->command($command)->cron($expression)->runInBackground();
+    }
+
+    /**
+     * Logs a message, ensuring that the log is only written once within a specified time-to-live (TTL) period.
+     *
+     * @param  string|int  $scheduleId  The schedule identifier.
+     * @param  callable(LoggerInterface $logger)  $callback  The callback to execute for logging.
+     */
+    protected function logOnceWithinTtl(string $scheduleType, string|int $scheduleId, callable $callback): void
+    {
+        $key = "backup-manager:log:{$scheduleType}:{$scheduleId}";
+
+        if ($this->logTtl > 0 && ! Cache::add($key, true, $this->logTtl)) {
+            return;
+        }
+
+        $callback(Log::getLogger());
     }
 
     /**

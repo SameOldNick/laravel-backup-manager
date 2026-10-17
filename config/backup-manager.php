@@ -202,6 +202,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Scheduler
+    |--------------------------------------------------------------------------
+    |
+    | Scheduler registration runs whenever Laravel rebuilds its scheduled
+    | events.
+    */
+    'scheduler' => [
+        /**
+         * The time-to-live (TTL) for log messages related to the scheduler in seconds.
+         * This prevents the same error message from being logged repeatedly within a short period of time.
+         *
+         * @var int
+         */
+        'log_ttl' => env('BACKUP_SCHEDULER_LOG_TTL', 900),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Config Fallbacks
     |--------------------------------------------------------------------------
     | Here you can specify the config values that will be used as fallbacks when the database
