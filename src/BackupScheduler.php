@@ -29,8 +29,8 @@ class BackupScheduler
         protected readonly ScheduleEligibilityService $eligibilityService,
         #[Config('backup-manager.jobs', [])]
         protected readonly array $config = [],
-        #[Config('backup-manager.scheduler.log_ttl', 900)]
-        protected readonly int $logTtl = 900
+        #[Config('backup-manager.scheduler.error_ttl', 900)]
+        protected readonly int $errorTtl = 900
     ) {
         //
     }
@@ -75,12 +75,13 @@ class BackupScheduler
                         $e,
                         'backup',
                         $schedule->getKey(),
+                        $schedule->getRawOriginal('name') ?? 'Unknown Schedule',
                     );
                 }
             }
 
         } catch (\Throwable $e) {
-            $this->logOnceWithinTtl('backup', null, function () use ($e) {
+            $this->runAtMostOnceWithinTtl($this->createRunAtMostCacheKey('backup', null, get_class($e)), function () use ($e) {
                 Log::error('Error retrieving backup schedules: '.$e->getMessage());
             });
         }
@@ -116,11 +117,12 @@ class BackupScheduler
                         $e,
                         'cleanup',
                         $schedule->getKey(),
+                        $schedule->getRawOriginal('name') ?? 'Unknown Schedule',
                     );
                 }
             }
         } catch (\Throwable $e) {
-            $this->logOnceWithinTtl('cleanup', null, function () use ($e) {
+            $this->runAtMostOnceWithinTtl($this->createRunAtMostCacheKey('cleanup', null, get_class($e)), function () use ($e) {
                 Log::error('Error retrieving cleanup schedules: '.$e->getMessage());
             });
         }
@@ -133,14 +135,23 @@ class BackupScheduler
      * @param  \Throwable  $e  The exception that occurred
      * @param  string  $scheduleType  The type of schedule (backup or cleanup)
      * @param  int|string|null  $scheduleId  The ID of the schedule
+     * @param  string  $scheduleName  The name of the schedule
      */
     protected function handleScheduleException(
         \Throwable $e,
         string $scheduleType,
         int|string|null $scheduleId = null,
+        string $scheduleName = 'Unknown Schedule',
     ): void {
-        $this->logOnceWithinTtl($scheduleType, $scheduleId, function () use ($e) {
+        $this->runAtMostOnceWithinTtl($this->createRunAtMostCacheKey($scheduleType, $scheduleId, get_class($e)), function () use ($e, $scheduleType, $scheduleId, $scheduleName) {
             Log::error($e->getMessage());
+
+            event(new Events\ScheduleRegistrationFailed(
+                scheduleType: $scheduleType,
+                scheduleId: $scheduleId,
+                scheduleName: $scheduleName,
+                exception: $e,
+            ));
         });
     }
 
@@ -165,19 +176,35 @@ class BackupScheduler
     }
 
     /**
-     * Logs a message, ensuring that the log is only written once within a specified time-to-live (TTL) period.
+     * Creates a cache key for tracking the execution of a job.
      *
-     * @param  string|int|null  $scheduleId  The schedule identifier.
-     * @param  callable()  $callback  The callback to execute for logging.
+     * @param  string  $scheduleType  The type of schedule (backup or cleanup)
+     * @param  string|int|null  $scheduleId  The ID of the schedule
+     * @param  string|null  $suffix  An optional suffix to append to the key
+     * @return string The generated cache key
      */
-    protected function logOnceWithinTtl(string $scheduleType, string|int|null $scheduleId, callable $callback): void
+    protected function createRunAtMostCacheKey(string $scheduleType, string|int|null $scheduleId, ?string $suffix = null): string
     {
-        $key =
-            $scheduleId !== null ?
-            "backup-manager:log:{$scheduleType}:{$scheduleId}" :
-            "backup-manager:log:{$scheduleType}";
+        $key = $scheduleId !== null
+            ? "backup-manager:run:{$scheduleType}:{$scheduleId}"
+            : "backup-manager:run:{$scheduleType}";
 
-        if ($this->logTtl > 0 && ! Cache::add($key, true, $this->logTtl)) {
+        if ($suffix !== null) {
+            $key .= ":{$suffix}";
+        }
+
+        return $key;
+    }
+
+    /**
+     * Runs a callback at most once within a specified time-to-live (TTL) period.
+     *
+     * @param  string  $key  The cache key to use for tracking the execution of the callback.
+     * @param  callable()  $callback  The callback to execute.
+     */
+    protected function runAtMostOnceWithinTtl(string $key, callable $callback): void
+    {
+        if ($this->errorTtl > 0 && ! Cache::add($key, true, $this->errorTtl)) {
             return;
         }
 

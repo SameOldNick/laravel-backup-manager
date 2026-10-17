@@ -210,12 +210,12 @@ return [
     */
     'scheduler' => [
         /**
-         * The time-to-live (TTL) for log messages related to the scheduler in seconds.
-         * This prevents the same error message from being logged repeatedly within a short period of time.
+         * The time-to-live (TTL) for handling errors during schedule registration.
+         * This is the amount of time (in seconds) that the system will wait before errors are logged again for the same schedule registration issue.
          *
          * @var int
          */
-        'log_ttl' => env('BACKUP_SCHEDULER_LOG_TTL', 900),
+        'error_ttl' => env('BACKUP_SCHEDULER_LOG_TTL', 900),
     ],
 
     /*

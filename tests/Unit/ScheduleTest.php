@@ -2,8 +2,11 @@
 
 namespace SameOldNick\BackupManager\Tests\Unit;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Log;
+use SameOldNick\BackupManager\Events\ScheduleRegistrationFailed;
+use SameOldNick\BackupManager\Exceptions\NoValidDisksException;
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Jobs\CleanupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
@@ -289,6 +292,28 @@ class ScheduleTest extends TestCase
         Log::shouldHaveReceived('error')
             ->once()
             ->with("No valid disks found for backup schedule 'Broken Schedule' with specified disks.");
+    }
+
+    public function test_schedule_registration_failed_event_is_dispatched_once_during_the_cooldown(): void
+    {
+        $schedule = $this->createBackupSchedule('Broken Schedule', 'full', '0 1 * * *', true);
+        $schedule->filesystemConfigurations()->attach(
+            $this->createDestination('Broken Destination', isValid: false)
+        );
+
+        Event::fake([ScheduleRegistrationFailed::class]);
+        $scheduler = $this->makeSchedulerSpy();
+
+        $scheduler->scheduleBackup();
+        $scheduler->scheduleBackup();
+
+        Event::assertDispatchedTimes(ScheduleRegistrationFailed::class, 1);
+        Event::assertDispatched(ScheduleRegistrationFailed::class, function (ScheduleRegistrationFailed $event) use ($schedule): bool {
+            return $event->scheduleType === 'backup'
+                && $event->scheduleId === $schedule->getKey()
+                && $event->scheduleName === 'Broken Schedule'
+                && $event->exception instanceof NoValidDisksException;
+        });
     }
 
     public function test_schedule_backup_skips_with_invalid_type(): void
