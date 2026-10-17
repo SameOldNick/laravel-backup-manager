@@ -7,6 +7,7 @@ use Illuminate\Console\Scheduling\Event;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Container\Attributes\Config;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use SameOldNick\BackupManager\Jobs\BackupJob;
@@ -31,10 +32,8 @@ class BackupScheduler
         protected readonly array $config = [],
         #[Config('backup-manager.scheduler.error_ttl', 900)]
         protected readonly int $errorTtl = 900,
-        #[Config('backup-manager.scheduler.backup', [])]
-        protected readonly array $backupScheduleConfig = [],
-        #[Config('backup-manager.scheduler.cleanup', [])]
-        protected readonly array $cleanupScheduleConfig = []
+        #[Config('backup-manager.scheduler.attributes', [])]
+        protected readonly array $scheduleAttributes = [],
     ) {
         //
     }
@@ -76,7 +75,7 @@ class BackupScheduler
                     $event = $this->scheduleJob($job, $eligible->expression)
                         ->description("Backup Schedule: {$schedule->name}");
 
-                    $this->configureScheduleEvent($event, $this->backupScheduleConfig ?? []);
+                    $this->configureScheduleEvent($event, 'backup');
                 } catch (\Throwable $e) {
                     $this->handleScheduleException(
                         $e,
@@ -121,7 +120,7 @@ class BackupScheduler
                     $event = $this->scheduleJob($job, $eligible->expression)
                         ->description("Cleanup Schedule: {$schedule->name}");
 
-                    $this->configureScheduleEvent($event, $this->cleanupScheduleConfig ?? []);
+                    $this->configureScheduleEvent($event, 'cleanup');
                 } catch (\Throwable $e) {
                     $this->handleScheduleException(
                         $e,
@@ -179,20 +178,20 @@ class BackupScheduler
      * Configures a scheduled event with the provided queue options.
      *
      * @param  Event  $event  The scheduled event to configure
-     * @param  array  $queueOptions  The queue options to apply
+     * @param  string  $scheduleType  The type of schedule (backup or cleanup)
      * @return Event The configured scheduled event
      */
-    protected function configureScheduleEvent(Event $event, array $queueOptions): Event
+    protected function configureScheduleEvent(Event $event, string $scheduleType): Event
     {
-        if (empty($queueOptions)) {
+        if (empty($this->scheduleAttributes)) {
             return $event;
         }
 
-        if ($queueOptions['on_one_server'] ?? false) {
+        if (Arr::get($this->scheduleAttributes, "on_one_server.{$scheduleType}", false)) {
             $event->onOneServer();
         }
 
-        $withoutOverlapping = $queueOptions['without_overlapping'] ?? ['enabled' => false];
+        $withoutOverlapping = Arr::get($this->scheduleAttributes, "without_overlapping.{$scheduleType}", ['enabled' => false]);
 
         if ($withoutOverlapping['enabled'] ?? false) {
             $event->withoutOverlapping(
@@ -201,27 +200,27 @@ class BackupScheduler
             );
         }
 
-        if ($user = $queueOptions['user'] ?? null) {
+        if ($user = Arr::get($this->scheduleAttributes, "user.{$scheduleType}")) {
             $event->user($user);
         }
 
-        if ($environments = $queueOptions['environments'] ?? null) {
+        if ($environments = Arr::get($this->scheduleAttributes, "environments.{$scheduleType}")) {
             $event->environments($environments);
         }
 
-        if ($queueOptions['even_in_maintenance_mode'] ?? false) {
+        if (Arr::get($this->scheduleAttributes, "even_in_maintenance_mode.{$scheduleType}", false)) {
             $event->evenInMaintenanceMode();
         }
 
-        if ($queueOptions['even_when_paused'] ?? false) {
+        if (Arr::get($this->scheduleAttributes, "even_when_paused.{$scheduleType}", false)) {
             $event->evenWhenPaused();
         }
 
-        if ($timezone = $queueOptions['timezone'] ?? null) {
+        if ($timezone = Arr::get($this->scheduleAttributes, "timezone.{$scheduleType}")) {
             $event->timezone($timezone);
         }
 
-        if ($when = $queueOptions['when'] ?? null) {
+        if ($when = Arr::get($this->scheduleAttributes, "when.{$scheduleType}")) {
             $event->when(function (...$args) use ($when) {
                 return app()->call($when, $args);
             });

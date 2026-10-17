@@ -2,9 +2,9 @@
 
 namespace SameOldNick\BackupManager\Tests\Unit;
 
-use Illuminate\Support\Facades\Event;
 use Illuminate\Console\Scheduling\Event as ScheduledEvent;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use SameOldNick\BackupManager\Events\ScheduleRegistrationFailed;
 use SameOldNick\BackupManager\Exceptions\NoValidDisksException;
@@ -151,19 +151,21 @@ class ScheduleTest extends TestCase
             $this->assertTrue($event->evenWhenPaused);
             $this->assertSame('America/Denver', $event->timezone);
             $this->assertTrue($event->filtersPass(app()));
-        }, backupScheduleConfig: [
-            'on_one_server' => true,
+        }, attributes: [
+            'on_one_server' => ['backup' => true],
             'without_overlapping' => [
-                'enabled' => true,
-                'expires_at' => 30,
-                'release_on_termination_signals' => false,
+                'backup' => [
+                    'enabled' => true,
+                    'expires_at' => 30,
+                    'release_on_termination_signals' => false,
+                ],
             ],
-            'user' => 'backup-user',
-            'environments' => ['production', 'staging'],
-            'even_in_maintenance_mode' => true,
-            'even_when_paused' => true,
-            'timezone' => 'America/Denver',
-            'when' => fn (): bool => true,
+            'user' => ['backup' => 'backup-user'],
+            'environments' => ['backup' => ['production', 'staging']],
+            'even_in_maintenance_mode' => ['backup' => true],
+            'even_when_paused' => ['backup' => true],
+            'timezone' => ['backup' => 'America/Denver'],
+            'when' => ['backup' => fn (): bool => true],
         ]);
     }
 
@@ -186,19 +188,21 @@ class ScheduleTest extends TestCase
             $this->assertTrue($event->evenWhenPaused);
             $this->assertSame('UTC', $event->timezone);
             $this->assertTrue($event->filtersPass(app()));
-        }, cleanupScheduleConfig: [
-            'on_one_server' => true,
+        }, attributes: [
+            'on_one_server' => ['cleanup' => true],
             'without_overlapping' => [
-                'enabled' => true,
-                'expires_at' => 45,
-                'release_on_termination_signals' => true,
+                'cleanup' => [
+                    'enabled' => true,
+                    'expires_at' => 45,
+                    'release_on_termination_signals' => true,
+                ],
             ],
-            'user' => 'cleanup-user',
-            'environments' => ['production'],
-            'even_in_maintenance_mode' => true,
-            'even_when_paused' => true,
-            'timezone' => 'UTC',
-            'when' => fn (): bool => true,
+            'user' => ['cleanup' => 'cleanup-user'],
+            'environments' => ['cleanup' => ['production']],
+            'even_in_maintenance_mode' => ['cleanup' => true],
+            'even_when_paused' => ['cleanup' => true],
+            'timezone' => ['cleanup' => 'UTC'],
+            'when' => ['cleanup' => fn (): bool => true],
         ]);
     }
 
@@ -213,11 +217,13 @@ class ScheduleTest extends TestCase
             $this->assertFalse($event->withoutOverlapping);
             $this->assertSame(1440, $event->expiresAt);
             $this->assertTrue($event->releaseOnTerminationSignals);
-        }, backupScheduleConfig: [
+        }, attributes: [
             'without_overlapping' => [
-                'enabled' => false,
-                'expires_at' => 15,
-                'release_on_termination_signals' => false,
+                'backup' => [
+                    'enabled' => false,
+                    'expires_at' => 15,
+                    'release_on_termination_signals' => false,
+                ],
             ],
         ]);
     }
@@ -229,8 +235,8 @@ class ScheduleTest extends TestCase
         $this->assertSchedulerEvents(function (array $events) {
             $this->assertCount(1, $events);
             $this->assertFalse($events[0]->filtersPass(app()));
-        }, cleanupScheduleConfig: [
-            'when' => fn (): bool => false,
+        }, attributes: [
+            'when' => ['cleanup' => fn (): bool => false],
         ]);
     }
 
@@ -246,11 +252,11 @@ class ScheduleTest extends TestCase
             $this->assertSame([], $event->environments);
             $this->assertNull($event->timezone);
             $this->assertTrue($event->filtersPass(app()));
-        }, backupScheduleConfig: [
-            'user' => '',
-            'environments' => [],
-            'timezone' => '',
-            'when' => null,
+        }, attributes: [
+            'user' => ['backup' => ''],
+            'environments' => ['backup' => []],
+            'timezone' => ['backup' => ''],
+            'when' => ['backup' => null],
         ]);
     }
 
@@ -269,14 +275,19 @@ class ScheduleTest extends TestCase
             $this->assertSame('cleanup-user', $events[1]->user);
             $this->assertSame(['cleanup'], $events[1]->environments);
             $this->assertSame('cleanup-timezone', $events[1]->timezone);
-        }, backupScheduleConfig: [
-            'user' => 'backup-user',
-            'environments' => ['backup'],
-            'timezone' => 'backup-timezone',
-        ], cleanupScheduleConfig: [
-            'user' => 'cleanup-user',
-            'environments' => ['cleanup'],
-            'timezone' => 'cleanup-timezone',
+        }, attributes: [
+            'user' => [
+                'backup' => 'backup-user',
+                'cleanup' => 'cleanup-user',
+            ],
+            'environments' => [
+                'backup' => ['backup'],
+                'cleanup' => ['cleanup'],
+            ],
+            'timezone' => [
+                'backup' => 'backup-timezone',
+                'cleanup' => 'cleanup-timezone',
+            ],
         ]);
     }
 

@@ -218,149 +218,119 @@ return [
         'error_ttl' => env('BACKUP_SCHEDULER_ERROR_TTL', 900),
 
         /**
-         * Queue configuration for the backup schedule.
+         * Attributes applied to the scheduled backup and cleanup events.
+         * Each attribute is keyed by schedule type ("backup" or "cleanup"),
+         * so both schedule types can be configured independently.
          *
-         * @var array
+         * @var array{
+         *     without_overlapping: array{backup: array{enabled: bool, expires_at: int, release_on_termination_signals: bool}, cleanup: array{enabled: bool, expires_at: int, release_on_termination_signals: bool}},
+         *     on_one_server: array{backup: bool, cleanup: bool},
+         *     user: array{backup: string|null, cleanup: string|null},
+         *     environments: array{backup: array|string|null, cleanup: array|string|null},
+         *     even_in_maintenance_mode: array{backup: bool, cleanup: bool},
+         *     even_when_paused: array{backup: bool, cleanup: bool},
+         *     timezone: array{backup: string|null, cleanup: string|null},
+         *     when: array{backup: callable|null, cleanup: callable|null}
+         * }
          */
-        'backup' => [
+        'attributes' => [
             /**
-             * Configuration for the "without overlapping" feature of the backup schedule.
+             * Configuration for the "without overlapping" feature of the scheduled events.
              * This feature prevents multiple instances of the same scheduled event from running simultaneously.
              *
-             * @var array
+             * It's recommended to use the \Illuminate\Queue\Middleware\WithoutOverlapping middleware for jobs
+             * that are dispatched by the scheduled events, as it provides a more robust solution for preventing
+             * overlapping jobs. This can be configured in the 'jobs' section of this configuration file.
+             *
+             * @var array{backup: array{enabled: bool, expires_at: int, release_on_termination_signals: bool}, cleanup: array{enabled: bool, expires_at: int, release_on_termination_signals: bool}}
              */
             'without_overlapping' => [
-                'enabled' => env('BACKUP_SCHEDULER_BACKUP_WITHOUT_OVERLAPPING', true),
-                'expires_at' => env('BACKUP_SCHEDULER_BACKUP_EXPIRES_AT', 1440),
-                'release_on_termination_signals' => env('BACKUP_SCHEDULER_BACKUP_RELEASE_ON_TERMINATION_SIGNALS', true),
+                'backup' => [
+                    'enabled' => env('BACKUP_SCHEDULER_BACKUP_WITHOUT_OVERLAPPING', false),
+                    'expires_at' => env('BACKUP_SCHEDULER_BACKUP_EXPIRES_AT', 1440),
+                    'release_on_termination_signals' => env('BACKUP_SCHEDULER_BACKUP_RELEASE_ON_TERMINATION_SIGNALS', true),
+                ],
+                'cleanup' => [
+                    'enabled' => env('BACKUP_SCHEDULER_CLEANUP_WITHOUT_OVERLAPPING', false),
+                    'expires_at' => env('BACKUP_SCHEDULER_CLEANUP_EXPIRES_AT', 1440),
+                    'release_on_termination_signals' => env('BACKUP_SCHEDULER_CLEANUP_RELEASE_ON_TERMINATION_SIGNALS', true),
+                ],
             ],
             /**
-             * Configuration for the "on one server" feature of the backup schedule.
-             * This feature ensures that the scheduled event runs on only one server in a multi-server environment.
+             * Configuration for the "on one server" feature of the scheduled events.
+             * This feature ensures that each scheduled event runs on only one server in a multi-server environment.
+             * This requires a cache store that is shared by all servers.
              *
-             * @var bool
+             * @var array{backup: bool, cleanup: bool}
              */
-            'on_one_server' => env('BACKUP_SCHEDULER_BACKUP_ON_ONE_SERVER', true),
-
-            /**
-             * The user that the backup schedule should run as.
-             * This is used to set the user for the scheduled command.
-             *
-             * @var string|null
-             */
-            'user' => env('BACKUP_SCHEDULER_BACKUP_USER', null),
-
-            /**
-             * The environments that the backup schedule should run in.
-             * This is used to set the environments for the scheduled command.
-             *
-             * @var string|null
-             */
-            'environments' => env('BACKUP_SCHEDULER_BACKUP_ENVIRONMENTS', '') ? implode(',', env('BACKUP_SCHEDULER_BACKUP_ENVIRONMENTS', '')) : null,
-
-            /**
-             * Indicates whether the backup schedule should run in maintenance mode.
-             * This is used to set the maintenance mode for the scheduled command.
-             *
-             * @var bool
-             */
-            'even_in_maintenance_mode' => env('BACKUP_SCHEDULER_BACKUP_EVEN_IN_MAINTENANCE_MODE', false),
-
-            /**
-             * Indicates whether the backup schedule should run even when the scheduler is paused.
-             * This is used to set the paused state for the scheduled command.
-             *
-             * @var bool
-             */
-            'even_when_paused' => env('BACKUP_SCHEDULER_BACKUP_EVEN_WHEN_PAUSED', false),
-
-            /**
-             * The timezone that the backup schedule should run in.
-             * This is used to set the timezone for the scheduled command.
-             *
-             * @var string|null
-             */
-            'timezone' => env('BACKUP_SCHEDULER_BACKUP_TIMEZONE', null),
-
-            /**
-             * The condition that determines if the backup schedule should run.
-             * This is used to set the condition for the scheduled command.
-             * This can be an anonymous function or a callable that returns a boolean value.
-             *
-             * @var callable|null
-             */
-            'when' => null,
-        ],
-
-        'cleanup' => [
-            /**
-             * Configuration for the "without overlapping" feature of the cleanup schedule.
-             * This feature prevents multiple instances of the same scheduled event from running simultaneously.
-             *
-             * @var array
-             */
-            'without_overlapping' => [
-                'enabled' => env('BACKUP_SCHEDULER_CLEANUP_WITHOUT_OVERLAPPING', true),
-                'expires_at' => env('BACKUP_SCHEDULER_CLEANUP_EXPIRES_AT', 1440),
-                'release_on_termination_signals' => env('BACKUP_SCHEDULER_CLEANUP_RELEASE_ON_TERMINATION_SIGNALS', true),
+            'on_one_server' => [
+                'backup' => env('BACKUP_SCHEDULER_BACKUP_ON_ONE_SERVER', true),
+                'cleanup' => env('BACKUP_SCHEDULER_CLEANUP_ON_ONE_SERVER', true),
             ],
 
             /**
-             * Configuration for the "on one server" feature of the cleanup schedule.
-             * This feature ensures that the scheduled event runs on only one server in a multi-server environment.
+             * The user that the scheduled events should run as.
              *
-             * @var bool
+             * @var array{backup: string|null, cleanup: string|null}
              */
-            'on_one_server' => env('BACKUP_SCHEDULER_CLEANUP_ON_ONE_SERVER', true),
+            'user' => [
+                'backup' => env('BACKUP_SCHEDULER_BACKUP_USER', null),
+                'cleanup' => env('BACKUP_SCHEDULER_CLEANUP_USER', null),
+            ],
 
             /**
-             * The user that the cleanup schedule should run as.
-             * This is used to set the user for the scheduled command.
+             * The environments that the scheduled events should run in.
+             * Each value may be an array of environment names or a comma-separated string.
              *
-             * @var string|null
+             * @var array{backup: array|string|null, cleanup: array|string|null}
              */
-            'user' => env('BACKUP_SCHEDULER_CLEANUP_USER', null),
+            'environments' => [
+                'backup' => env('BACKUP_SCHEDULER_BACKUP_ENVIRONMENTS', '') ? implode(',', env('BACKUP_SCHEDULER_BACKUP_ENVIRONMENTS', '')) : null,
+                'cleanup' => env('BACKUP_SCHEDULER_CLEANUP_ENVIRONMENTS', '') ? implode(',', env('BACKUP_SCHEDULER_CLEANUP_ENVIRONMENTS', '')) : null,
+            ],
 
             /**
-             * The environments that the cleanup schedule should run in.
-             * This is used to set the environments for the scheduled command.
+             * Indicates whether the scheduled events should run in maintenance mode.
              *
-             * @var string|null
+             * @var array{backup: bool, cleanup: bool}
              */
-            'environments' => env('BACKUP_SCHEDULER_CLEANUP_ENVIRONMENTS', '') ? implode(',', env('BACKUP_SCHEDULER_CLEANUP_ENVIRONMENTS', '')) : null,
+            'even_in_maintenance_mode' => [
+                'backup' => env('BACKUP_SCHEDULER_BACKUP_EVEN_IN_MAINTENANCE_MODE', false),
+                'cleanup' => env('BACKUP_SCHEDULER_CLEANUP_EVEN_IN_MAINTENANCE_MODE', false),
+            ],
 
             /**
-             * Indicates whether the cleanup schedule should run in maintenance mode.
-             * This is used to set the maintenance mode for the scheduled command.
+             * Indicates whether the scheduled events should run even when the scheduler is paused.
              *
-             * @var bool
+             * @var array{backup: bool, cleanup: bool}
              */
-            'even_in_maintenance_mode' => env('BACKUP_SCHEDULER_CLEANUP_EVEN_IN_MAINTENANCE_MODE', false),
+            'even_when_paused' => [
+                'backup' => env('BACKUP_SCHEDULER_BACKUP_EVEN_WHEN_PAUSED', false),
+                'cleanup' => env('BACKUP_SCHEDULER_CLEANUP_EVEN_WHEN_PAUSED', false),
+            ],
 
             /**
-             * Indicates whether the cleanup schedule should run even when the scheduler is paused.
-             * This is used to set the paused state for the scheduled command.
+             * The timezone that the scheduled events should run in.
              *
-             * @var bool
+             * @var array{backup: string|null, cleanup: string|null}
              */
-            'even_when_paused' => env('BACKUP_SCHEDULER_CLEANUP_EVEN_WHEN_PAUSED', false),
+            'timezone' => [
+                'backup' => env('BACKUP_SCHEDULER_BACKUP_TIMEZONE', null),
+                'cleanup' => env('BACKUP_SCHEDULER_CLEANUP_TIMEZONE', null),
+            ],
 
             /**
-             * The timezone that the cleanup schedule should run in.
-             * This is used to set the timezone for the scheduled command.
+             * The conditions that determine if the scheduled events should run.
+             * Each value can be an anonymous function or a callable that returns a boolean value.
              *
-             * @var string|null
+             * @var array{backup: callable|null, cleanup: callable|null}
              */
-            'timezone' => env('BACKUP_SCHEDULER_CLEANUP_TIMEZONE', null),
-
-            /**
-             * The condition that determines if the cleanup schedule should run.
-             * This is used to set the condition for the scheduled command.
-             *
-             * @var callable|null
-             */
-            'when' => null,
+            'when' => [
+                'backup' => null,
+                'cleanup' => null,
+            ],
         ],
+
     ],
 
     /*

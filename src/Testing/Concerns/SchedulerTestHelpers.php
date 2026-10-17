@@ -10,26 +10,26 @@ use SameOldNick\BackupManager\Testing\BackupSchedulerRecorder;
 trait SchedulerTestHelpers
 {
     /**
-     * Creates a spy instance of the BackupScheduler class that records scheduled jobs and commands.
+     * Creates a spy instance of the BackupScheduler class that records scheduled jobs and events.
      *
      * @param  Schedule|null  $schedule  The schedule instance to use
-     * @param  array|null  $config  The configuration array to use
+     * @param  ScheduleEligibilityService|null  $eligibilityService  The schedule eligibility service to use
+     * @param  array|null  $config  The jobs configuration array to use
+     * @param  array|null  $attributes  The scheduler attributes to use
      * @return BackupSchedulerRecorder A spy instance of the BackupScheduler class
      */
     protected function makeSchedulerSpy(
         ?Schedule $schedule = null,
         ?ScheduleEligibilityService $eligibilityService = null,
         ?array $config = null,
-        ?array $backupScheduleConfig = null,
-        ?array $cleanupScheduleConfig = null,
+        ?array $attributes = null,
     ): BackupSchedulerRecorder {
         return new BackupSchedulerRecorder(
             $schedule ?? new Schedule,
             $eligibilityService ?? new ScheduleEligibilityService,
             $config ?? config('backup-manager.jobs', []),
             900,
-            $backupScheduleConfig ?? [],
-            $cleanupScheduleConfig ?? [],
+            $attributes ?? config('backup-manager.scheduler.attributes', [])
         );
     }
 
@@ -52,16 +52,14 @@ trait SchedulerTestHelpers
      * Asserts that the expected events were scheduled by the BackupScheduler.
      *
      * @param  callable  $callback  A callback function that receives the array of scheduled events for making assertions
+     * @param  array|null  $attributes  The scheduler attributes to use
      */
     protected function assertSchedulerEvents(
         callable $callback,
-        ?array $backupScheduleConfig = null,
-        ?array $cleanupScheduleConfig = null,
-    ): void
-    {
+        ?array $attributes = null,
+    ): void {
         $scheduler = $this->makeSchedulerSpy(
-            backupScheduleConfig: $backupScheduleConfig,
-            cleanupScheduleConfig: $cleanupScheduleConfig,
+            attributes: $attributes
         );
 
         $scheduler->scheduleBackup();
