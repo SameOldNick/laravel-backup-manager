@@ -47,19 +47,4 @@ trait SchedulerTestHelpers
 
         $callback($scheduler->jobs);
     }
-
-    /**
-     * Asserts that the expected commands were scheduled by the BackupScheduler.
-     *
-     * @param  callable  $callback  A callback function that receives the array of scheduled commands for making assertions
-     */
-    protected function assertSchedulerCommands(callable $callback): void
-    {
-        $scheduler = $this->makeSchedulerSpy();
-
-        $scheduler->scheduleBackup();
-        $scheduler->scheduleCleanup();
-
-        $callback($scheduler->commands);
-    }
 }
