@@ -285,8 +285,12 @@ return [
              * @var array{backup: array|string|null, cleanup: array|string|null}
              */
             'environments' => [
-                'backup' => env('BACKUP_SCHEDULER_BACKUP_ENVIRONMENTS', '') ? implode(',', env('BACKUP_SCHEDULER_BACKUP_ENVIRONMENTS', '')) : null,
-                'cleanup' => env('BACKUP_SCHEDULER_CLEANUP_ENVIRONMENTS', '') ? implode(',', env('BACKUP_SCHEDULER_CLEANUP_ENVIRONMENTS', '')) : null,
+                'backup' => env('BACKUP_SCHEDULER_BACKUP_ENVIRONMENTS', '')
+                    ? array_values(array_filter(array_map('trim', explode(',', env('BACKUP_SCHEDULER_BACKUP_ENVIRONMENTS', '')))))
+                    : null,
+                'cleanup' => env('BACKUP_SCHEDULER_CLEANUP_ENVIRONMENTS', '')
+                    ? array_values(array_filter(array_map('trim', explode(',', env('BACKUP_SCHEDULER_CLEANUP_ENVIRONMENTS', '')))))
+                    : null,
             ],
 
             /**
