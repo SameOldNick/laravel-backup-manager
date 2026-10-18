@@ -2,6 +2,12 @@
 
 All notable changes will be documented in this file.
 
+## v3.1.1 - 2026-10-17
+
+### Fixed
+
+- Fixed scheduler environment configuration to parse comma-separated environment names with `explode()` instead of joining them with `implode()`, while trimming whitespace and ignoring empty values
+
 ## v3.1.0 - 2026-10-17
 
 ### Added
