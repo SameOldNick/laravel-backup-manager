@@ -13,7 +13,7 @@ The [demo repository](https://github.com/SameOldNick/laravel-backup-manager-demo
 ## Requirements
 
 - PHP 8.4+
-- Laravel 11 / 12 / 13
+- Laravel 12 / 13
 - [spatie/laravel-backup](https://github.com/spatie/laravel-backup)
 
 ## Installation

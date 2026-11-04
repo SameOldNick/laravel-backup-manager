@@ -21,7 +21,7 @@
     "php": "^8.4",
     "dragonmantank/cron-expression": "^3.6",
     "ifsnop/mysqldump-php": "^2.12",
-    "illuminate/contracts": "^11.0||^12.0||^13.0",
+    "illuminate/contracts": "^12.0||^13.0",
     "laravel/socialite": "^5.27",
     "spatie/laravel-backup": "*"
   },
@@ -32,7 +32,7 @@
     "league/flysystem-ftp": "^3.31",
     "league/flysystem-sftp-v3": "^3.33",
     "nunomaduro/collision": "^8.8",
-    "orchestra/testbench": "^11.0.0||^10.0.0||^9.0.0",
+    "orchestra/testbench": "^11.0.0||^10.0.0",
     "pestphp/pest": "^4.0",
     "pestphp/pest-plugin-arch": "^4.0",
     "pestphp/pest-plugin-laravel": "^4.0",
