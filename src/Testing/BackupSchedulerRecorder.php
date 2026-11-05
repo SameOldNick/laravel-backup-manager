@@ -30,4 +30,16 @@ class BackupSchedulerRecorder extends BackupScheduler
 
         return $event;
     }
+
+    /**
+     * Overrides the handleScheduleException method to throw the exception instead of handling it
+     */
+    protected function handleScheduleException(
+        \Throwable $e,
+        string $scheduleType,
+        int|string|null $scheduleId = null,
+        string $scheduleName = 'Unknown Schedule',
+    ): void {
+        throw $e;
+    }
 }
