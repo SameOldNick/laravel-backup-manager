@@ -158,10 +158,7 @@ class ScheduleTest extends TestCase
                 $event->evenWhenPaused :
                 true
             );
-            $this->assertSame(
-                'America/Denver',
-                $event->timezone ?? (new \ReflectionClass($event))->getProperty('timezone')->getValue($event)
-            );
+            $this->assertSame('America/Denver', $event->timezone);
             $this->assertTrue($event->filtersPass(app()));
         }, attributes: [
             'on_one_server' => ['backup' => true],
@@ -207,10 +204,7 @@ class ScheduleTest extends TestCase
                 $event->evenWhenPaused :
                 true
             );
-            $this->assertSame(
-                'UTC',
-                $event->timezone ?? (new \ReflectionClass($event))->getProperty('timezone')->getValue($event)
-            );
+            $this->assertSame('UTC', $event->timezone);
             $this->assertTrue($event->filtersPass(app()));
         }, attributes: [
             'on_one_server' => ['cleanup' => true],
