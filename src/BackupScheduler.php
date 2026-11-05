@@ -87,9 +87,7 @@ class BackupScheduler
             }
 
         } catch (\Throwable $e) {
-            $this->runAtMostOnceWithinTtl($this->createRunAtMostCacheKey('backup', null, get_class($e)), function () use ($e) {
-                Log::error('Error retrieving backup schedules: '.$e->getMessage());
-            });
+            $this->handleOuterScheduleException($e, 'backup');
         }
 
     }
@@ -131,11 +129,22 @@ class BackupScheduler
                 }
             }
         } catch (\Throwable $e) {
-            $this->runAtMostOnceWithinTtl($this->createRunAtMostCacheKey('cleanup', null, get_class($e)), function () use ($e) {
-                Log::error('Error retrieving cleanup schedules: '.$e->getMessage());
-            });
+            $this->handleOuterScheduleException($e, 'cleanup');
         }
 
+    }
+
+    /**
+     * Handles outer schedule exception
+     *
+     * @param  \Throwable  $e  The exception that occurred
+     * @param  string  $scheduleType  The type of schedule (backup or cleanup)
+     */
+    protected function handleOuterScheduleException(\Throwable $e, string $scheduleType): void
+    {
+        $this->runAtMostOnceWithinTtl($this->createRunAtMostCacheKey($scheduleType, null, get_class($e)), function () use ($e, $scheduleType) {
+            Log::error('Error retrieving '.$scheduleType.' schedules: '.$e->getMessage());
+        });
     }
 
     /**

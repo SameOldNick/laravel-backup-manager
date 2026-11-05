@@ -32,6 +32,14 @@ class BackupSchedulerRecorder extends BackupScheduler
     }
 
     /**
+     * Overrides the handleOuterScheduleException method to throw the exception instead of handling it
+     */
+    protected function handleOuterScheduleException(\Throwable $e, string $scheduleType): void
+    {
+        throw $e;
+    }
+
+    /**
      * Overrides the handleScheduleException method to throw the exception instead of handling it
      */
     protected function handleScheduleException(
