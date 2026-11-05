@@ -221,7 +221,10 @@ class BackupScheduler
             $event->evenInMaintenanceMode();
         }
 
-        if (Arr::get($this->scheduleAttributes, "even_when_paused.{$scheduleType}", false)) {
+        if (
+            Arr::get($this->scheduleAttributes, "even_when_paused.{$scheduleType}", false)
+            && method_exists($event, 'evenWhenPaused')
+        ) {
             $event->evenWhenPaused();
         }
 
