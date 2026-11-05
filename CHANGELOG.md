@@ -2,6 +2,12 @@
 
 All notable changes will be documented in this file.
 
+## v4.0.1 - 2026-11-05
+
+### Fixed
+
+- Fixed the scaffolded `BackupSchedulesUiResponder` and `CleanupSchedulesUiResponder` redirecting to the unregistered `backup-manager.schedules.index` route, which threw `RouteNotFoundException` after `backup-manager:install`; they now use `backup.schedules.index`
+
 ## v4.0.0 - 2026-11-05
 
 ### Breaking
@@ -110,6 +116,7 @@ All notable changes will be documented in this file.
   ```
 
   Both features use cache locks, so configure a cache store shared by all servers when running more than one
+
 - Registration failures, including schedules whose attached destinations are all inactive or invalid, are now dispatched as `ScheduleRegistrationFailed` and logged at most once per schedule and exception type per `scheduler.error_ttl` (default 15 minutes). Set `BACKUP_SCHEDULER_ERROR_TTL=0` to log every failure
 - If you use the package's `SchedulerTestHelpers` trait, `assertSchedulerCommands()` has been removed and has no direct replacement. Use `assertSchedulerEvents()` to inspect the registered Laravel events, or `assertSchedulerJobs()` to inspect the dispatched jobs. Calls to `makeSchedulerSpy()` that passed the jobs config as the second argument must use named arguments (`makeSchedulerSpy(config: [...])`) or pass `null` for the new `ScheduleEligibilityService` argument. Scheduler attributes are overridden with the `attributes` argument, which uses the same `scheduler.attributes` shape as the config file
 
