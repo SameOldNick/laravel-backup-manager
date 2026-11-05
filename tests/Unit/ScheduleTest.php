@@ -424,7 +424,7 @@ class ScheduleTest extends TestCase
             $this->assertSame('0 8 * * *', $jobs[0]['expression']);
             $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
             $this->assertSame([$active->driver_name], $jobs[0]['job']->disks);
-        });
+        }, rethrowExceptions: false);
     }
 
     public function test_backup_schedule_without_filesystem_configurations_uses_all_disks(): void
@@ -456,7 +456,7 @@ class ScheduleTest extends TestCase
             $this->assertSame('0 0 * * *', $jobs[0]['expression']);
             $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
             $this->assertSame([$valid->driver_name], $jobs[0]['job']->disks);
-        });
+        }, rethrowExceptions: false);
     }
 
     public function test_invalid_backup_disks_are_logged_once_during_the_cooldown(): void
@@ -467,14 +467,33 @@ class ScheduleTest extends TestCase
         );
 
         Log::spy();
-        $scheduler = $this->makeSchedulerSpy();
+        $scheduler = $this->makeSchedulerSpy(rethrowExceptions: false);
 
         $scheduler->scheduleBackup();
         $scheduler->scheduleBackup();
+
+        $this->assertCount(1, $scheduler->exceptions);
+        $this->assertInstanceOf(NoValidDisksException::class, $scheduler->exceptions[0]);
 
         Log::shouldHaveReceived('error')
             ->once()
             ->with("No valid disks found for backup schedule 'Broken Schedule' with specified disks.");
+    }
+
+    public function test_schedule_registration_failed_exception_is_thrown(): void
+    {
+        $schedule = $this->createBackupSchedule('Broken Schedule', 'full', '0 1 * * *', true);
+        $schedule->filesystemConfigurations()->attach(
+            $this->createDestination('Broken Destination', isValid: false)
+        );
+
+        Event::fake([ScheduleRegistrationFailed::class]);
+        $scheduler = $this->makeSchedulerSpy(rethrowExceptions: true);
+
+        $this->expectException(NoValidDisksException::class);
+
+        $scheduler->scheduleBackup();
+
     }
 
     public function test_schedule_registration_failed_event_is_dispatched_once_during_the_cooldown(): void
@@ -485,10 +504,13 @@ class ScheduleTest extends TestCase
         );
 
         Event::fake([ScheduleRegistrationFailed::class]);
-        $scheduler = $this->makeSchedulerSpy();
+        $scheduler = $this->makeSchedulerSpy(rethrowExceptions: false);
 
         $scheduler->scheduleBackup();
         $scheduler->scheduleBackup();
+
+        $this->assertCount(1, $scheduler->exceptions);
+        $this->assertInstanceOf(NoValidDisksException::class, $scheduler->exceptions[0]);
 
         Event::assertDispatchedTimes(ScheduleRegistrationFailed::class, 1);
         Event::assertDispatched(ScheduleRegistrationFailed::class, function (ScheduleRegistrationFailed $event) use ($schedule): bool {
@@ -511,7 +533,7 @@ class ScheduleTest extends TestCase
             $this->assertSame('0 0 * * *', $jobs[0]['expression']);
             $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
             $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
-        });
+        }, rethrowExceptions: false);
     }
 
     public function test_schedule_backup_skips_with_invalid_schedule(): void
@@ -524,7 +546,7 @@ class ScheduleTest extends TestCase
             $this->assertSame('0 0 * * *', $jobs[0]['expression']);
             $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
             $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
-        });
+        }, rethrowExceptions: false);
     }
 
     /**
