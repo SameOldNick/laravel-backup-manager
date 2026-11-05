@@ -144,7 +144,12 @@ class ScheduleTest extends TestCase
             $this->assertTrue($event->onOneServer);
             $this->assertTrue($event->withoutOverlapping);
             $this->assertSame(30, $event->expiresAt);
-            $this->assertFalse($event->releaseOnTerminationSignals);
+            // Laravel 13 added the `releaseOnTerminationSignals` property to the ScheduledEvent class, so we need to check if it exists before asserting its value.
+            $this->assertFalse(
+                property_exists($event, 'releaseOnTerminationSignals') ?
+                $event->releaseOnTerminationSignals :
+                false
+            );
             $this->assertSame('backup-user', $event->user);
             $this->assertSame(['production', 'staging'], $event->environments);
             $this->assertTrue($event->evenInMaintenanceMode);
@@ -181,7 +186,12 @@ class ScheduleTest extends TestCase
             $this->assertTrue($event->onOneServer);
             $this->assertTrue($event->withoutOverlapping);
             $this->assertSame(45, $event->expiresAt);
-            $this->assertTrue($event->releaseOnTerminationSignals);
+            // Laravel 13 added the `releaseOnTerminationSignals` property to the ScheduledEvent class, so we need to check if it exists before asserting its value.
+            $this->assertTrue(
+                property_exists($event, 'releaseOnTerminationSignals') ?
+                $event->releaseOnTerminationSignals :
+                true
+            );
             $this->assertSame('cleanup-user', $event->user);
             $this->assertSame(['production'], $event->environments);
             $this->assertTrue($event->evenInMaintenanceMode);
@@ -216,7 +226,12 @@ class ScheduleTest extends TestCase
 
             $this->assertFalse($event->withoutOverlapping);
             $this->assertSame(1440, $event->expiresAt);
-            $this->assertTrue($event->releaseOnTerminationSignals);
+            // Laravel 13 added the `releaseOnTerminationSignals` property to the ScheduledEvent class, so we need to check if it exists before asserting its value.
+            $this->assertTrue(
+                property_exists($event, 'releaseOnTerminationSignals') ?
+                $event->releaseOnTerminationSignals :
+                true
+            );
         }, attributes: [
             'without_overlapping' => [
                 'backup' => [
