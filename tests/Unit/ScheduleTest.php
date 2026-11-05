@@ -472,8 +472,9 @@ class ScheduleTest extends TestCase
         $scheduler->scheduleBackup();
         $scheduler->scheduleBackup();
 
-        $this->assertCount(1, $scheduler->exceptions);
+        $this->assertCount(2, $scheduler->exceptions);
         $this->assertInstanceOf(NoValidDisksException::class, $scheduler->exceptions[0]);
+        $this->assertInstanceOf(NoValidDisksException::class, $scheduler->exceptions[1]);
 
         Log::shouldHaveReceived('error')
             ->once()
@@ -509,8 +510,9 @@ class ScheduleTest extends TestCase
         $scheduler->scheduleBackup();
         $scheduler->scheduleBackup();
 
-        $this->assertCount(1, $scheduler->exceptions);
+        $this->assertCount(2, $scheduler->exceptions);
         $this->assertInstanceOf(NoValidDisksException::class, $scheduler->exceptions[0]);
+        $this->assertInstanceOf(NoValidDisksException::class, $scheduler->exceptions[1]);
 
         Event::assertDispatchedTimes(ScheduleRegistrationFailed::class, 1);
         Event::assertDispatched(ScheduleRegistrationFailed::class, function (ScheduleRegistrationFailed $event) use ($schedule): bool {
