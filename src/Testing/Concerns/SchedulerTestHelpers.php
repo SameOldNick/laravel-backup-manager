@@ -36,29 +36,13 @@ trait SchedulerTestHelpers
     }
 
     /**
-     * Asserts that the expected jobs were scheduled by the BackupScheduler.
+     * Asserts that the BackupScheduler schedules the expected jobs and events.
      *
-     * @param  callable  $callback  A callback function that receives the array of scheduled jobs for making assertions
-     * @param  bool  $rethrowExceptions  Whether to rethrow exceptions instead of handling them
-     */
-    protected function assertSchedulerJobs(callable $callback, bool $rethrowExceptions = true): void
-    {
-        $scheduler = $this->makeSchedulerSpy(rethrowExceptions: $rethrowExceptions);
-
-        $scheduler->scheduleBackup();
-        $scheduler->scheduleCleanup();
-
-        $callback($scheduler->jobs);
-    }
-
-    /**
-     * Asserts that the expected events were scheduled by the BackupScheduler.
-     *
-     * @param  callable  $callback  A callback function that receives the array of scheduled events for making assertions
+     * @param  callable(BackupSchedulerRecorder)  $callback  A callback function that receives the BackupScheduler instance for making assertions
      * @param  array|null  $attributes  The scheduler attributes to use
      * @param  bool  $rethrowExceptions  Whether to rethrow exceptions instead of handling them
      */
-    protected function assertSchedulerEvents(
+    protected function assertScheduler(
         callable $callback,
         ?array $attributes = null,
         bool $rethrowExceptions = true
@@ -71,6 +55,6 @@ trait SchedulerTestHelpers
         $scheduler->scheduleBackup();
         $scheduler->scheduleCleanup();
 
-        $callback($scheduler->events);
+        $callback($scheduler);
     }
 }

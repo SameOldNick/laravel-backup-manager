@@ -6,6 +6,7 @@ use SameOldNick\BackupManager\Enums\BackupTypes;
 use SameOldNick\BackupManager\Jobs\BackupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
+use SameOldNick\BackupManager\Testing\BackupSchedulerRecorder;
 use SameOldNick\BackupManager\Testing\Concerns;
 use SameOldNick\BackupManager\Tests\TestCase;
 
@@ -35,11 +36,11 @@ class BackupScheduleControllerTest extends TestCase
         $this->assertSame(BackupTypes::Full, $schedule->type);
         $this->assertTrue($schedule->is_active);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
-            $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 0 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_FULL, $scheduler->jobs[0]['job']->backupType);
         });
     }
 

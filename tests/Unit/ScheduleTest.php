@@ -13,6 +13,7 @@ use SameOldNick\BackupManager\Jobs\CleanupJob;
 use SameOldNick\BackupManager\Models\BackupSchedule;
 use SameOldNick\BackupManager\Models\CleanupSchedule;
 use SameOldNick\BackupManager\Models\FilesystemConfiguration;
+use SameOldNick\BackupManager\Testing\BackupSchedulerRecorder;
 use SameOldNick\BackupManager\Testing\Concerns;
 use SameOldNick\BackupManager\Tests\TestCase;
 
@@ -26,11 +27,11 @@ class ScheduleTest extends TestCase
         $this->createBackupSchedule('Active Schedule', 'full', '0 0 * * *', true);
         $this->createBackupSchedule('Inactive Schedule', 'full', '0 1 * * *', false);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
-            $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 0 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_FULL, $scheduler->jobs[0]['job']->backupType);
         });
     }
 
@@ -38,11 +39,11 @@ class ScheduleTest extends TestCase
     {
         $this->createBackupSchedule('Shortcut Schedule', 'full', '@daily', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
-            $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 0 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_FULL, $scheduler->jobs[0]['job']->backupType);
         });
     }
 
@@ -50,11 +51,11 @@ class ScheduleTest extends TestCase
     {
         $this->createBackupSchedule('Full Backup', 'full', '0 2 * * *', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 2 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
-            $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 2 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_FULL, $scheduler->jobs[0]['job']->backupType);
         });
     }
 
@@ -62,11 +63,11 @@ class ScheduleTest extends TestCase
     {
         $this->createBackupSchedule('Database Backup', 'databases', '0 3 * * *', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 3 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
-            $this->assertSame(BackupJob::BACKUP_ONLY_DATABASES, $jobs[0]['job']->backupType);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 3 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_ONLY_DATABASES, $scheduler->jobs[0]['job']->backupType);
         });
     }
 
@@ -74,11 +75,11 @@ class ScheduleTest extends TestCase
     {
         $this->createBackupSchedule('Files Backup', 'files', '0 4 * * *', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 4 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
-            $this->assertSame(BackupJob::BACKUP_ONLY_FILES, $jobs[0]['job']->backupType);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 4 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_ONLY_FILES, $scheduler->jobs[0]['job']->backupType);
         });
     }
 
@@ -95,10 +96,10 @@ class ScheduleTest extends TestCase
 
         $this->createBackupSchedule('Queued Schedule', 'full', '0 0 * * *', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
 
-            $job = $jobs[0]['job'];
+            $job = $scheduler->jobs[0]['job'];
 
             $this->assertInstanceOf(BackupJob::class, $job);
             $this->assertSame('redis', $job->connection);
@@ -120,10 +121,10 @@ class ScheduleTest extends TestCase
 
         $this->createCleanupSchedule('Queued Cleanup', '0 5 * * *', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
 
-            $job = $jobs[0]['job'];
+            $job = $scheduler->jobs[0]['job'];
 
             $this->assertInstanceOf(CleanupJob::class, $job);
             $this->assertSame('redis', $job->connection);
@@ -136,9 +137,9 @@ class ScheduleTest extends TestCase
     {
         $this->createBackupSchedule('Configured Backup', 'full', '0 0 * * *', true);
 
-        $this->assertSchedulerEvents(function (array $events) {
-            $this->assertCount(1, $events);
-            $event = $events[0];
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->events);
+            $event = $scheduler->events[0];
 
             $this->assertInstanceOf(ScheduledEvent::class, $event);
             $this->assertTrue($event->onOneServer);
@@ -182,9 +183,9 @@ class ScheduleTest extends TestCase
     {
         $this->createCleanupSchedule('Configured Cleanup', '0 1 * * *', true);
 
-        $this->assertSchedulerEvents(function (array $events) {
-            $this->assertCount(1, $events);
-            $event = $events[0];
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->events);
+            $event = $scheduler->events[0];
 
             $this->assertInstanceOf(ScheduledEvent::class, $event);
             $this->assertTrue($event->onOneServer);
@@ -228,9 +229,9 @@ class ScheduleTest extends TestCase
     {
         $this->createBackupSchedule('Non-overlapping Backup', 'full', '0 2 * * *', true);
 
-        $this->assertSchedulerEvents(function (array $events) {
-            $this->assertCount(1, $events);
-            $event = $events[0];
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->events);
+            $event = $scheduler->events[0];
 
             $this->assertFalse($event->withoutOverlapping);
             $this->assertSame(1440, $event->expiresAt);
@@ -255,9 +256,9 @@ class ScheduleTest extends TestCase
     {
         $this->createCleanupSchedule('Conditional Cleanup', '0 3 * * *', true);
 
-        $this->assertSchedulerEvents(function (array $events) {
-            $this->assertCount(1, $events);
-            $this->assertFalse($events[0]->filtersPass(app()));
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->events);
+            $this->assertFalse($scheduler->events[0]->filtersPass(app()));
         }, attributes: [
             'when' => ['cleanup' => fn (): bool => false],
         ]);
@@ -267,9 +268,9 @@ class ScheduleTest extends TestCase
     {
         $this->createBackupSchedule('Empty Configuration Backup', 'full', '0 4 * * *', true);
 
-        $this->assertSchedulerEvents(function (array $events) {
-            $this->assertCount(1, $events);
-            $event = $events[0];
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->events);
+            $event = $scheduler->events[0];
 
             $this->assertNull($event->user);
             $this->assertSame([], $event->environments);
@@ -288,16 +289,16 @@ class ScheduleTest extends TestCase
         $this->createBackupSchedule('Isolated Backup', 'full', '0 5 * * *', true);
         $this->createCleanupSchedule('Isolated Cleanup', '0 6 * * *', true);
 
-        $this->assertSchedulerEvents(function (array $events) {
-            $this->assertCount(2, $events);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(2, $scheduler->events);
 
-            $this->assertSame('backup-user', $events[0]->user);
-            $this->assertSame(['backup'], $events[0]->environments);
-            $this->assertSame('backup-timezone', $events[0]->timezone);
+            $this->assertSame('backup-user', $scheduler->events[0]->user);
+            $this->assertSame(['backup'], $scheduler->events[0]->environments);
+            $this->assertSame('backup-timezone', $scheduler->events[0]->timezone);
 
-            $this->assertSame('cleanup-user', $events[1]->user);
-            $this->assertSame(['cleanup'], $events[1]->environments);
-            $this->assertSame('cleanup-timezone', $events[1]->timezone);
+            $this->assertSame('cleanup-user', $scheduler->events[1]->user);
+            $this->assertSame(['cleanup'], $scheduler->events[1]->environments);
+            $this->assertSame('cleanup-timezone', $scheduler->events[1]->timezone);
         }, attributes: [
             'user' => [
                 'backup' => 'backup-user',
@@ -319,10 +320,10 @@ class ScheduleTest extends TestCase
         $this->createCleanupSchedule('Active Cleanup', '0 5 * * *', true);
         $this->createCleanupSchedule('Inactive Cleanup', '0 6 * * *', false);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 5 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 5 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(CleanupJob::class, $scheduler->jobs[0]['job']);
         });
     }
 
@@ -330,10 +331,10 @@ class ScheduleTest extends TestCase
     {
         $this->createCleanupSchedule('Shortcut Cleanup', '@daily', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 0 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(CleanupJob::class, $scheduler->jobs[0]['job']);
         });
     }
 
@@ -341,10 +342,10 @@ class ScheduleTest extends TestCase
     {
         $this->createCleanupSchedule('Cleanup Run', '0 7 * * *', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 7 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 7 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(CleanupJob::class, $scheduler->jobs[0]['job']);
         });
     }
 
@@ -352,11 +353,11 @@ class ScheduleTest extends TestCase
     {
         $this->createCleanupSchedule('Cleanup Run', '0 7 * * *', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertInstanceOf(CleanupJob::class, $scheduler->jobs[0]['job']);
             // No configurations attached: keep the legacy behaviour of cleaning every disk.
-            $this->assertNull($jobs[0]['job']->disks);
+            $this->assertNull($scheduler->jobs[0]['job']->disks);
         });
     }
 
@@ -367,10 +368,10 @@ class ScheduleTest extends TestCase
 
         $schedule->filesystemConfigurations()->attach($destination);
 
-        $this->assertSchedulerJobs(function (array $jobs) use ($destination) {
-            $this->assertCount(1, $jobs);
-            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
-            $this->assertSame([$destination->driver_name], $jobs[0]['job']->disks);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) use ($destination) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertInstanceOf(CleanupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame([$destination->driver_name], $scheduler->jobs[0]['job']->disks);
         });
     }
 
@@ -382,11 +383,11 @@ class ScheduleTest extends TestCase
 
         $schedule->filesystemConfigurations()->attach([$active->id, $inactive->id]);
 
-        $this->assertSchedulerJobs(function (array $jobs) use ($active, $inactive) {
-            $this->assertCount(1, $jobs);
-            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
-            $this->assertSame([$active->driver_name], $jobs[0]['job']->disks);
-            $this->assertNotContains($inactive->driver_name, $jobs[0]['job']->disks);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) use ($active, $inactive) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertInstanceOf(CleanupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame([$active->driver_name], $scheduler->jobs[0]['job']->disks);
+            $this->assertNotContains($inactive->driver_name, $scheduler->jobs[0]['job']->disks);
         });
     }
 
@@ -398,11 +399,11 @@ class ScheduleTest extends TestCase
 
         $schedule->filesystemConfigurations()->attach([$valid->id, $invalid->id]);
 
-        $this->assertSchedulerJobs(function (array $jobs) use ($valid, $invalid) {
-            $this->assertCount(1, $jobs);
-            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
-            $this->assertSame([$valid->driver_name], $jobs[0]['job']->disks);
-            $this->assertNotContains($invalid->driver_name, $jobs[0]['job']->disks);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) use ($valid, $invalid) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertInstanceOf(CleanupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame([$valid->driver_name], $scheduler->jobs[0]['job']->disks);
+            $this->assertNotContains($invalid->driver_name, $scheduler->jobs[0]['job']->disks);
         });
     }
 
@@ -419,11 +420,11 @@ class ScheduleTest extends TestCase
         $active = $this->createDestination('Active Destination');
         $kept->filesystemConfigurations()->attach($active);
 
-        $this->assertSchedulerJobs(function (array $jobs) use ($active) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 8 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(CleanupJob::class, $jobs[0]['job']);
-            $this->assertSame([$active->driver_name], $jobs[0]['job']->disks);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) use ($active) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 8 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(CleanupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame([$active->driver_name], $scheduler->jobs[0]['job']->disks);
         }, rethrowExceptions: false);
     }
 
@@ -431,10 +432,10 @@ class ScheduleTest extends TestCase
     {
         $this->createBackupSchedule('Backup Run', 'full', '0 0 * * *', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
-            $this->assertNull($jobs[0]['job']->disks);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertInstanceOf(BackupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertNull($scheduler->jobs[0]['job']->disks);
         });
     }
 
@@ -451,11 +452,11 @@ class ScheduleTest extends TestCase
         $valid = $this->createDestination('Valid Destination');
         $kept->filesystemConfigurations()->attach($valid);
 
-        $this->assertSchedulerJobs(function (array $jobs) use ($valid) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
-            $this->assertSame([$valid->driver_name], $jobs[0]['job']->disks);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) use ($valid) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 0 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame([$valid->driver_name], $scheduler->jobs[0]['job']->disks);
         }, rethrowExceptions: false);
     }
 
@@ -530,11 +531,11 @@ class ScheduleTest extends TestCase
 
         $schedule2->setRawAttributes(array_merge($schedule2->getAttributes(), ['type' => 'invalid_type']))->save();
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
-            $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 0 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_FULL, $scheduler->jobs[0]['job']->backupType);
         }, rethrowExceptions: false);
     }
 
@@ -543,11 +544,11 @@ class ScheduleTest extends TestCase
         $this->createBackupSchedule('Valid Schedule', 'full', '0 0 * * *', true);
         $this->createBackupSchedule('Invalid Schedule', 'full', 'invalid schedule', true);
 
-        $this->assertSchedulerJobs(function (array $jobs) {
-            $this->assertCount(1, $jobs);
-            $this->assertSame('0 0 * * *', $jobs[0]['expression']);
-            $this->assertInstanceOf(BackupJob::class, $jobs[0]['job']);
-            $this->assertSame(BackupJob::BACKUP_FULL, $jobs[0]['job']->backupType);
+        $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+            $this->assertCount(1, $scheduler->jobs);
+            $this->assertSame('0 0 * * *', $scheduler->jobs[0]['expression']);
+            $this->assertInstanceOf(BackupJob::class, $scheduler->jobs[0]['job']);
+            $this->assertSame(BackupJob::BACKUP_FULL, $scheduler->jobs[0]['job']->backupType);
         }, rethrowExceptions: false);
     }
 
