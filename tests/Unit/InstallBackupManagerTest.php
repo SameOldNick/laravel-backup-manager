@@ -3,6 +3,7 @@
 namespace SameOldNick\BackupManager\Tests\Unit;
 
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Route;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
@@ -298,7 +299,7 @@ class InstallBackupManagerTest extends TestCase
         $this->assertCount(
             count($this->expectedResponderFiles),
             $responderWrites,
-            'All 6 responders should be written to the custom path.'
+            'All responders should be written to the custom path.'
         );
     }
 
@@ -371,6 +372,39 @@ class InstallBackupManagerTest extends TestCase
             '--stack' => 'inertia',
             '--skip-registration' => true,
         ]);
+    }
+
+    // ──── Stub Integrity ─────────────────────────────────────────────
+
+    #[Test]
+    public function it_only_references_registered_routes_in_the_responder_stubs(): void
+    {
+        $routeNames = [];
+
+        foreach ($this->realFilesystem->allFiles(dirname(__DIR__, 2).'/resources/stubs') as $file) {
+            if ($file->getExtension() !== 'php') {
+                continue;
+            }
+
+            preg_match_all(
+                '/(?:temporarySignedRoute|signedRoute|\broute)\(\s*[\'"]([^\'"]+)[\'"]/',
+                $file->getContents(),
+                $matches
+            );
+
+            foreach ($matches[1] as $routeName) {
+                $routeNames[$routeName][] = $file->getRelativePathname();
+            }
+        }
+
+        $this->assertNotEmpty($routeNames, 'Expected the responder stubs to reference package routes.');
+
+        foreach ($routeNames as $routeName => $files) {
+            $this->assertTrue(
+                Route::has($routeName),
+                'Stub(s) '.implode(', ', array_unique($files))." reference the unregistered route [{$routeName}]."
+            );
+        }
     }
 
     // ──── Helpers ────────────────────────────────────────────────────

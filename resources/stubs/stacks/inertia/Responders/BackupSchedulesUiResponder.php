@@ -30,7 +30,7 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
     public function renderStoreBackupSchedule(StoreBackupScheduleViewData $data)
     {
         return redirect()
-            ->route('backup-manager.schedules.index')
+            ->route('backup.schedules.index')
             ->with('success', __('backup-manager::messages.backup_schedule_created'));
     }
 
@@ -56,7 +56,7 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
     public function renderUpdateBackupSchedule(UpdateBackupScheduleViewData $data)
     {
         return redirect()
-            ->route('backup-manager.schedules.index')
+            ->route('backup.schedules.index')
             ->with('success', __('backup-manager::messages.backup_schedule_updated'));
     }
 
@@ -66,7 +66,7 @@ class BackupSchedulesUiResponder implements BackupSchedulesUiResponderContract
     public function renderDestroyBackupSchedule(DestroyBackupScheduleViewData $data)
     {
         return redirect()
-            ->route('backup-manager.schedules.index')
+            ->route('backup.schedules.index')
             ->with('success', __('backup-manager::messages.backup_schedule_deleted'));
     }
 }
