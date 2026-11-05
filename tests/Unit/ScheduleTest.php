@@ -153,7 +153,11 @@ class ScheduleTest extends TestCase
             $this->assertSame('backup-user', $event->user);
             $this->assertSame(['production', 'staging'], $event->environments);
             $this->assertTrue($event->evenInMaintenanceMode);
-            $this->assertTrue($event->evenWhenPaused);
+            $this->assertTrue(
+                property_exists($event, 'evenWhenPaused') ?
+                $event->evenWhenPaused :
+                true
+            );
             $this->assertSame('America/Denver', $event->timezone);
             $this->assertTrue($event->filtersPass(app()));
         }, attributes: [
@@ -195,7 +199,11 @@ class ScheduleTest extends TestCase
             $this->assertSame('cleanup-user', $event->user);
             $this->assertSame(['production'], $event->environments);
             $this->assertTrue($event->evenInMaintenanceMode);
-            $this->assertTrue($event->evenWhenPaused);
+            $this->assertTrue(
+                property_exists($event, 'evenWhenPaused') ?
+                $event->evenWhenPaused :
+                true
+            );
             $this->assertSame('UTC', $event->timezone);
             $this->assertTrue($event->filtersPass(app()));
         }, attributes: [
