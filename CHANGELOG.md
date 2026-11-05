@@ -2,6 +2,49 @@
 
 All notable changes will be documented in this file.
 
+## v4.0.0 - 2026-11-05
+
+### Breaking
+
+- Dropped Laravel 11 support: `illuminate/contracts` now requires `^12.0||^13.0`, the test suite runs against Laravel 12 and 13, and the README requirements list Laravel 12 / 13. Applications on Laravel 11 should stay on `3.x`
+- Removed `SchedulerTestHelpers::assertSchedulerJobs()` and `SchedulerTestHelpers::assertSchedulerEvents()` in favour of a single `assertScheduler()` helper
+
+### Added
+
+- `BackupSchedulerRecorder` now records every exception it handles in its `exceptions` property and accepts a `rethrowExceptions` flag, so tests can inspect the recorded exceptions or let them fail the test
+- `makeSchedulerSpy()` and `assertScheduler()` accept `rethrowExceptions` to control whether recorded exceptions are rethrown
+- Added `BackupScheduler::handleOuterScheduleException()`, an overridable extension point for failures that occur while retrieving backup or cleanup schedules
+
+### Fixed
+
+- Fixed backup and cleanup schedule registration failing on Laravel 12 when `scheduler.attributes.even_when_paused` was enabled: `evenWhenPaused()` is now only called on events that support it, since Laravel 12 has no paused-scheduler option
+
+### Refactored
+
+- `BackupScheduler` now routes failures while retrieving backup and cleanup schedules through `handleOuterScheduleException()` instead of duplicating the throttled logging in both methods
+- `assertScheduler()` passes the `BackupSchedulerRecorder` to the callback, so a single assertion can inspect the scheduled jobs, the registered events, and any handled exceptions
+- Scheduler tests and the backup schedule controller feature test now use `assertScheduler()`
+- The test workflow runs Laravel 12 / Testbench 10 and Laravel 13 / Testbench 11 jobs, and builds the workbench before running the suite
+
+### Documentation
+
+- Updated the README requirements to Laravel 12 / 13
+
+### Upgrade Notes
+
+- Laravel 11 is no longer supported. If you cannot upgrade Laravel yet, pin this package to `^3.1`
+- `scheduler.attributes.even_when_paused` only has an effect on Laravel 13 and later. Laravel 12 has no paused-scheduler support, so the setting is ignored there instead of breaking schedule registration
+- If you use the package's `SchedulerTestHelpers` trait, replace `assertSchedulerJobs()` and `assertSchedulerEvents()` with `assertScheduler()` and assert against the recorder it passes to the callback:
+
+  ```php
+  $this->assertScheduler(function (BackupSchedulerRecorder $scheduler) {
+      $this->assertCount(1, $scheduler->jobs);
+      $this->assertCount(1, $scheduler->events);
+  }, attributes: [...]);
+  ```
+
+- `BackupSchedulerRecorder` rethrows handled exceptions by default, so schedules that previously failed registration silently (logged and throttled) now surface as exceptions in tests. Pass `rethrowExceptions: false` to `makeSchedulerSpy()` or `assertScheduler()` to keep the previous logging behaviour and assert on `$scheduler->exceptions` instead
+
 ## v3.1.1 - 2026-10-17
 
 ### Fixed
